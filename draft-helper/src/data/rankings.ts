@@ -100,15 +100,15 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 15
   },
   {
-    "name": "Kenneth Walker",
-    "position": "RB",
-    "team": "KC",
-    "etrRank": 16
-  },
-  {
     "name": "Brock Bowers",
     "position": "TE",
     "team": "LV",
+    "etrRank": 16
+  },
+  {
+    "name": "Kenneth Walker",
+    "position": "RB",
+    "team": "KC",
     "etrRank": 17
   },
   {
@@ -172,21 +172,21 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 27
   },
   {
-    "name": "Devonta Smith",
-    "position": "WR",
-    "team": "PHI",
-    "etrRank": 28
-  },
-  {
     "name": "Garrett Wilson",
     "position": "WR",
     "team": "NYJ",
+    "etrRank": 28
+  },
+  {
+    "name": "Devonta Smith",
+    "position": "WR",
+    "team": "PHI",
     "etrRank": 29
   },
   {
-    "name": "Kyren Williams",
-    "position": "RB",
-    "team": "LA",
+    "name": "Malik Nabers",
+    "position": "WR",
+    "team": "NYG",
     "etrRank": 30
   },
   {
@@ -196,51 +196,51 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 31
   },
   {
+    "name": "Kyren Williams",
+    "position": "RB",
+    "team": "LA",
+    "etrRank": 32
+  },
+  {
     "name": "Ladd McConkey",
     "position": "WR",
     "team": "LAC",
-    "etrRank": 32
+    "etrRank": 33
   },
   {
     "name": "Zay Flowers",
     "position": "WR",
     "team": "BAL",
-    "etrRank": 33
+    "etrRank": 34
   },
   {
     "name": "Emeka Egbuka",
     "position": "WR",
     "team": "TB",
-    "etrRank": 34
+    "etrRank": 35
   },
   {
     "name": "Javonte Williams",
     "position": "RB",
     "team": "DAL",
-    "etrRank": 35
+    "etrRank": 36
   },
   {
     "name": "Josh Allen",
     "position": "QB",
     "team": "BUF",
-    "etrRank": 36
+    "etrRank": 37
   },
   {
     "name": "Colston Loveland",
     "position": "TE",
     "team": "CHI",
-    "etrRank": 37
+    "etrRank": 38
   },
   {
     "name": "Tee Higgins",
     "position": "WR",
     "team": "CIN",
-    "etrRank": 38
-  },
-  {
-    "name": "Travis Etienne",
-    "position": "RB",
-    "team": "NO",
     "etrRank": 39
   },
   {
@@ -250,21 +250,21 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 40
   },
   {
-    "name": "Malik Nabers",
-    "position": "WR",
-    "team": "NYG",
+    "name": "Travis Etienne",
+    "position": "RB",
+    "team": "NO",
     "etrRank": 41
-  },
-  {
-    "name": "Davante Adams",
-    "position": "WR",
-    "team": "LA",
-    "etrRank": 42
   },
   {
     "name": "Tetairoa McMillan",
     "position": "WR",
     "team": "CAR",
+    "etrRank": 42
+  },
+  {
+    "name": "Davante Adams",
+    "position": "WR",
+    "team": "LA",
     "etrRank": 43
   },
   {
@@ -274,27 +274,27 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 44
   },
   {
+    "name": "Cam Skattebo",
+    "position": "RB",
+    "team": "NYG",
+    "etrRank": 45
+  },
+  {
     "name": "D'Andre Swift",
     "position": "RB",
     "team": "CHI",
-    "etrRank": 45
+    "etrRank": 46
   },
   {
     "name": "Luther Burden",
     "position": "WR",
     "team": "CHI",
-    "etrRank": 46
+    "etrRank": 47
   },
   {
     "name": "Jaylen Waddle",
     "position": "WR",
     "team": "DEN",
-    "etrRank": 47
-  },
-  {
-    "name": "Cam Skattebo",
-    "position": "RB",
-    "team": "NYG",
     "etrRank": 48
   },
   {
@@ -304,9 +304,9 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 49
   },
   {
-    "name": "Lamar Jackson",
-    "position": "QB",
-    "team": "BAL",
+    "name": "Mike Evans",
+    "position": "WR",
+    "team": "SF",
     "etrRank": 50
   },
   {
@@ -316,21 +316,21 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 51
   },
   {
-    "name": "Bucky Irving",
-    "position": "RB",
-    "team": "TB",
+    "name": "Lamar Jackson",
+    "position": "QB",
+    "team": "BAL",
     "etrRank": 52
-  },
-  {
-    "name": "Mike Evans",
-    "position": "WR",
-    "team": "SF",
-    "etrRank": 53
   },
   {
     "name": "DJ Moore",
     "position": "WR",
     "team": "BUF",
+    "etrRank": 53
+  },
+  {
+    "name": "Bucky Irving",
+    "position": "RB",
+    "team": "TB",
     "etrRank": 54
   },
   {
@@ -340,51 +340,51 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 55
   },
   {
-    "name": "Joe Burrow",
-    "position": "QB",
-    "team": "CIN",
-    "etrRank": 56
-  },
-  {
     "name": "Bhayshul Tuten",
     "position": "RB",
     "team": "JAX",
-    "etrRank": 57
+    "etrRank": 56
   },
   {
     "name": "Jordyn Tyson",
     "position": "WR",
     "team": "NO",
-    "etrRank": 58
+    "etrRank": 57
   },
   {
-    "name": "Tony Pollard",
-    "position": "RB",
-    "team": "TEN",
-    "etrRank": 59
+    "name": "Joe Burrow",
+    "position": "QB",
+    "team": "CIN",
+    "etrRank": 58
   },
   {
     "name": "TreVeyon Henderson",
     "position": "RB",
     "team": "NE",
-    "etrRank": 60
+    "etrRank": 59
   },
   {
     "name": "Jadarian Price",
     "position": "RB",
     "team": "SEA",
-    "etrRank": 61
+    "etrRank": 60
   },
   {
     "name": "Quinshon Judkins",
     "position": "RB",
     "team": "CLE",
-    "etrRank": 62
+    "etrRank": 61
   },
   {
     "name": "Christian Watson",
     "position": "WR",
     "team": "GB",
+    "etrRank": 62
+  },
+  {
+    "name": "Tyler Warren",
+    "position": "TE",
+    "team": "IND",
     "etrRank": 63
   },
   {
@@ -394,87 +394,87 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 64
   },
   {
-    "name": "Tyler Warren",
-    "position": "TE",
-    "team": "IND",
-    "etrRank": 65
-  },
-  {
     "name": "Carnell Tate",
     "position": "WR",
     "team": "TEN",
-    "etrRank": 66
-  },
-  {
-    "name": "Drake Maye",
-    "position": "QB",
-    "team": "NE",
-    "etrRank": 67
+    "etrRank": 65
   },
   {
     "name": "Rhamondre Stevenson",
     "position": "RB",
     "team": "NE",
-    "etrRank": 68
-  },
-  {
-    "name": "Rico Dowdle",
-    "position": "RB",
-    "team": "PIT",
-    "etrRank": 69
-  },
-  {
-    "name": "Parker Washington",
-    "position": "WR",
-    "team": "JAX",
-    "etrRank": 70
-  },
-  {
-    "name": "Dak Prescott",
-    "position": "QB",
-    "team": "DAL",
-    "etrRank": 71
-  },
-  {
-    "name": "Marvin Harrison",
-    "position": "WR",
-    "team": "ARI",
-    "etrRank": 72
-  },
-  {
-    "name": "Jalen Hurts",
-    "position": "QB",
-    "team": "PHI",
-    "etrRank": 73
+    "etrRank": 66
   },
   {
     "name": "Jaylen Warren",
     "position": "RB",
     "team": "PIT",
-    "etrRank": 74
+    "etrRank": 67
+  },
+  {
+    "name": "Parker Washington",
+    "position": "WR",
+    "team": "JAX",
+    "etrRank": 68
+  },
+  {
+    "name": "Drake Maye",
+    "position": "QB",
+    "team": "NE",
+    "etrRank": 69
+  },
+  {
+    "name": "Tony Pollard",
+    "position": "RB",
+    "team": "TEN",
+    "etrRank": 70
+  },
+  {
+    "name": "Marvin Harrison",
+    "position": "WR",
+    "team": "ARI",
+    "etrRank": 71
   },
   {
     "name": "Brian Thomas",
     "position": "WR",
     "team": "JAX",
-    "etrRank": 75
+    "etrRank": 72
+  },
+  {
+    "name": "Dak Prescott",
+    "position": "QB",
+    "team": "DAL",
+    "etrRank": 73
   },
   {
     "name": "Rome Odunze",
     "position": "WR",
     "team": "CHI",
-    "etrRank": 76
+    "etrRank": 74
+  },
+  {
+    "name": "Jalen Hurts",
+    "position": "QB",
+    "team": "PHI",
+    "etrRank": 75
   },
   {
     "name": "Chuba Hubbard",
     "position": "RB",
     "team": "CAR",
+    "etrRank": 76
+  },
+  {
+    "name": "Rico Dowdle",
+    "position": "RB",
+    "team": "PIT",
     "etrRank": 77
   },
   {
-    "name": "Caleb Williams",
-    "position": "QB",
-    "team": "CHI",
+    "name": "RJ Harvey",
+    "position": "RB",
+    "team": "DEN",
     "etrRank": 78
   },
   {
@@ -484,33 +484,33 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 79
   },
   {
-    "name": "Justin Herbert",
-    "position": "QB",
-    "team": "LAC",
-    "etrRank": 80
-  },
-  {
-    "name": "RJ Harvey",
-    "position": "RB",
-    "team": "DEN",
-    "etrRank": 81
-  },
-  {
-    "name": "Brock Purdy",
-    "position": "QB",
-    "team": "SF",
-    "etrRank": 82
-  },
-  {
     "name": "Jordan Addison",
     "position": "WR",
     "team": "MIN",
-    "etrRank": 83
+    "etrRank": 80
+  },
+  {
+    "name": "Caleb Williams",
+    "position": "QB",
+    "team": "CHI",
+    "etrRank": 81
   },
   {
     "name": "Jayden Reed",
     "position": "WR",
     "team": "GB",
+    "etrRank": 82
+  },
+  {
+    "name": "Brock Purdy",
+    "position": "QB",
+    "team": "SF",
+    "etrRank": 83
+  },
+  {
+    "name": "Courtland Sutton",
+    "position": "WR",
+    "team": "DEN",
     "etrRank": 84
   },
   {
@@ -520,27 +520,27 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 85
   },
   {
-    "name": "Courtland Sutton",
-    "position": "WR",
-    "team": "DEN",
+    "name": "Justin Herbert",
+    "position": "QB",
+    "team": "LAC",
     "etrRank": 86
-  },
-  {
-    "name": "Trevor Lawrence",
-    "position": "QB",
-    "team": "JAX",
-    "etrRank": 87
-  },
-  {
-    "name": "Patrick Mahomes",
-    "position": "QB",
-    "team": "KC",
-    "etrRank": 88
   },
   {
     "name": "Alec Pierce",
     "position": "WR",
     "team": "IND",
+    "etrRank": 87
+  },
+  {
+    "name": "Sam LaPorta",
+    "position": "TE",
+    "team": "DET",
+    "etrRank": 88
+  },
+  {
+    "name": "Trevor Lawrence",
+    "position": "QB",
+    "team": "JAX",
     "etrRank": 89
   },
   {
@@ -550,93 +550,93 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 90
   },
   {
-    "name": "Sam LaPorta",
-    "position": "TE",
-    "team": "DET",
-    "etrRank": 91
-  },
-  {
-    "name": "Jordan Love",
+    "name": "Patrick Mahomes",
     "position": "QB",
-    "team": "GB",
-    "etrRank": 92
+    "team": "KC",
+    "etrRank": 91
   },
   {
     "name": "Kenneth Gainwell",
     "position": "RB",
     "team": "TB",
-    "etrRank": 93
-  },
-  {
-    "name": "Kyler Murray",
-    "position": "QB",
-    "team": "MIN",
-    "etrRank": 94
-  },
-  {
-    "name": "Harold Fannin",
-    "position": "TE",
-    "team": "CLE",
-    "etrRank": 95
-  },
-  {
-    "name": "Jaxson Dart",
-    "position": "QB",
-    "team": "NYG",
-    "etrRank": 96
+    "etrRank": 92
   },
   {
     "name": "Kyle Pitts",
     "position": "TE",
     "team": "ATL",
-    "etrRank": 97
+    "etrRank": 93
+  },
+  {
+    "name": "Harold Fannin",
+    "position": "TE",
+    "team": "CLE",
+    "etrRank": 94
   },
   {
     "name": "Michael Wilson",
     "position": "WR",
     "team": "ARI",
-    "etrRank": 98
+    "etrRank": 95
   },
   {
     "name": "Quentin Johnston",
     "position": "WR",
     "team": "LAC",
-    "etrRank": 99
+    "etrRank": 96
+  },
+  {
+    "name": "Jordan Love",
+    "position": "QB",
+    "team": "GB",
+    "etrRank": 97
   },
   {
     "name": "Michael Pittman",
     "position": "WR",
     "team": "PIT",
-    "etrRank": 100
+    "etrRank": 98
+  },
+  {
+    "name": "Kyler Murray",
+    "position": "QB",
+    "team": "MIN",
+    "etrRank": 99
   },
   {
     "name": "Josh Downs",
     "position": "WR",
     "team": "IND",
+    "etrRank": 100
+  },
+  {
+    "name": "Jaxson Dart",
+    "position": "QB",
+    "team": "NYG",
     "etrRank": 101
-  },
-  {
-    "name": "Bo Nix",
-    "position": "QB",
-    "team": "DEN",
-    "etrRank": 102
-  },
-  {
-    "name": "Jared Goff",
-    "position": "QB",
-    "team": "DET",
-    "etrRank": 103
-  },
-  {
-    "name": "Makai Lemon",
-    "position": "WR",
-    "team": "PHI",
-    "etrRank": 104
   },
   {
     "name": "Blake Corum",
     "position": "RB",
     "team": "LA",
+    "etrRank": 102
+  },
+  {
+    "name": "Makai Lemon",
+    "position": "WR",
+    "team": "PHI",
+    "etrRank": 103
+  },
+  {
+    "name": "Bo Nix",
+    "position": "QB",
+    "team": "DEN",
+    "etrRank": 104
+  },
+  {
+    "name": "Jared Goff",
+    "position": "QB",
+    "team": "DET",
     "etrRank": 105
   },
   {
@@ -646,27 +646,27 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 106
   },
   {
+    "name": "Ricky Pearsall",
+    "position": "WR",
+    "team": "SF",
+    "etrRank": 107
+  },
+  {
     "name": "Xavier Worthy",
     "position": "WR",
     "team": "KC",
-    "etrRank": 107
+    "etrRank": 108
   },
   {
     "name": "JK Dobbins",
     "position": "RB",
     "team": "DEN",
-    "etrRank": 108
+    "etrRank": 109
   },
   {
     "name": "Kyle Monangai",
     "position": "RB",
     "team": "CHI",
-    "etrRank": 109
-  },
-  {
-    "name": "Ricky Pearsall",
-    "position": "WR",
-    "team": "SF",
     "etrRank": 110
   },
   {
@@ -700,45 +700,45 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 115
   },
   {
-    "name": "Aaron Jones",
-    "position": "RB",
-    "team": "MIN",
-    "etrRank": 116
-  },
-  {
     "name": "Khalil Shakir",
     "position": "WR",
     "team": "BUF",
-    "etrRank": 117
+    "etrRank": 116
   },
   {
     "name": "Travis Kelce",
     "position": "TE",
     "team": "KC",
-    "etrRank": 118
-  },
-  {
-    "name": "Malik Willis",
-    "position": "QB",
-    "team": "MIA",
-    "etrRank": 119
+    "etrRank": 117
   },
   {
     "name": "Dallas Goedert",
     "position": "TE",
     "team": "PHI",
-    "etrRank": 120
+    "etrRank": 118
   },
   {
     "name": "Dalton Kincaid",
     "position": "TE",
     "team": "BUF",
-    "etrRank": 121
+    "etrRank": 119
   },
   {
     "name": "Jordan Mason",
     "position": "RB",
     "team": "MIN",
+    "etrRank": 120
+  },
+  {
+    "name": "Malik Willis",
+    "position": "QB",
+    "team": "MIA",
+    "etrRank": 121
+  },
+  {
+    "name": "Jonathon Brooks",
+    "position": "RB",
+    "team": "CAR",
     "etrRank": 122
   },
   {
@@ -748,15 +748,15 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 123
   },
   {
-    "name": "Sam Darnold",
-    "position": "QB",
-    "team": "SEA",
+    "name": "Aaron Jones",
+    "position": "RB",
+    "team": "MIN",
     "etrRank": 124
   },
   {
-    "name": "Jonathon Brooks",
-    "position": "RB",
-    "team": "CAR",
+    "name": "Sam Darnold",
+    "position": "QB",
+    "team": "SEA",
     "etrRank": 125
   },
   {
@@ -766,39 +766,39 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 126
   },
   {
-    "name": "CJ Stroud",
-    "position": "QB",
-    "team": "HOU",
-    "etrRank": 127
-  },
-  {
-    "name": "Tyrone Tracy",
-    "position": "RB",
-    "team": "NYG",
-    "etrRank": 128
-  },
-  {
     "name": "Jake Ferguson",
     "position": "TE",
     "team": "DAL",
-    "etrRank": 129
+    "etrRank": 127
+  },
+  {
+    "name": "CJ Stroud",
+    "position": "QB",
+    "team": "HOU",
+    "etrRank": 128
   },
   {
     "name": "Mark Andrews",
     "position": "TE",
     "team": "BAL",
-    "etrRank": 130
+    "etrRank": 129
   },
   {
     "name": "Chris Rodriguez",
     "position": "RB",
     "team": "JAX",
+    "etrRank": 130
+  },
+  {
+    "name": "Romeo Doubs",
+    "position": "WR",
+    "team": "NE",
     "etrRank": 131
   },
   {
-    "name": "Jalen Coker",
-    "position": "WR",
-    "team": "CAR",
+    "name": "Tyrone Tracy",
+    "position": "RB",
+    "team": "NYG",
     "etrRank": 132
   },
   {
@@ -808,9 +808,9 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 133
   },
   {
-    "name": "Romeo Doubs",
+    "name": "Jalen Coker",
     "position": "WR",
-    "team": "NE",
+    "team": "CAR",
     "etrRank": 134
   },
   {
@@ -850,15 +850,15 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 140
   },
   {
-    "name": "Cameron Ward",
-    "position": "QB",
-    "team": "TEN",
-    "etrRank": 141
-  },
-  {
     "name": "Rashid Shaheed",
     "position": "WR",
     "team": "SEA",
+    "etrRank": 141
+  },
+  {
+    "name": "Omar Cooper",
+    "position": "WR",
+    "team": "NYJ",
     "etrRank": 142
   },
   {
@@ -868,39 +868,39 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 143
   },
   {
-    "name": "Omar Cooper",
-    "position": "WR",
-    "team": "NYJ",
-    "etrRank": 144
-  },
-  {
     "name": "Alvin Kamara",
     "position": "RB",
     "team": "NO",
-    "etrRank": 145
-  },
-  {
-    "name": "Bryce Young",
-    "position": "QB",
-    "team": "CAR",
-    "etrRank": 146
+    "etrRank": 144
   },
   {
     "name": "Brenton Strange",
     "position": "TE",
     "team": "JAX",
-    "etrRank": 147
+    "etrRank": 145
   },
   {
     "name": "Jauan Jennings",
     "position": "WR",
     "team": "MIN",
-    "etrRank": 148
+    "etrRank": 146
   },
   {
     "name": "Isiah Pacheco",
     "position": "RB",
     "team": "DET",
+    "etrRank": 147
+  },
+  {
+    "name": "Cameron Ward",
+    "position": "QB",
+    "team": "TEN",
+    "etrRank": 148
+  },
+  {
+    "name": "Kenyon Sadiq",
+    "position": "TE",
+    "team": "NYJ",
     "etrRank": 149
   },
   {
@@ -910,21 +910,21 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 150
   },
   {
-    "name": "Denzel Boston",
-    "position": "WR",
-    "team": "CLE",
-    "etrRank": 151
-  },
-  {
     "name": "Jalen McMillan",
     "position": "WR",
     "team": "TB",
+    "etrRank": 151
+  },
+  {
+    "name": "Bryce Young",
+    "position": "QB",
+    "team": "CAR",
     "etrRank": 152
   },
   {
-    "name": "Kenyon Sadiq",
-    "position": "TE",
-    "team": "NYJ",
+    "name": "Denzel Boston",
+    "position": "WR",
+    "team": "CLE",
     "etrRank": 153
   },
   {
@@ -940,9 +940,9 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 155
   },
   {
-    "name": "Aaron Rodgers",
-    "position": "QB",
-    "team": "PIT",
+    "name": "TJ Hockenson",
+    "position": "TE",
+    "team": "MIN",
     "etrRank": 156
   },
   {
@@ -952,9 +952,9 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 157
   },
   {
-    "name": "TJ Hockenson",
-    "position": "TE",
-    "team": "MIN",
+    "name": "Tyler Allgeier",
+    "position": "RB",
+    "team": "ARI",
     "etrRank": 158
   },
   {
@@ -964,21 +964,21 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 159
   },
   {
-    "name": "Tyler Allgeier",
-    "position": "RB",
-    "team": "ARI",
+    "name": "Aaron Rodgers",
+    "position": "QB",
+    "team": "PIT",
     "etrRank": 160
-  },
-  {
-    "name": "Brian Robinson",
-    "position": "RB",
-    "team": "ATL",
-    "etrRank": 161
   },
   {
     "name": "Tre Tucker",
     "position": "WR",
     "team": "LV",
+    "etrRank": 161
+  },
+  {
+    "name": "Brian Robinson",
+    "position": "RB",
+    "team": "ATL",
     "etrRank": 162
   },
   {
@@ -1012,45 +1012,45 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 167
   },
   {
+    "name": "Dalton Schultz",
+    "position": "TE",
+    "team": "HOU",
+    "etrRank": 168
+  },
+  {
     "name": "Cade Otton",
     "position": "TE",
     "team": "TB",
-    "etrRank": 168
+    "etrRank": 169
   },
   {
     "name": "Fernando Mendoza",
     "position": "QB",
     "team": "LV",
-    "etrRank": 169
-  },
-  {
-    "name": "Dalton Schultz",
-    "position": "TE",
-    "team": "HOU",
     "etrRank": 170
-  },
-  {
-    "name": "Sean Tucker",
-    "position": "RB",
-    "team": "TB",
-    "etrRank": 171
-  },
-  {
-    "name": "Zach Charbonnet",
-    "position": "RB",
-    "team": "SEA",
-    "etrRank": 172
   },
   {
     "name": "Jerry Jeudy",
     "position": "WR",
     "team": "CLE",
-    "etrRank": 173
+    "etrRank": 171
   },
   {
     "name": "Pat Freiermuth",
     "position": "TE",
     "team": "PIT",
+    "etrRank": 172
+  },
+  {
+    "name": "De'Zhaun Stribling",
+    "position": "WR",
+    "team": "SF",
+    "etrRank": 173
+  },
+  {
+    "name": "Zach Charbonnet",
+    "position": "RB",
+    "team": "SEA",
     "etrRank": 174
   },
   {
@@ -1060,93 +1060,93 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 175
   },
   {
-    "name": "Cooper Kupp",
+    "name": "Adonai Mitchell",
     "position": "WR",
-    "team": "SEA",
+    "team": "NYJ",
     "etrRank": 176
-  },
-  {
-    "name": "Germie Bernard",
-    "position": "WR",
-    "team": "PIT",
-    "etrRank": 177
   },
   {
     "name": "Ray Davis",
     "position": "RB",
     "team": "BUF",
-    "etrRank": 178
+    "etrRank": 177
   },
   {
     "name": "Antonio Williams",
     "position": "WR",
     "team": "WAS",
-    "etrRank": 179
-  },
-  {
-    "name": "Adonai Mitchell",
-    "position": "WR",
-    "team": "NYJ",
-    "etrRank": 180
+    "etrRank": 178
   },
   {
     "name": "Tre' Harris",
     "position": "WR",
     "team": "LAC",
-    "etrRank": 181
+    "etrRank": 179
   },
   {
     "name": "Ty Johnson",
     "position": "RB",
     "team": "BUF",
-    "etrRank": 182
+    "etrRank": 180
   },
   {
     "name": "Justice Hill",
     "position": "RB",
     "team": "BAL",
-    "etrRank": 183
+    "etrRank": 181
   },
   {
     "name": "Isaac TeSlaa",
     "position": "WR",
     "team": "DET",
-    "etrRank": 184
+    "etrRank": 182
+  },
+  {
+    "name": "Sean Tucker",
+    "position": "RB",
+    "team": "TB",
+    "etrRank": 183
   },
   {
     "name": "DJ Giddens",
     "position": "RB",
     "team": "IND",
-    "etrRank": 185
+    "etrRank": 184
   },
   {
     "name": "Kaytron Allen",
     "position": "RB",
     "team": "WAS",
-    "etrRank": 186
+    "etrRank": 185
   },
   {
     "name": "Gunnar Helm",
     "position": "TE",
     "team": "TEN",
-    "etrRank": 187
+    "etrRank": 186
   },
   {
     "name": "Emmett Johnson",
     "position": "RB",
     "team": "KC",
-    "etrRank": 188
+    "etrRank": 187
   },
   {
     "name": "Jaydon Blue",
     "position": "RB",
     "team": "DAL",
+    "etrRank": 188
+  },
+  {
+    "name": "Germie Bernard",
+    "position": "WR",
+    "team": "PIT",
     "etrRank": 189
   },
   {
-    "name": "Terrance Ferguson",
-    "position": "TE",
-    "team": "LA",
+    "name": "Travis Hunter",
+    "position": "WR",
+    "team": "JAX",
     "etrRank": 190
   },
   {
@@ -1162,26 +1162,26 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 192
   },
   {
-    "name": "Travis Hunter",
-    "position": "WR",
-    "team": "JAX",
+    "name": "Terrance Ferguson",
+    "position": "TE",
+    "team": "LA",
     "etrRank": 193
-  },
-  {
-    "name": "Braelon Allen",
-    "position": "RB",
-    "team": "NYJ",
-    "etrRank": 194
   },
   {
     "name": "Jordan James",
     "position": "RB",
     "team": "SF",
+    "etrRank": 194
+  },
+  {
+    "name": "Cooper Kupp",
+    "position": "WR",
+    "team": "SEA",
     "etrRank": 195
   },
   {
-    "name": "De'Zhaun Stribling",
-    "position": "WR",
+    "name": "Kaelon Black",
+    "position": "RB",
     "team": "SF",
     "etrRank": 196
   },
@@ -1192,75 +1192,75 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 197
   },
   {
-    "name": "Kaelon Black",
-    "position": "RB",
-    "team": "SF",
-    "etrRank": 198
-  },
-  {
     "name": "Zachariah Branch",
     "position": "WR",
     "team": "ATL",
-    "etrRank": 199
+    "etrRank": 198
   },
   {
     "name": "MarShawn Lloyd",
     "position": "RB",
     "team": "GB",
-    "etrRank": 200
+    "etrRank": 199
   },
   {
     "name": "Najee Harris",
     "position": "RB",
     "team": "FA",
-    "etrRank": 201
+    "etrRank": 200
   },
   {
     "name": "Mike Gesicki",
     "position": "TE",
     "team": "CIN",
-    "etrRank": 202
+    "etrRank": 201
   },
   {
-    "name": "Tank Dell",
-    "position": "WR",
-    "team": "HOU",
-    "etrRank": 203
+    "name": "Braelon Allen",
+    "position": "RB",
+    "team": "NYJ",
+    "etrRank": 202
   },
   {
     "name": "Nicholas Singleton",
     "position": "RB",
     "team": "TEN",
-    "etrRank": 204
+    "etrRank": 203
   },
   {
     "name": "Chris Brooks",
     "position": "RB",
     "team": "GB",
-    "etrRank": 205
+    "etrRank": 204
   },
   {
-    "name": "Geno Smith",
-    "position": "QB",
-    "team": "NYJ",
-    "etrRank": 206
+    "name": "Tank Dell",
+    "position": "WR",
+    "team": "HOU",
+    "etrRank": 205
   },
   {
     "name": "Pat Bryant",
     "position": "WR",
     "team": "DEN",
-    "etrRank": 207
+    "etrRank": 206
   },
   {
     "name": "Demond Claiborne",
     "position": "RB",
     "team": "MIN",
-    "etrRank": 208
+    "etrRank": 207
   },
   {
     "name": "AJ Barner",
     "position": "TE",
     "team": "SEA",
+    "etrRank": 208
+  },
+  {
+    "name": "Rashod Bateman",
+    "position": "WR",
+    "team": "BAL",
     "etrRank": 209
   },
   {
@@ -1270,45 +1270,45 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 210
   },
   {
-    "name": "Rashod Bateman",
-    "position": "WR",
-    "team": "BAL",
+    "name": "Geno Smith",
+    "position": "QB",
+    "team": "NYJ",
     "etrRank": 211
   },
   {
-    "name": "Kayshon Boutte",
-    "position": "WR",
-    "team": "NE",
+    "name": "Isaiah Davis",
+    "position": "RB",
+    "team": "NYJ",
     "etrRank": 212
-  },
-  {
-    "name": "Keenan Allen",
-    "position": "WR",
-    "team": "FA",
-    "etrRank": 213
-  },
-  {
-    "name": "Jaylin Noel",
-    "position": "WR",
-    "team": "HOU",
-    "etrRank": 214
   },
   {
     "name": "Dontayvion Wicks",
     "position": "WR",
     "team": "PHI",
+    "etrRank": 213
+  },
+  {
+    "name": "Keenan Allen",
+    "position": "WR",
+    "team": "FA",
+    "etrRank": 214
+  },
+  {
+    "name": "Jaylin Noel",
+    "position": "WR",
+    "team": "HOU",
     "etrRank": 215
+  },
+  {
+    "name": "Darnell Mooney",
+    "position": "WR",
+    "team": "NYG",
+    "etrRank": 216
   },
   {
     "name": "Evan Engram",
     "position": "TE",
     "team": "DEN",
-    "etrRank": 216
-  },
-  {
-    "name": "Darius Slayton",
-    "position": "WR",
-    "team": "NYG",
     "etrRank": 217
   },
   {
@@ -1318,15 +1318,15 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 218
   },
   {
-    "name": "Devaughn Vele",
+    "name": "Kayshon Boutte",
     "position": "WR",
-    "team": "NO",
+    "team": "NE",
     "etrRank": 219
   },
   {
-    "name": "Tyreek Hill",
+    "name": "Devaughn Vele",
     "position": "WR",
-    "team": "FA",
+    "team": "NO",
     "etrRank": 220
   },
   {
@@ -1336,87 +1336,87 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 221
   },
   {
-    "name": "Jacoby Brissett",
-    "position": "QB",
-    "team": "ARI",
+    "name": "Darius Slayton",
+    "position": "WR",
+    "team": "NYG",
     "etrRank": 222
-  },
-  {
-    "name": "Jaylen Wright",
-    "position": "RB",
-    "team": "MIA",
-    "etrRank": 223
-  },
-  {
-    "name": "Michael Mayer",
-    "position": "TE",
-    "team": "LV",
-    "etrRank": 224
   },
   {
     "name": "George Holani",
     "position": "RB",
     "team": "SEA",
+    "etrRank": 223
+  },
+  {
+    "name": "Jaylen Wright",
+    "position": "RB",
+    "team": "MIA",
+    "etrRank": 224
+  },
+  {
+    "name": "Michael Mayer",
+    "position": "TE",
+    "team": "LV",
     "etrRank": 225
   },
   {
-    "name": "Mack Hollins",
-    "position": "WR",
-    "team": "NE",
+    "name": "Jacoby Brissett",
+    "position": "QB",
+    "team": "ARI",
     "etrRank": 226
-  },
-  {
-    "name": "Christian Kirk",
-    "position": "WR",
-    "team": "SF",
-    "etrRank": 227
   },
   {
     "name": "Dawson Knox",
     "position": "TE",
     "team": "BUF",
-    "etrRank": 228
+    "etrRank": 227
   },
   {
     "name": "Jahan Dotson",
     "position": "WR",
     "team": "ATL",
-    "etrRank": 229
+    "etrRank": 228
   },
   {
     "name": "Seth McGowan",
     "position": "RB",
     "team": "IND",
-    "etrRank": 230
+    "etrRank": 229
   },
   {
     "name": "Andrei Iosivas",
     "position": "WR",
     "team": "CIN",
-    "etrRank": 231
+    "etrRank": 230
   },
   {
     "name": "Kalif Raymond",
     "position": "WR",
     "team": "CHI",
-    "etrRank": 232
+    "etrRank": 231
   },
   {
     "name": "Malachi Fields",
     "position": "WR",
     "team": "NYG",
-    "etrRank": 233
+    "etrRank": 232
   },
   {
     "name": "Kendrick Bourne",
     "position": "WR",
     "team": "ARI",
-    "etrRank": 234
+    "etrRank": 233
   },
   {
     "name": "Marvin Mims",
     "position": "WR",
     "team": "DEN",
+    "etrRank": 234
+  },
+  {
+    "name": "David Njoku",
+    "position": "TE",
+    "team": "LAC",
     "etrRank": 235
   },
   {
@@ -1426,56 +1426,56 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 236
   },
   {
-    "name": "David Njoku",
-    "position": "TE",
-    "team": "LAC",
-    "etrRank": 237
-  },
-  {
-    "name": "Isaiah Davis",
-    "position": "RB",
-    "team": "NYJ",
-    "etrRank": 238
-  },
-  {
     "name": "Caleb Douglas",
     "position": "WR",
     "team": "MIA",
-    "etrRank": 239
+    "etrRank": 237
   },
   {
     "name": "Chris Brazzell",
     "position": "WR",
     "team": "CAR",
-    "etrRank": 240
-  },
-  {
-    "name": "Chris Bell",
-    "position": "WR",
-    "team": "MIA",
-    "etrRank": 241
-  },
-  {
-    "name": "Joshua Palmer",
-    "position": "WR",
-    "team": "BUF",
-    "etrRank": 242
+    "etrRank": 238
   },
   {
     "name": "Malik Washington",
     "position": "WR",
     "team": "MIA",
-    "etrRank": 243
+    "etrRank": 239
+  },
+  {
+    "name": "Joshua Palmer",
+    "position": "WR",
+    "team": "BUF",
+    "etrRank": 240
+  },
+  {
+    "name": "Demario Douglas",
+    "position": "WR",
+    "team": "NE",
+    "etrRank": 241
+  },
+  {
+    "name": "Chris Bell",
+    "position": "WR",
+    "team": "MIA",
+    "etrRank": 242
   },
   {
     "name": "Brandon Aiyuk",
     "position": "WR",
     "team": "FA",
-    "etrRank": 244
+    "etrRank": 243
   },
   {
     "name": "Emari Demercado",
     "position": "RB",
+    "team": "KC",
+    "etrRank": 244
+  },
+  {
+    "name": "Tyquan Thornton",
+    "position": "WR",
     "team": "KC",
     "etrRank": 245
   },
@@ -1486,111 +1486,111 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 246
   },
   {
-    "name": "Tyquan Thornton",
-    "position": "WR",
-    "team": "KC",
-    "etrRank": 247
-  },
-  {
     "name": "Darnell Washington",
     "position": "TE",
     "team": "PIT",
-    "etrRank": 248
-  },
-  {
-    "name": "Darnell Mooney",
-    "position": "WR",
-    "team": "NYG",
-    "etrRank": 249
+    "etrRank": 247
   },
   {
     "name": "Cole Kmet",
     "position": "TE",
     "team": "CHI",
-    "etrRank": 250
+    "etrRank": 248
   },
   {
     "name": "Brashard Smith",
     "position": "RB",
     "team": "KC",
-    "etrRank": 251
+    "etrRank": 249
   },
   {
     "name": "Ja'Tavion Sanders",
     "position": "TE",
     "team": "CAR",
-    "etrRank": 252
+    "etrRank": 250
   },
   {
     "name": "James Conner",
     "position": "RB",
     "team": "ARI",
-    "etrRank": 253
+    "etrRank": 251
   },
   {
     "name": "Isaac Guerendo",
     "position": "RB",
     "team": "SF",
-    "etrRank": 254
+    "etrRank": 252
   },
   {
     "name": "Elijah Arroyo",
     "position": "TE",
     "team": "SEA",
-    "etrRank": 255
+    "etrRank": 253
   },
   {
     "name": "Noah Gray",
     "position": "TE",
     "team": "KC",
-    "etrRank": 256
+    "etrRank": 254
   },
   {
     "name": "Will Shipley",
     "position": "RB",
     "team": "PHI",
-    "etrRank": 257
+    "etrRank": 255
   },
   {
     "name": "Keon Coleman",
     "position": "WR",
     "team": "BUF",
-    "etrRank": 258
+    "etrRank": 256
   },
   {
     "name": "Dyami Brown",
     "position": "WR",
     "team": "WAS",
-    "etrRank": 259
+    "etrRank": 257
   },
   {
     "name": "Treylon Burks",
     "position": "WR",
     "team": "WAS",
-    "etrRank": 260
+    "etrRank": 258
   },
   {
     "name": "Theo Johnson",
     "position": "TE",
     "team": "NYG",
-    "etrRank": 261
+    "etrRank": 259
   },
   {
     "name": "Chimere Dike",
     "position": "WR",
     "team": "TEN",
-    "etrRank": 262
+    "etrRank": 260
+  },
+  {
+    "name": "Mack Hollins",
+    "position": "WR",
+    "team": "NE",
+    "etrRank": 261
   },
   {
     "name": "Elijah Sarratt",
     "position": "WR",
     "team": "BAL",
-    "etrRank": 263
+    "etrRank": 262
   },
   {
     "name": "Ted Hurst",
     "position": "WR",
     "team": "TB",
+    "etrRank": 263
+  },
+  {
+    "name": "Christian Kirk",
+    "position": "WR",
+    "team": "SF",
     "etrRank": 264
   },
   {
@@ -1612,15 +1612,15 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 267
   },
   {
-    "name": "Elic Ayomanor",
-    "position": "WR",
-    "team": "TEN",
-    "etrRank": 268
-  },
-  {
     "name": "Mason Taylor",
     "position": "TE",
     "team": "NYJ",
+    "etrRank": 268
+  },
+  {
+    "name": "Elic Ayomanor",
+    "position": "WR",
+    "team": "TEN",
     "etrRank": 269
   },
   {
@@ -1690,51 +1690,51 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 280
   },
   {
-    "name": "Demario Douglas",
-    "position": "WR",
-    "team": "NE",
-    "etrRank": 281
-  },
-  {
     "name": "Terrell Jennings",
     "position": "RB",
     "team": "NE",
-    "etrRank": 282
+    "etrRank": 281
   },
   {
     "name": "Malik Davis",
     "position": "RB",
     "team": "DAL",
-    "etrRank": 283
+    "etrRank": 282
   },
   {
     "name": "Devin Neal",
     "position": "RB",
     "team": "NO",
-    "etrRank": 284
+    "etrRank": 283
   },
   {
     "name": "Kendre Miller",
     "position": "RB",
     "team": "NO",
-    "etrRank": 285
+    "etrRank": 284
   },
   {
     "name": "Erick All",
     "position": "TE",
     "team": "CIN",
-    "etrRank": 286
+    "etrRank": 285
   },
   {
     "name": "Devin Singletary",
     "position": "RB",
     "team": "NYG",
-    "etrRank": 287
+    "etrRank": 286
   },
   {
     "name": "Tez Johnson",
     "position": "WR",
     "team": "TB",
+    "etrRank": 287
+  },
+  {
+    "name": "Tory Horton",
+    "position": "WR",
+    "team": "SEA",
     "etrRank": 288
   },
   {
@@ -1792,21 +1792,21 @@ export const rankings: ExternalRanking[] = [
     "etrRank": 297
   },
   {
-    "name": "Tua Tagovailoa",
-    "position": "QB",
-    "team": "ATL",
-    "etrRank": 298
-  },
-  {
     "name": "Jahdae Walker",
     "position": "WR",
     "team": "CHI",
-    "etrRank": 299
+    "etrRank": 298
   },
   {
     "name": "Isaiah Bond",
     "position": "WR",
     "team": "CLE",
+    "etrRank": 299
+  },
+  {
+    "name": "Jam Miller",
+    "position": "RB",
+    "team": "NE",
     "etrRank": 300
   }
 ];

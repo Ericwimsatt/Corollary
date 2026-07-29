@@ -73,7 +73,7 @@ export const annotateExternalRankings: Effect.Effect<void> =
       const rankCell = cells[1];
       const badge = document.createElement('span');
       badge.className = 'dh-rank-badge';
-      badge.textContent = `\u00A0ETR: ${match.etrRank}`;
+      badge.textContent = `\u00A0${match.etrRank}`;
 
       let color: string;
       if (match.etrRank < dkRank) {

@@ -53,7 +53,9 @@ function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
 }
 
 export default function OpponentsTable({ roster, available }: Props) {
-  const first8 = roster.slice(0, 8);
+  const qbs = roster.filter(p => p.position === 'QB');
+  const nonQbs = roster.filter(p => p.position !== 'QB');
+  const first8 = [...qbs, ...nonQbs].slice(0, 8);
 
   return (
     <div style={styles.container}>

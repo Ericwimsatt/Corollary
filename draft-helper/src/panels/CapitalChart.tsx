@@ -25,10 +25,10 @@ interface PosGroup {
 }
 
 const POS_GROUPS: { pos: Position[]; label: string; color: string; maxCapital: number }[] = [
-  { pos: ['QB'], label: 'QB', color: '#4fc3f7', maxCapital: 12000 },
-  { pos: ['RB'], label: 'RB', color: '#81c784', maxCapital: 30000 },
-  { pos: ['WR'], label: 'WR', color: '#ffb74d', maxCapital: 35000 },
-  { pos: ['TE'], label: 'TE', color: '#ba68c8', maxCapital: 7000 },
+  { pos: ['QB'], label: 'QB', color: '#4fc3f7', maxCapital: 3000 },
+  { pos: ['RB'], label: 'RB', color: '#81c784', maxCapital: 9000 },
+  { pos: ['WR'], label: 'WR', color: '#ffb74d', maxCapital: 13000 },
+  { pos: ['TE'], label: 'TE', color: '#ba68c8', maxCapital: 3000 },
 ];
 
 function formatCapital(val: number): string {
