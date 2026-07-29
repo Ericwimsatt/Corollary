@@ -10,6 +10,9 @@ function injectPageStyles() {
     [class*="SnakeDraft_snake-draft-inner-container"] {
       max-width: none !important;
     }
+    #draft-helper-root {
+      padding: 2px;
+    }
   `;
   document.head.appendChild(style);
 }
