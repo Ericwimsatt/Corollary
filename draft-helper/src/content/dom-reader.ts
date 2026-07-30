@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import { type Player, type RosterPick, type Position } from './types';
 
 const ACTIVE_USER = '[class*="UserCard_is-active-user"]';
+const TEAMS = 12;
 
 function parsePosition(text: string): Position | null {
   const p = text.trim().toUpperCase();
@@ -12,6 +13,14 @@ function parsePosition(text: string): Position | null {
 function parseByeWeek(text: string): number {
   const m = text.trim().match(/\d+/);
   return m ? parseInt(m[0], 10) : 0;
+}
+
+function slotFromOverallPick(overallPick: number): number | null {
+  if (overallPick < 1) return null;
+
+  const round = Math.ceil(overallPick / TEAMS);
+  const pickInRound = ((overallPick - 1) % TEAMS) + 1;
+  return round % 2 === 1 ? pickInRound : TEAMS - pickInRound + 1;
 }
 
 export const readRoster: Effect.Effect<ReadonlyArray<RosterPick>> =
@@ -115,11 +124,16 @@ export const readUserPickNumber: Effect.Effect<number | null> =
         ?.trim()
       ?? activeCard?.textContent?.trim()
       ?? '';
-    const match = teamLabel.match(/Team\s+(\d{1,2})(?!\d)/i);
-    if (!match) return null;
+    const teamMatch = teamLabel.match(/Team\s+(\d{1,2})(?!\d)/i);
+    if (teamMatch) {
+      const pick = parseInt(teamMatch[1], 10);
+      return pick >= 1 && pick <= TEAMS ? pick : null;
+    }
 
-    const pick = parseInt(match[1], 10);
-    return pick >= 1 && pick <= 12 ? pick : null;
+    const pickMatch = teamLabel.match(/Pick\s+(\d{1,3})(?!\d)/i);
+    if (!pickMatch) return null;
+
+    return slotFromOverallPick(parseInt(pickMatch[1], 10));
   });
 
 export const readAvailablePlayers: Effect.Effect<ReadonlyArray<Player>> =

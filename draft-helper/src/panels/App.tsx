@@ -58,7 +58,7 @@ export default function App() {
     <div style={styles.app}>
       <div style={styles.topbar}>
         <div>
-          <div style={styles.title}>Draft Helper</div>
+          <div style={styles.title}>Draft Hand</div>
         </div>
         <div
           style={styles.pickStatus}
