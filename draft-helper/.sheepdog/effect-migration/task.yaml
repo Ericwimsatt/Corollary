@@ -1,0 +1,33 @@
+name: effect-migration
+phases:
+  - description: "Install Effect + Schema types + schedule access"
+    runAfter:
+      - npx tsc --noEmit
+      - npx vitest run
+
+  - description: "Storage (AdpStore) + Cache (RosterCache) as Effect Layers"
+    runAfter:
+      - npx tsc --noEmit
+      - npx vitest run
+
+  - description: "DOM reader + stack annotator + stacking utils as Effect"
+    runAfter:
+      - npx tsc --noEmit
+      - npx vitest run
+
+  - description: "Pipeline + Stream + React bridge + cleanup"
+    runAfter:
+      - npx tsc --noEmit
+      - npx vitest run
+      - npx vite build
+
+runBeforeAll:
+  - npm install effect @effect/schema
+  - npm install --save-dev @effect/vitest 2>/dev/null; true
+
+runAfterAll:
+  - npx tsc --noEmit
+  - npx vitest run
+  - npx vite build
+
+onPhaseFailure: stop

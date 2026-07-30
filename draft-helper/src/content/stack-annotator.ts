@@ -2,6 +2,7 @@ import { Effect, Option } from "effect";
 import type { Player, RosterPick } from './types';
 import { getOpponents } from "../data/schedule";
 import { attachOverlayTooltip, createOverlayTooltip, tooltipLabelStyle } from './overlay-tooltip';
+import { isNflTeam, normalizeTeam } from '../utils/teams';
 
 const badgeRowStyle = [
   'display:flex',
@@ -43,15 +44,6 @@ const week17BadgeStyle = [
   'white-space:nowrap',
   'box-shadow:0 1px 2px rgba(16,24,32,.12)',
 ].join(';');
-
-const teamAliases: Record<string, string> = {
-  LA: 'LAR',
-  JAC: 'JAX',
-};
-
-function normalizeTeam(team: string): string {
-  return teamAliases[team] ?? team;
-}
 
 function abbreviateName(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -109,8 +101,8 @@ export const annotateStackTargets = (
 
     const rosterByTeam = new Map<string, { qb: string[]; wr: string[]; te: string[]; rb: string[] }>();
     for (const pick of roster) {
-      if (!pick.team) continue;
       const team = normalizeTeam(pick.team);
+      if (!isNflTeam(team)) continue;
       let entry = rosterByTeam.get(team);
       if (!entry) {
         entry = { qb: [], wr: [], te: [], rb: [] };
@@ -162,7 +154,7 @@ export const annotateStackTargets = (
 
       const teamEl = cells[2]?.querySelector('.PlayerCell_player-team div');
       const team = normalizeTeam(teamEl?.textContent?.trim() ?? '');
-      if (!team) continue;
+      if (!isNflTeam(team)) continue;
 
       const stackNames = teamPlayers.get(team) ?? [];
       const opponents = getOpponents(team);

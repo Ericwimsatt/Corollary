@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import type { Player, Position, RosterPick } from './types';
 import { attachOverlayTooltip, createOverlayTooltip } from './overlay-tooltip';
+import { isFreeAgentTeam, isNflTeam, normalizeTeam } from '../utils/teams';
 
 function colorForByeCount(count: number): string {
   if (count === 0) return '#168a52';
@@ -29,13 +30,13 @@ function badgeStyle(count: number): string {
 }
 
 function playerKey(player: Pick<Player, 'name' | 'team' | 'position'>): string {
-  return `${player.name}::${player.team}::${player.position}`;
+  return `${player.name}::${normalizeTeam(player.team)}::${player.position}`;
 }
 
 function availableByes(available: ReadonlyArray<Player>): Map<string, number> {
   const byes = new Map<string, number>();
   for (const player of available) {
-    if (player.byeWeek !== 0) {
+    if (isNflTeam(player.team) && player.byeWeek !== 0) {
       byes.set(playerKey(player), player.byeWeek);
     }
   }
@@ -45,6 +46,7 @@ function availableByes(available: ReadonlyArray<Player>): Map<string, number> {
 function buildRosterIndex(roster: ReadonlyArray<RosterPick>) {
   const index = new Map<string, string[]>();
   for (const pick of roster) {
+    if (isFreeAgentTeam(pick.team)) continue;
     const key = `${pick.position}::${pick.byeWeek}`;
     const names = index.get(key) ?? [];
     names.push(pick.name);
@@ -105,9 +107,9 @@ export const annotateByeWeekCounts = (
       if (cells.length < 6) continue;
 
       const name = cells[2]?.querySelector('.PlayerCell_player-name')?.textContent?.trim() ?? '';
-      const team = cells[2]?.querySelector('.PlayerCell_player-team div')?.textContent?.trim() ?? '';
+      const team = normalizeTeam(cells[2]?.querySelector('.PlayerCell_player-team div')?.textContent?.trim() ?? '');
       const position = readPosition(cells[2]?.querySelector('.player-position')?.textContent ?? '');
-      if (!name || !position) continue;
+      if (!name || !position || !isNflTeam(team)) continue;
 
       const byeCell = cells[4] as HTMLElement | undefined;
       if (!byeCell) continue;

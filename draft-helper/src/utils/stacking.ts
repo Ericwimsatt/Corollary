@@ -1,31 +1,32 @@
 import { type Player, type RosterPick, type StackTarget } from '../content/types';
+import { isFreeAgentTeam, isNflTeam, normalizeTeam } from './teams';
 
 export function calcStackTargets(
   roster: RosterPick[],
   available: Player[]
 ): StackTarget[] {
   const rosteredSkill = roster.filter(
-    (p) => p.position === 'RB' || p.position === 'WR' || p.position === 'TE'
+    (p) => (p.position === 'RB' || p.position === 'WR' || p.position === 'TE') && !isFreeAgentTeam(p.team)
   );
 
   const allPlayers: Player[] = [
     ...roster.map(toPlayer),
     ...available,
-  ];
+  ].filter((p) => isNflTeam(p.team));
 
   const targets: StackTarget[] = [];
 
   for (const rostered of rosteredSkill) {
-    let team = rostered.team;
+    let team = normalizeTeam(rostered.team);
 
     if (!team) {
       team = guessTeam(rostered.name, allPlayers) ?? '';
     }
 
-    if (!team) continue;
+    if (!isNflTeam(team)) continue;
 
     const teamQb = allPlayers.find(
-      (p) => p.position === 'QB' && p.team === team
+      (p) => p.position === 'QB' && normalizeTeam(p.team) === team
     );
 
     if (teamQb) {
@@ -60,14 +61,14 @@ function guessTeam(playerName: string, allPlayers: Player[]): string | null {
   for (const p of allPlayers) {
     const pLower = p.name.toLowerCase();
     const lastName = nameParts[nameParts.length - 1];
-    if (lastName && pLower.endsWith(lastName)) return p.team;
+    if (lastName && pLower.endsWith(lastName)) return normalizeTeam(p.team);
   }
 
   for (const p of allPlayers) {
     const pLower = p.name.toLowerCase();
     const firstName = nameParts[0];
     if (firstName && (pLower.startsWith(firstName) || pLower.includes(firstName)))
-      return p.team;
+      return normalizeTeam(p.team);
   }
 
   return null;

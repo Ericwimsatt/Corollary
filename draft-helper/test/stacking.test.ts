@@ -55,4 +55,19 @@ describe('calcStackTargets', () => {
     expect(targets[0].qb.name).toBe('Joe Burrow');
     expect(targets[1].qb.name).toBe('Jared Goff');
   });
+
+  it('ignores free agents when calculating stack targets', () => {
+    const roster: RosterPick[] = [
+      { round: 1, pick: 3, name: 'Unsigned Receiver', position: 'WR', team: 'FA', byeWeek: 0 },
+      { round: 2, pick: 4, name: 'Ja\'Marr Chase', position: 'WR', team: 'CIN', byeWeek: 6 },
+    ];
+    const available: Player[] = [
+      { rank: 1, name: 'Free Agent QB', position: 'QB', team: 'FA', adp: 12.3, byeWeek: 0, isDrafted: false },
+      { rank: 2, name: 'Joe Burrow', position: 'QB', team: 'CIN', adp: 55.6, byeWeek: 6, isDrafted: false },
+    ];
+    const targets = calcStackTargets(roster, available);
+    expect(targets).toHaveLength(1);
+    expect(targets[0].qb.name).toBe('Joe Burrow');
+    expect(targets[0].rostered.name).toBe('Ja\'Marr Chase');
+  });
 });

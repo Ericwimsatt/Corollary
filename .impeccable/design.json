@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-30T12:57:31-07:00",
+  "title": "Design System: Draft Helper",
+  "extensions": {
+    "colorMeta": {
+      "sheet-bg": {
+        "role": "neutral",
+        "displayName": "Sheet Background",
+        "canonical": "#edf2f5",
+        "tonalRamp": ["#172024", "#2c3a40", "#465961", "#647a83", "#879da5", "#b2c2c8", "#d8e4e8", "#f5f8fa"]
+      },
+      "sheet-panel": {
+        "role": "neutral",
+        "displayName": "Sheet Panel",
+        "canonical": "#ffffff",
+        "tonalRamp": ["#171717", "#323232", "#525252", "#737373", "#969696", "#bdbdbd", "#dedede", "#ffffff"]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink Black",
+        "canonical": "#101820",
+        "tonalRamp": ["#101820", "#24313d", "#3d4c5b", "#5b6b79", "#7e8b96", "#a7b0b7", "#d0d6da", "#f1f4f6"]
+      },
+      "qb-blue": {
+        "role": "secondary",
+        "displayName": "QB Blue",
+        "canonical": "#1570d6",
+        "tonalRamp": ["#071a35", "#0d315f", "#124c91", "#1570d6", "#3f8ee4", "#78b0ee", "#b6d4f7", "#eef6ff"]
+      },
+      "rb-green": {
+        "role": "secondary",
+        "displayName": "RB Green",
+        "canonical": "#168a52",
+        "tonalRamp": ["#061f14", "#0d3d26", "#126338", "#168a52", "#3dad74", "#76c99d", "#b5e3ca", "#eefaf3"]
+      },
+      "wr-orange": {
+        "role": "secondary",
+        "displayName": "WR Orange",
+        "canonical": "#c96d00",
+        "tonalRamp": ["#2c1600", "#552c00", "#864600", "#c96d00", "#df8d2b", "#efb66d", "#f8d9ad", "#fff3df"]
+      },
+      "te-purple": {
+        "role": "secondary",
+        "displayName": "TE Purple",
+        "canonical": "#7b43c4",
+        "tonalRamp": ["#1e1134", "#35205a", "#543287", "#7b43c4", "#986bd4", "#b899e4", "#dacaf2", "#f5effb"]
+      }
+    },
+    "typographyMeta": {
+      "title": { "displayName": "Title", "purpose": "Product name only." },
+      "heading": { "displayName": "Heading", "purpose": "Compact section labels." },
+      "body": { "displayName": "Body", "purpose": "Player names, empty states, and supporting text." },
+      "label": { "displayName": "Label", "purpose": "Controls, table headings, metadata, and abbreviations." }
+    },
+    "shadows": [
+      {
+        "name": "overlay-lift",
+        "value": "0 14px 30px rgba(16, 24, 32, 0.24)",
+        "purpose": "Separate the extension shell from the DraftKings host page."
+      },
+      {
+        "name": "selected-control-lift",
+        "value": "0 2px 6px rgba(16, 24, 32, 0.18)",
+        "purpose": "Distinguish the active segmented-control option."
+      }
+    ],
+    "motion": [],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Segmented Control Active",
+      "kind": "button",
+      "refersTo": "segmented-active",
+      "description": "Selected Actual or ADP mode.",
+      "html": "<button class=\"ds-segment ds-segment-active\">Actual</button>",
+      "css": ".ds-segment { min-width: 52px; height: 24px; border: 0; border-radius: 8px; background: transparent; color: #536273; font: 800 10px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; cursor: pointer; } .ds-segment-active { background: #101820; color: #fff; box-shadow: 0 2px 6px rgba(16, 24, 32, 0.18); } .ds-segment:focus-visible { outline: 2px solid #1570d6; outline-offset: 2px; }"
+    },
+    {
+      "name": "Pick Input",
+      "kind": "input",
+      "refersTo": "input-compact",
+      "description": "Compact numeric draft-position input.",
+      "html": "<input class=\"ds-pick-input\" value=\"1\" aria-label=\"Your draft position\" />",
+      "css": ".ds-pick-input { width: 38px; height: 25px; border-radius: 8px; border: 1px solid #b7c6d0; background: #fff; color: #101820; font: 800 12px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; font-variant-numeric: tabular-nums; } .ds-pick-input:focus-visible { outline: 2px solid #1570d6; outline-offset: 2px; }"
+    },
+    {
+      "name": "Allocation Bar",
+      "kind": "custom",
+      "refersTo": "allocation-bar",
+      "description": "Position allocation comparison without interpretive labels.",
+      "html": "<div class=\"ds-allocation\"><span class=\"ds-pos\">WR</span><div class=\"ds-track\"><div class=\"ds-fill\"></div></div><strong>$11.4k</strong><span class=\"ds-count\">6</span></div>",
+      "css": ".ds-allocation { display: grid; grid-template-columns: 26px minmax(128px,1fr) 52px 18px; align-items: center; gap: 7px; min-height: 20px; color: #101820; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; } .ds-pos { color: #c96d00; font-size: 11px; font-weight: 900; line-height: 1; } .ds-track { height: 14px; border: 1px solid #d8e1e7; border-radius: 999px; background: #fff; overflow: visible; } .ds-fill { width: 86%; height: 14px; margin-top: -1px; margin-left: -1px; border-radius: 999px; background: #c96d00; box-shadow: inset 0 -1px 0 rgba(0,0,0,.18); } .ds-count { color: #536273; font-size: 10px; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; } .ds-allocation strong { color: #101820; font-size: 11px; font-weight: 850; text-align: right; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Matchup Pill",
+      "kind": "chip",
+      "refersTo": "matchup-pill",
+      "description": "Opponent abbreviation with prominent team colors and high-contrast text.",
+      "html": "<span class=\"ds-matchup-pill\"><span class=\"ds-matchup-text\">LAC</span></span>",
+      "css": ".ds-matchup-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 39px; min-height: 20px; padding: 2px; border-radius: 8px; border: 1px solid rgba(16,24,32,.18); background: linear-gradient(135deg, #0080c6 0 58%, #ffc20e 58% 100%); line-height: 1; cursor: default; } .ds-matchup-text { display: block; min-width: 30px; padding: 3px 5px 2px; border-radius: 6px; border: 1px solid rgba(16,24,32,.18); background: rgba(255,255,255,.78); color: #101820; font: 900 10px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; text-align: center; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Tooltip",
+      "kind": "card",
+      "refersTo": "tooltip",
+      "description": "Compact available-player card shown on matchup hover.",
+      "html": "<div class=\"ds-tooltip\"><div class=\"ds-tooltip-title\"><span>Los Angeles Chargers</span><span>LAC</span></div><div class=\"ds-tooltip-row\"><span><b>WR</b> Player Name</span><span>42.0</span></div></div>",
+      "css": ".ds-tooltip { background: #fff; border: 1px solid #b7c6d0; border-radius: 8px; padding: 7px 9px; box-shadow: 0 12px 26px rgba(0,0,0,.24); color: #101820; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; white-space: nowrap; } .ds-tooltip-title { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 5px; padding-bottom: 4px; border-bottom: 1px solid #d8e1e7; font-size: 12px; font-weight: 850; } .ds-tooltip-title span:last-child, .ds-tooltip-row span:last-child { color: #536273; font-size: 10px; font-weight: 850; } .ds-tooltip-row { display: flex; justify-content: space-between; gap: 14px; padding: 2px 0; font-size: 11px; font-weight: 700; } .ds-tooltip-row b { color: #c96d00; font-size: 10px; margin-right: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Draft Sheet",
+    "overview": "Draft Helper should feel like a compact analyst sheet embedded inside the draft room: direct, tabular, and built for fast comparison. The surface can be pleasant and polished, but it should never ask the drafter to parse a theme before reading the data.\n\nThe system is minimal by default. Roster construction is understood through visual allocation bars, not secondary interpretation labels. Playoff matchups are understood through prominent opponent team colors with high-contrast abbreviations. Supporting metadata stays quiet and narrow.",
+    "keyCharacteristics": [
+      "Minimal analyst-sheet presentation.",
+      "Roster allocation bars carry the main meaning.",
+      "Team matchup pills use strong team colors and legible abbreviations.",
+      "Dense but not cramped spacing.",
+      "System UI typography with tabular numerals."
+    ],
+    "rules": [
+      {
+        "name": "The Allocation Color Rule",
+        "body": "Position colors identify QB, RB, WR, and TE only; do not use them for unrelated decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Team Color Rule",
+        "body": "Playoff matchup pills should use the opponent's real team colors prominently enough that the abbreviation is reinforced, not carrying recognition alone.",
+        "section": "colors"
+      },
+      {
+        "name": "The No Extra Reading Rule",
+        "body": "If a bar or table already communicates the relationship, do not add a second text label or percentage explaining the same relationship.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Inside Rule",
+        "body": "Once inside the extension shell, use lines and tonal changes before shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do make allocation comparison the most visually obvious part of the panel.",
+      "Do use target-based bars instead of percentages or interpretive allocation labels.",
+      "Do make playoff opponent colors prominent enough to recognize quickly.",
+      "Do preserve dense rows and tabular alignment for live draft scanning."
+    ],
+    "donts": [
+      "Don't add labels like \"heavy\", \"thin\", or \"ok\" next to allocation bars.",
+      "Don't add percentage labels next to allocation bars.",
+      "Don't make team-color matchup pills low-contrast or mostly neutral.",
+      "Don't add decorative theme language that competes with the draft data.",
+      "Don't create extra status chips when a single metadata line is enough."
+    ]
+  }
+}
