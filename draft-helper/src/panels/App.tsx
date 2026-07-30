@@ -21,6 +21,7 @@ export default function App() {
   const [userPickNumber, setUserPickNumber] = useState(1);
   const [rankingsData, setRankingsData] = useState<CustomRankingsData | null>(null);
   const [rankingsOpen, setRankingsOpen] = useState(false);
+  const [rankingsTooltipOpen, setRankingsTooltipOpen] = useState(false);
   const [rankingsText, setRankingsText] = useState('');
   const [rankingsMessage, setRankingsMessage] = useState('Paste a CSV with name, position, team, and rank columns.');
 
@@ -110,23 +111,39 @@ export default function App() {
     <div style={styles.app}>
       <div style={styles.topbar}>
         <div>
-          <div style={styles.title}>Draft Hand</div>
-        </div>
-        <div style={styles.statusGroup}>
-          <div
-            style={styles.pickStatus}
-            title={`Detected from the active DraftKings team card. Synced ${loadCount} times.`}
-          >
-            Pick {userPickNumber}
+          <div style={styles.titleRow}>
+            <div style={styles.title}>Draft Hand</div>
+            <span
+              style={styles.tooltipAnchor}
+              onMouseEnter={() => setRankingsTooltipOpen(true)}
+              onMouseLeave={() => setRankingsTooltipOpen(false)}
+            >
+              <button
+                type="button"
+                style={styles.rankingsButton}
+                aria-describedby={rankingsTooltipOpen ? 'dh-rankings-tooltip' : undefined}
+                onFocus={() => setRankingsTooltipOpen(true)}
+                onBlur={() => setRankingsTooltipOpen(false)}
+                onClick={() => {
+                  setRankingsTooltipOpen(false);
+                  setRankingsOpen(true);
+                }}
+              >
+                Rankings
+              </button>
+              {rankingsTooltipOpen ? (
+                <span id="dh-rankings-tooltip" role="tooltip" style={styles.tooltip}>
+                  Import custom rankings
+                </span>
+              ) : null}
+            </span>
           </div>
-          <button
-            type="button"
-            style={styles.rankingsButton}
-            title="Import custom rankings"
-            onClick={() => setRankingsOpen(true)}
-          >
-            Rankings
-          </button>
+        </div>
+        <div
+          style={styles.pickStatus}
+          title={`Detected from the active DraftKings team card. Synced ${loadCount} times.`}
+        >
+          Pick {userPickNumber}
         </div>
       </div>
 
@@ -196,6 +213,11 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 900,
     lineHeight: 1.1,
   },
+  titleRow: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: 7,
+  },
   subtitle: {
     color: color.muted,
     fontSize: 10.5,
@@ -216,23 +238,43 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 900,
     fontVariantNumeric: 'tabular-nums',
   },
-  statusGroup: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 6,
-  },
   rankingsButton: {
     appearance: 'none',
     border: `1px solid ${color.lineStrong}`,
     borderRadius: 8,
-    background: color.text,
-    color: color.panel,
+    background: color.panelRaised,
+    color: color.text,
     padding: '4px 8px',
     minHeight: 24,
     fontSize: 10,
     fontWeight: 900,
     lineHeight: 1,
     cursor: 'pointer',
+  },
+  tooltipAnchor: {
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+  },
+  tooltip: {
+    position: 'absolute',
+    top: 'calc(100% + 6px)',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    zIndex: 20,
+    width: 'max-content',
+    maxWidth: 190,
+    padding: '5px 7px',
+    border: `1px solid ${color.lineStrong}`,
+    borderRadius: 8,
+    background: color.panel,
+    color: color.text,
+    boxShadow: '0 8px 18px rgba(16, 24, 32, 0.2)',
+    fontSize: 10,
+    fontWeight: 850,
+    lineHeight: 1.1,
+    pointerEvents: 'none',
+    whiteSpace: 'nowrap',
   },
   modalBackdrop: {
     position: 'fixed',

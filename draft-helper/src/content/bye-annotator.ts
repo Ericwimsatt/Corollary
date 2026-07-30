@@ -13,7 +13,7 @@ function badgeStyle(count: number): string {
   return [
     'display:inline-flex',
     'align-items:center',
-    'margin-left:5px',
+    'margin-left:2px',
     'padding:1px 5px',
     'border-radius:6px',
     `border:1px solid ${color}`,
@@ -111,8 +111,10 @@ export const annotateByeWeekCounts = (
 
       const byeCell = cells[4] as HTMLElement | undefined;
       if (!byeCell) continue;
+      const byeNumber = byeCell.querySelector('.NumberCell_number-cell') as HTMLElement | null;
+      const byeNumberSpan = byeNumber?.querySelector('span') as HTMLElement | null;
 
-      const visibleBye = readBye(byeCell.textContent ?? '');
+      const visibleBye = readBye(byeNumberSpan?.textContent ?? byeCell.textContent ?? '');
       const byeWeek = visibleBye || persistedByes.get(playerKey({ name, team, position })) || 0;
       const names = rosterIndex.get(`${position}::${byeWeek}`) ?? [];
 
@@ -123,7 +125,17 @@ export const annotateByeWeekCounts = (
       badge.setAttribute('style', badgeStyle(names.length));
 
       addTooltip(badge, names.length, position, byeWeek, names);
-      byeCell.appendChild(badge);
+      if (byeNumber) {
+        byeNumber.style.display = 'inline-flex';
+        byeNumber.style.alignItems = 'center';
+        byeNumber.style.justifyContent = 'flex-start';
+      }
+      if (byeNumberSpan) {
+        byeNumberSpan.style.display = 'inline-block';
+        byeNumberSpan.style.width = '2ch';
+        byeNumberSpan.style.textAlign = 'right';
+      }
+      (byeNumber ?? byeCell).appendChild(badge);
       annotated++;
     }
 
