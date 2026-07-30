@@ -105,6 +105,23 @@ export const readRoster: Effect.Effect<ReadonlyArray<RosterPick>> =
     return picks;
   });
 
+export const readUserPickNumber: Effect.Effect<number | null> =
+  Effect.sync(() => {
+    const activeCard = document.querySelector(ACTIVE_USER);
+    const teamLabel =
+      activeCard
+        ?.querySelector('[class*="UserCard_information-top"]')
+        ?.textContent
+        ?.trim()
+      ?? activeCard?.textContent?.trim()
+      ?? '';
+    const match = teamLabel.match(/Team\s+(\d{1,2})(?!\d)/i);
+    if (!match) return null;
+
+    const pick = parseInt(match[1], 10);
+    return pick >= 1 && pick <= 12 ? pick : null;
+  });
+
 export const readAvailablePlayers: Effect.Effect<ReadonlyArray<Player>> =
   Effect.gen(function*() {
     yield* Effect.logDebug("[DraftHelper] readAvailablePlayers");

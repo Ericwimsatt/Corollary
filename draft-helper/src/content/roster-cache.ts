@@ -11,7 +11,6 @@ export interface CachedRosterPick {
   pick: number;
   overallPick: number;
   byeWeek: number;
-  adp: number;
   firstSeen: number;
   lastSeen: number;
   seenCount: number;
@@ -24,10 +23,7 @@ interface PersistedRoster {
 
 interface RosterCacheService {
   readonly switchDraft: (draftId: string) => Effect.Effect<void>;
-  readonly update: (
-    picks: ReadonlyArray<RosterPick>,
-    getAdp?: (name: string, team: string, position: Position) => number | undefined,
-  ) => Effect.Effect<void>;
+  readonly update: (picks: ReadonlyArray<RosterPick>) => Effect.Effect<void>;
   readonly getAll: Effect.Effect<ReadonlyArray<RosterPick>>;
   readonly currentDraftId: Effect.Effect<string | null>;
 }
@@ -102,10 +98,7 @@ const switchDraftImpl = (draftId: string) =>
     yield* Ref.set(draftsRef, draftId);
   });
 
-const updateImpl = (
-  picks: ReadonlyArray<RosterPick>,
-  getAdp?: (name: string, team: string, position: Position) => number | undefined,
-) =>
+const updateImpl = (picks: ReadonlyArray<RosterPick>) =>
   Effect.gen(function*() {
     const id = yield* Ref.get(draftsRef);
     if (!id) return;
@@ -118,7 +111,6 @@ const updateImpl = (
       for (const pick of picks) {
         const k = playerKey(pick.name, pick.team, pick.position);
         if (!current.has(k)) {
-          const adp = pick.adp > 0 ? pick.adp : (getAdp?.(pick.name, pick.team, pick.position) ?? 0);
           current.set(k, {
             name: pick.name,
             team: pick.team,
@@ -127,7 +119,6 @@ const updateImpl = (
             pick: pick.pick,
             overallPick: current.size + 1,
             byeWeek: pick.byeWeek,
-            adp,
             firstSeen: now,
             lastSeen: now,
             seenCount: 1,
@@ -164,7 +155,7 @@ const getAllImpl = Effect.gen(function*() {
     pick: e.pick,
     overallPick: e.overallPick,
     byeWeek: e.byeWeek,
-    adp: e.adp,
+    adp: 0,
   }));
 });
 

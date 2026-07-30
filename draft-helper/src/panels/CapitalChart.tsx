@@ -6,7 +6,6 @@ import { color, positionColor } from './styles';
 interface Props {
   roster: RosterPick[];
   userPickNumber: number;
-  useAdp: boolean;
 }
 
 const TEAMS = 12;
@@ -36,18 +35,13 @@ function formatCapital(val: number): string {
   return String(val);
 }
 
-function pickForCapital(p: RosterPick, rosterIndex: number, userPickNumber: number, useAdp: boolean): number {
-  if (useAdp && p.adp > 0) return Math.round(p.adp);
-  return overallFromUserPick(rosterIndex, userPickNumber);
-}
-
-export default function CapitalChart({ roster, userPickNumber, useAdp }: Props) {
+export default function CapitalChart({ roster, userPickNumber }: Props) {
   const groups: PosGroup[] = POS_GROUPS.map((g) => {
     const players = roster.filter((p) => g.pos.includes(p.position));
     const capital = players.reduce(
       (sum, p) => {
         const rosterIndex = roster.indexOf(p);
-        const pk = pickForCapital(p, rosterIndex, userPickNumber, useAdp);
+        const pk = overallFromUserPick(rosterIndex, userPickNumber);
         const cap = draftCapital(pk);
         return sum + cap;
       },
@@ -62,18 +56,11 @@ export default function CapitalChart({ roster, userPickNumber, useAdp }: Props) 
     };
   });
 
-  const missingAdpCount = useAdp ? roster.filter(p => p.adp <= 0).length : 0;
-
   return (
     <section style={styles.container} aria-label="Draft capital by position">
       <div style={styles.header}>
         <h3 style={styles.heading}>Draft Capital</h3>
       </div>
-      {missingAdpCount > 0 && (
-        <div style={styles.warning}>
-          {missingAdpCount} missing ADP; actual pick used
-        </div>
-      )}
       <div style={styles.barList}>
         {groups.map((g) => {
           const posColor = positionColor[g.label];
