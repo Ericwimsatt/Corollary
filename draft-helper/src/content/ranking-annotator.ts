@@ -77,15 +77,15 @@ export const annotateExternalRankings: Effect.Effect<void> =
 
       let color: string;
       if (match.etrRank < dkRank) {
-        color = '#4caf50';
+        color = '#168a52';
       } else if (match.etrRank > dkRank) {
-        color = '#f44336';
+        color = '#c24132';
       } else {
-        color = '#ffeb3b';
+        color = '#9b6200';
       }
 
       badge.setAttribute('style',
-        `color:${color};font-size:11px;white-space:nowrap;margin-left:4px;`
+        `display:inline-flex;align-items:center;margin-left:5px;padding:1px 5px;border-radius:6px;border:1px solid ${color};background:#fff;color:${color};font-size:10px;font-weight:900;line-height:14px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 1px 2px rgba(16,24,32,.12);`
       );
       rankCell.appendChild(badge);
       annotated++;

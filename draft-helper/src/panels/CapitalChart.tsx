@@ -1,6 +1,7 @@
 import React from 'react';
 import type { RosterPick, Position } from '../content/types';
 import { draftCapital } from '../utils/capital';
+import { color, positionColor } from './styles';
 
 interface Props {
   roster: RosterPick[];
@@ -17,18 +18,17 @@ function overallFromUserPick(rosterIndex: number, userPick: number): number {
 }
 
 interface PosGroup {
-  label: string;
+  label: Position;
   capital: number;
   count: number;
-  color: string;
-  maxCapital: number;
+  pct: number;
 }
 
-const POS_GROUPS: { pos: Position[]; label: string; color: string; maxCapital: number }[] = [
-  { pos: ['QB'], label: 'QB', color: '#4fc3f7', maxCapital: 3000 },
-  { pos: ['RB'], label: 'RB', color: '#81c784', maxCapital: 9000 },
-  { pos: ['WR'], label: 'WR', color: '#ffb74d', maxCapital: 13000 },
-  { pos: ['TE'], label: 'TE', color: '#ba68c8', maxCapital: 3000 },
+const POS_GROUPS: { pos: Position[]; label: Position; maxCapital: number }[] = [
+  { pos: ['QB'], label: 'QB', maxCapital: 3000 },
+  { pos: ['RB'], label: 'RB', maxCapital: 9000 },
+  { pos: ['WR'], label: 'WR', maxCapital: 13000 },
+  { pos: ['TE'], label: 'TE', maxCapital: 3000 },
 ];
 
 function formatCapital(val: number): string {
@@ -42,70 +42,60 @@ function pickForCapital(p: RosterPick, rosterIndex: number, userPickNumber: numb
 }
 
 export default function CapitalChart({ roster, userPickNumber, useAdp }: Props) {
-  console.group('[DraftHelper] CapitalChart');
-  console.log(`User pick number: ${userPickNumber}, mode: ${useAdp ? 'ADP' : 'Actual'}`);
-  console.log('Full roster:', JSON.parse(JSON.stringify(roster)));
   const groups: PosGroup[] = POS_GROUPS.map((g) => {
     const players = roster.filter((p) => g.pos.includes(p.position));
-    console.log(`${g.label} players (${players.length}):`, players.map(p => p.name).join(', '));
-    const details: string[] = [];
     const capital = players.reduce(
-      (sum, p, idx) => {
+      (sum, p) => {
         const rosterIndex = roster.indexOf(p);
         const pk = pickForCapital(p, rosterIndex, userPickNumber, useAdp);
         const cap = draftCapital(pk);
-        details.push(`${p.name}: ${useAdp ? `adp=#${p.adp}` : `snakeOverall=#${pk}`} -> $${cap}`);
         return sum + cap;
       },
       0
     );
-    details.forEach(d => console.log(`  ${d}`));
-    console.log(`  total: $${capital}, max: $${g.maxCapital}`);
+    const pct = (capital / g.maxCapital) * 100;
     return {
       label: g.label,
       capital,
       count: players.length,
-      color: g.color,
-      maxCapital: g.maxCapital,
+      pct,
     };
   });
-  console.groupEnd();
 
   const missingAdpCount = useAdp ? roster.filter(p => p.adp <= 0).length : 0;
 
   return (
-    <div style={styles.container}>
-      <h3 style={styles.heading}>
-        Draft Capital
-        <span style={{ fontSize: 10, color: '#999', fontWeight: 400, marginLeft: 8 }}>
-          ({useAdp ? 'ADP' : 'Actual'})
-        </span>
-      </h3>
+    <section style={styles.container} aria-label="Draft capital by position">
+      <div style={styles.header}>
+        <h3 style={styles.heading}>Draft Capital</h3>
+      </div>
       {missingAdpCount > 0 && (
-        <div style={{ fontSize: 10, color: '#f0a030', marginBottom: 6 }}>
-          ⚠ {missingAdpCount} player{missingAdpCount > 1 ? 's' : ''} missing ADP (using actual pick)
+        <div style={styles.warning}>
+          {missingAdpCount} missing ADP; actual pick used
         </div>
       )}
-      {groups.map((g) => {
-        const pct = (g.capital / g.maxCapital) * 100;
-        return (
-          <div key={g.label} style={styles.row}>
-            <span style={styles.label}>{g.label}</span>
-            <div style={styles.barBg}>
-              <div
-                style={{
-                  ...styles.barFill,
-                  width: `${Math.max(pct, 2)}%`,
-                  backgroundColor: g.color,
-                }}
-              />
+      <div style={styles.barList}>
+        {groups.map((g) => {
+          const posColor = positionColor[g.label];
+          return (
+            <div key={g.label} style={styles.row}>
+              <span style={{ ...styles.label, color: posColor }}>{g.label}</span>
+              <div style={styles.barBg}>
+                <div
+                  style={{
+                    ...styles.barFill,
+                    width: `${Math.max(g.pct, 2)}%`,
+                    backgroundColor: posColor,
+                  }}
+                />
+              </div>
+              <span style={styles.capital}>${formatCapital(g.capital)}</span>
+              <span style={styles.count}>{g.count}</span>
             </div>
-            <span style={styles.capital}>${formatCapital(g.capital)}</span>
-            <span style={styles.count}>{g.count}</span>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -113,57 +103,81 @@ const styles: Record<string, React.CSSProperties> = {
   container: {
     marginBottom: 12,
   },
+  header: {
+    display: 'flex',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    marginBottom: 7,
+  },
   heading: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: '#e8e8e8',
-    marginBottom: 8,
+    color: color.text,
+    fontSize: 12,
+    fontWeight: 850,
+    lineHeight: 1.2,
+  },
+  mode: {
+    color: color.muted,
+    fontSize: 10,
+    fontWeight: 750,
+  },
+  barList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 4,
   },
   row: {
-    display: 'flex',
+    display: 'grid',
+    gridTemplateColumns: '26px minmax(128px, 1fr) 52px 18px',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 6,
-    fontSize: 12,
+    gap: 7,
+    minHeight: 20,
   },
   label: {
-    width: 36,
-    color: '#ccc',
-    fontWeight: 600,
-    flexShrink: 0,
+    fontSize: 11,
+    fontWeight: 900,
+    lineHeight: 1,
   },
   barBg: {
-    flex: 1,
-    height: 16,
-    backgroundColor: '#333',
-    borderRadius: 8,
+    height: 14,
+    backgroundColor: color.panel,
+    border: `1px solid ${color.line}`,
+    borderRadius: 999,
     position: 'relative',
-    overflow: 'hidden',
+    overflow: 'visible',
   },
   barFill: {
     position: 'absolute',
-    left: 0,
-    top: 0,
+    left: -1,
+    top: -1,
     height: '100%',
-    borderRadius: 8,
-    transition: 'width 0.3s',
+    minHeight: 14,
+    borderRadius: 999,
+    boxShadow: 'inset 0 -1px 0 rgba(0, 0, 0, 0.18)',
   },
   capital: {
-    width: 48,
-    textAlign: 'right',
-    color: '#e0e0e0',
-    fontWeight: 600,
+    position: 'relative',
+    color: color.text,
+    fontWeight: 850,
     fontSize: 11,
+    textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
+    zIndex: 2,
   },
   count: {
-    width: 20,
-    textAlign: 'center',
-    color: '#aaa',
-    backgroundColor: '#444',
-    borderRadius: 10,
-    padding: '0 4px',
-    fontSize: 11,
+    color: color.muted,
+    fontSize: 10,
+    fontWeight: 800,
+    textAlign: 'right',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  warning: {
+    color: color.warning,
+    background: 'rgba(246, 196, 83, 0.1)',
+    border: '1px solid rgba(246, 196, 83, 0.24)',
+    borderRadius: 7,
+    padding: '5px 7px',
+    marginBottom: 7,
+    fontSize: 10,
     fontWeight: 700,
   },
 };

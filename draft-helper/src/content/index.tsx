@@ -11,7 +11,18 @@ function injectPageStyles() {
       max-width: none !important;
     }
     #draft-helper-root {
-      padding: 2px;
+      padding: 10px 12px 12px !important;
+      margin: 10px 10px 12px 0 !important;
+      background: #dfe8ee !important;
+      border: 1px solid #b6c5cf !important;
+      border-radius: 16px !important;
+      box-shadow:
+        0 0 0 2px rgba(255, 255, 255, 0.82),
+        0 16px 34px rgba(16, 24, 32, 0.3) !important;
+    }
+    .LiveDraft_live-draft,
+    .LiveDraft-Mobile_live-draft-mobile__body {
+      padding: 0 24px !important;
     }
   `;
   document.head.appendChild(style);
@@ -59,14 +70,28 @@ function inject() {
       display: block;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 13px;
-      color: #e0e0e0;
-      background: #1e1e1e;
-      border-radius: 8px;
-      padding: 12px;
-      margin: 8px 0;
+      color: #101820;
+      background: #edf2f5;
+      border: 1px solid #c9d6de;
+      border-radius: 14px;
+      padding: 16px;
+      margin: 0;
       min-height: 50px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    button, input {
+      font: inherit;
+    }
+    button:focus-visible,
+    input:focus-visible {
+      outline: 2px solid #1570d6;
+      outline-offset: 2px;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      margin: 0;
+    }
   `;
   shadow.appendChild(style);
 

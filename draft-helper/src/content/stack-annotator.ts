@@ -81,7 +81,7 @@ export const annotateStackTargets = (
       badge.className = 'dh-stack-badge';
       badge.textContent = '\u00A0' + label;
       badge.setAttribute('style',
-        'color:#4fc3f7;font-size:11px;white-space:nowrap;margin-left:4px;'
+        'display:inline-flex;align-items:center;margin-left:5px;padding:1px 5px;border-radius:6px;border:1px solid #1570d6;background:#fff;color:#1570d6;font-size:10px;font-weight:900;line-height:14px;white-space:nowrap;box-shadow:0 1px 2px rgba(16,24,32,.12);'
       );
       container.appendChild(badge);
       annotated++;
