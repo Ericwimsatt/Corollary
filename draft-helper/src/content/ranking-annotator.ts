@@ -81,7 +81,7 @@ export const annotateExternalRankings: Effect.Effect<void> =
       } else if (match.etrRank > dkRank) {
         color = '#c24132';
       } else {
-        color = '#9b6200';
+        color = '#101820';
       }
 
       badge.setAttribute('style',

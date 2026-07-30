@@ -104,14 +104,14 @@ function hexToRgb(hex: string): [number, number, number] {
 export default function OpponentsTable({ roster, available }: Props) {
   const qbs = roster.filter(p => p.position === 'QB');
   const nonQbs = roster.filter(p => p.position !== 'QB');
-  const first8 = [...qbs, ...nonQbs].slice(0, 8);
+  const first15 = [...qbs, ...nonQbs].slice(0, 15);
 
   return (
     <section style={styles.container} aria-label="Playoff opponents">
       <div style={sharedStyles.sectionHeader}>
         <h3 style={sharedStyles.heading}>Playoff Matchups</h3>
       </div>
-      {first8.length === 0 ? (
+      {first15.length === 0 ? (
         <p style={sharedStyles.empty}>Draft players to see playoff opponents.</p>
       ) : (
         <table style={styles.table}>
@@ -124,7 +124,7 @@ export default function OpponentsTable({ roster, available }: Props) {
             </tr>
           </thead>
           <tbody>
-            {first8.map((pick, i) => {
+            {first15.map((pick, i) => {
               const opps = pick.team
                 ? getOpponents(pick.team)
                 : Option.none<OpponentRow>();

@@ -110,7 +110,8 @@ const updateImpl = (picks: ReadonlyArray<RosterPick>) =>
       if (!current) return all;
       for (const pick of picks) {
         const k = playerKey(pick.name, pick.team, pick.position);
-        if (!current.has(k)) {
+        const existing = current.get(k);
+        if (!existing) {
           current.set(k, {
             name: pick.name,
             team: pick.team,
@@ -123,6 +124,11 @@ const updateImpl = (picks: ReadonlyArray<RosterPick>) =>
             lastSeen: now,
             seenCount: 1,
           });
+          added = true;
+        } else if (existing.byeWeek === 0 && pick.byeWeek !== 0) {
+          existing.byeWeek = pick.byeWeek;
+          existing.lastSeen = now;
+          existing.seenCount += 1;
           added = true;
         }
       }
