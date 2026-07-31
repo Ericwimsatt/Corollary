@@ -3,6 +3,7 @@ import { Effect } from 'effect';
 import { setupDraftPage } from './fixtures/setup';
 import { annotateByeWeekCounts } from '../src/content/bye-annotator';
 import { annotateStackTargets } from '../src/content/stack-annotator';
+import { draftKingsAdapter } from '../src/content/adapters';
 import type { Player, RosterPick } from '../src/content/types';
 
 function run<A>(eff: Effect.Effect<A>): A {
@@ -61,7 +62,7 @@ describe('free agent annotations', () => {
       player('Joe Burrow', 'QB', 'CIN', 6),
     ];
 
-    run(annotateStackTargets(roster, available));
+    run(annotateStackTargets(draftKingsAdapter, roster, available));
 
     const freeAgentRow = Array.from(document.querySelectorAll('.BaseTable__row')).find((row) =>
       row.textContent?.includes('Free Agent Receiver'),
@@ -78,7 +79,7 @@ describe('free agent annotations', () => {
     ];
     const available = [player('Free Agent Receiver', 'WR', 'FA', 0)];
 
-    run(annotateByeWeekCounts(roster, available, available));
+    run(annotateByeWeekCounts(draftKingsAdapter, roster, available, available));
 
     const freeAgentRow = Array.from(document.querySelectorAll('.BaseTable__row')).find((row) =>
       row.textContent?.includes('Free Agent Receiver'),

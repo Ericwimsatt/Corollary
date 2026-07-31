@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Effect } from 'effect';
 import { setupDraftPage } from './fixtures/setup';
-import { readRoster, readAvailablePlayers } from '../src/content/dom-reader';
+import { draftKingsAdapter } from '../src/content/adapters';
 
 function run<A>(eff: Effect.Effect<A>): A {
   return Effect.runSync(eff);
@@ -13,7 +13,7 @@ describe('readRoster', () => {
   });
 
   it('reads roster rows', () => {
-    const roster = run(readRoster);
+    const roster = run(draftKingsAdapter.readRoster);
     expect(roster).toHaveLength(1);
     expect(roster[0].name).toBe('Ja\'Marr Chase');
     expect(roster[0].position).toBe('WR');
@@ -28,7 +28,7 @@ describe('readAvailablePlayers', () => {
   });
 
   it('reads available players with ADP', () => {
-    const players = run(readAvailablePlayers);
+    const players = run(draftKingsAdapter.readAvailablePlayers);
     expect(players.length).toBeGreaterThanOrEqual(4);
     const allen = players.find((p) => p.name === 'Josh Allen');
     expect(allen).toBeDefined();
@@ -38,7 +38,7 @@ describe('readAvailablePlayers', () => {
   });
 
   it('parses ADP as float', () => {
-    const players = run(readAvailablePlayers);
+    const players = run(draftKingsAdapter.readAvailablePlayers);
     const chase = players.find((p) => p.name === 'Ja\'Marr Chase');
     expect(chase!.adp).toBe(3.0);
   });

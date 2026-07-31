@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import type { Player, Position, RosterPick } from './types';
 import { attachOverlayTooltip, createOverlayTooltip } from './overlay-tooltip';
 import { isFreeAgentTeam, isNflTeam, normalizeTeam } from '../utils/teams';
+import type { DraftPlatformAdapter } from './adapters';
 
 function colorForByeCount(count: number): string {
   if (count === 0) return '#168a52';
@@ -55,12 +56,6 @@ function buildRosterIndex(roster: ReadonlyArray<RosterPick>) {
   return index;
 }
 
-function readPosition(text: string): Position | null {
-  const position = text.trim().toUpperCase();
-  if (position === 'QB' || position === 'RB' || position === 'WR' || position === 'TE') return position;
-  return null;
-}
-
 function readBye(text: string): number {
   const match = text.trim().match(/\d+/);
   return match ? parseInt(match[0], 10) : 0;
@@ -73,6 +68,7 @@ function addTooltip(target: HTMLElement, count: number, position: Position, byeW
 }
 
 export const annotateByeWeekCounts = (
+  adapter: DraftPlatformAdapter,
   roster: ReadonlyArray<RosterPick>,
   available: ReadonlyArray<Player>,
   persistedAvailable: ReadonlyArray<Player>,
@@ -83,38 +79,23 @@ export const annotateByeWeekCounts = (
     const rosterIndex = buildRosterIndex(roster);
     const persistedByes = availableByes(persistedAvailable);
 
-    let body: Element | null = null;
-    const mobileSection = document.querySelector('.DraftablePlayersTable-Mobile_draftable-players');
-    if (mobileSection) {
-      body = mobileSection.querySelector('.BaseTable__body');
-      if (!body) {
-        const allTables = mobileSection.querySelectorAll('.BaseTable__body');
-        body = allTables[0] ?? null;
-      }
-    } else {
-      const desktopSection = document.querySelector('.LiveDraft_draftable-players');
-      if (desktopSection) {
-        body = desktopSection.querySelector('.BaseTable__body');
-      }
-    }
-
+    const body = adapter.ui.findAvailablePlayersBody();
     if (!body) return;
 
     let annotated = 0;
-    const rows = body.querySelectorAll('.BaseTable__row');
+    const rows = adapter.ui.getAvailablePlayerRows(body);
     for (const row of rows) {
-      const cells = row.querySelectorAll('.BaseTable__row-cell');
-      if (cells.length < 6) continue;
+      const parsed = adapter.ui.parseAvailablePlayerRow(row);
+      if (!parsed) continue;
 
-      const name = cells[2]?.querySelector('.PlayerCell_player-name')?.textContent?.trim() ?? '';
-      const team = normalizeTeam(cells[2]?.querySelector('.PlayerCell_player-team div')?.textContent?.trim() ?? '');
-      const position = readPosition(cells[2]?.querySelector('.player-position')?.textContent ?? '');
+      const { name, position } = parsed;
+      const team = normalizeTeam(parsed.team);
       if (!name || !position || !isNflTeam(team)) continue;
 
-      const byeCell = cells[4] as HTMLElement | undefined;
+      const byeCell = parsed.byeCell;
       if (!byeCell) continue;
-      const byeNumber = byeCell.querySelector('.NumberCell_number-cell') as HTMLElement | null;
-      const byeNumberSpan = byeNumber?.querySelector('span') as HTMLElement | null;
+      const byeNumber = parsed.byeNumber;
+      const byeNumberSpan = parsed.byeNumberSpan;
 
       const visibleBye = readBye(byeNumberSpan?.textContent ?? byeCell.textContent ?? '');
       const byeWeek = visibleBye || persistedByes.get(playerKey({ name, team, position })) || 0;

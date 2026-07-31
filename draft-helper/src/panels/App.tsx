@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Effect } from "effect";
 import type { RosterPick, Player } from '../content/types';
 import { runRefresh } from '../content/pipeline';
+import { getActiveAdapter, type DraftPlatformAdapter } from '../content/adapters';
 import {
   clearCustomRankings,
   getCustomRankings,
@@ -14,6 +15,7 @@ import OpponentsTable from './OpponentsTable';
 import { color } from './styles';
 
 export default function App() {
+  const [adapter, setAdapter] = useState<DraftPlatformAdapter>(() => getActiveAdapter());
   const [roster, setRoster] = useState<ReadonlyArray<RosterPick>>([]);
   const [available, setAvailable] = useState<ReadonlyArray<Player>>([]);
   const [, setDraftId] = useState<string | null>(null);
@@ -42,6 +44,7 @@ export default function App() {
             setAvailable([]);
           }
           currentDraftId = data.draftId;
+          setAdapter(data.adapter);
           setDraftId(data.draftId);
           if (data.userPickNumber !== null) {
             setUserPickNumber(data.userPickNumber);
@@ -67,8 +70,8 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    getCustomRankings().then(setRankingsData);
-  }, []);
+    getCustomRankings(adapter.id).then(setRankingsData);
+  }, [adapter.id]);
 
   const refreshRankingsAnnotations = () => {
     Effect.runPromise(runRefresh).catch(() => undefined);
@@ -81,7 +84,7 @@ export default function App() {
       return;
     }
 
-    const saved = await saveCustomRankings(result.rankings);
+    const saved = await saveCustomRankings(result.rankings, adapter.id);
     setRankingsData(saved);
     setRankingsMessage(`Imported ${result.rankings.length} rankings${result.skipped ? ` and skipped ${result.skipped}` : ''}.`);
     setRankingsOpen(false);
@@ -90,7 +93,7 @@ export default function App() {
   };
 
   const removeRankings = async () => {
-    await clearCustomRankings();
+    await clearCustomRankings(adapter.id);
     setRankingsData(null);
     setRankingsMessage('Custom rankings cleared.');
     refreshRankingsAnnotations();
@@ -133,7 +136,7 @@ export default function App() {
               </button>
               {rankingsTooltipOpen ? (
                 <span id="dh-rankings-tooltip" role="tooltip" style={styles.tooltip}>
-                  Import custom rankings
+                  Import {adapter.label} rankings
                 </span>
               ) : null}
             </span>
@@ -141,20 +144,20 @@ export default function App() {
         </div>
         <div
           style={styles.pickStatus}
-          title={`Detected from the active DraftKings team card. Synced ${loadCount} times.`}
+          title={`Detected from the active ${adapter.label} draft page. Synced ${loadCount} times.`}
         >
-          Pick {userPickNumber}
+          {adapter.label} Pick {userPickNumber}
         </div>
       </div>
 
-      <CapitalChart roster={roster as RosterPick[]} userPickNumber={userPickNumber} />
+      <CapitalChart roster={roster as RosterPick[]} userPickNumber={userPickNumber} adapter={adapter} />
       <OpponentsTable roster={roster as RosterPick[]} available={available as Player[]} />
       {rankingsOpen ? (
         <div style={styles.modalBackdrop} role="presentation">
           <div style={styles.modal} role="dialog" aria-modal="true" aria-labelledby="dh-rankings-title">
             <div style={styles.modalHeader}>
               <div>
-                <div id="dh-rankings-title" style={styles.modalTitle}>Custom Rankings</div>
+                <div id="dh-rankings-title" style={styles.modalTitle}>{adapter.label} Rankings</div>
                 <div style={styles.modalMeta}>
                   {rankingsData ? `${rankingsData.rankings.length} saved` : 'No rankings saved'}
                 </div>

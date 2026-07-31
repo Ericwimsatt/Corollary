@@ -4,6 +4,7 @@ import {
   normalizeRankingTeam,
   type CustomRanking,
 } from "../rankings/custom-rankings";
+import type { DraftPlatformAdapter } from "./adapters";
 
 const teamAliases: Record<string, string> = {
   'LA': 'LAR',
@@ -25,74 +26,48 @@ function matchLastName(name: string): string {
   return '';
 }
 
-export const annotateExternalRankings: Effect.Effect<void> =
+export const annotateExternalRankings = (adapter: DraftPlatformAdapter): Effect.Effect<void> =>
   Effect.tryPromise({
     try: async () => {
-      const data = await getCustomRankings();
-      annotateRankings(data?.rankings ?? []);
+      const data = await getCustomRankings(adapter.id);
+      annotateRankings(adapter, data?.rankings ?? []);
     },
     catch: () => new Error("custom rankings annotation failed"),
-  }).pipe(Effect.catchAll(() => Effect.sync(() => annotateRankings([]))));
+  }).pipe(Effect.catchAll(() => Effect.sync(() => annotateRankings(adapter, []))));
 
-function annotateRankings(rankings: ReadonlyArray<CustomRanking>) {
+function annotateRankings(adapter: DraftPlatformAdapter, rankings: ReadonlyArray<CustomRanking>) {
   document.querySelectorAll('.dh-rank-badge').forEach(el => el.remove());
   if (rankings.length === 0) return;
 
-  let body: Element | null = null;
-  const mobileSection = document.querySelector('.DraftablePlayersTable-Mobile_draftable-players');
-  if (mobileSection) {
-    body = mobileSection.querySelector('.BaseTable__body');
-    if (!body) {
-      const allTables = mobileSection.querySelectorAll('.BaseTable__body');
-      body = allTables[0] ?? null;
-    }
-  } else {
-    const desktopSection = document.querySelector('.LiveDraft_draftable-players');
-    if (desktopSection) {
-      body = desktopSection.querySelector('.BaseTable__body');
-    }
-  }
-
+  const body = adapter.ui.findAvailablePlayersBody();
   if (!body) return;
 
   let annotated = 0;
-  const rows = body.querySelectorAll('.BaseTable__row');
+  const rows = adapter.ui.getAvailablePlayerRows(body);
   for (const row of rows) {
-    const cells = row.querySelectorAll('.BaseTable__row-cell');
-    if (cells.length < 6) continue;
+    const parsed = adapter.ui.parseAvailablePlayerRow(row);
+    if (!parsed?.rankCell) continue;
 
-    const dkRankText = cells[1]?.textContent?.trim() ?? '0';
-    const dkRank = parseInt(dkRankText, 10) || 0;
-
-    const nameEl = cells[2]?.querySelector('.PlayerCell_player-name');
-    const posEl = cells[2]?.querySelector('.player-position');
-    const teamEl = cells[2]?.querySelector('.PlayerCell_player-team div');
-
-    const dkName = nameEl?.textContent?.trim() ?? '';
-    const dkPos = posEl?.textContent?.trim() ?? '';
-    const dkTeam = normalizeTeam(teamEl?.textContent?.trim() ?? '');
-    if (!dkName || !dkPos || !dkTeam) continue;
-
-    const dkLastName = matchLastName(dkName);
+    const platformLastName = matchLastName(parsed.name);
+    const platformTeam = normalizeTeam(parsed.team);
 
     const match = rankings.find(r => {
-      if (r.position !== dkPos) return false;
-      if (normalizeTeam(r.team) !== dkTeam) return false;
+      if (r.position !== parsed.position) return false;
+      if (normalizeTeam(r.team) !== platformTeam) return false;
       const csvLastName = matchLastName(r.name);
-      return csvLastName === dkLastName;
+      return csvLastName === platformLastName;
     });
 
     if (!match) continue;
 
-    const rankCell = cells[1];
     const badge = document.createElement('span');
     badge.className = 'dh-rank-badge';
     badge.textContent = `\u00A0${match.rank}`;
 
     let color: string;
-    if (match.rank < dkRank) {
+    if (match.rank < parsed.rank) {
       color = '#168a52';
-    } else if (match.rank > dkRank) {
+    } else if (match.rank > parsed.rank) {
       color = '#c24132';
     } else {
       color = '#101820';
@@ -101,7 +76,7 @@ function annotateRankings(rankings: ReadonlyArray<CustomRanking>) {
     badge.setAttribute('style',
       `display:inline-flex;align-items:center;margin-left:5px;padding:1px 5px;border-radius:6px;border:1px solid ${color};background:#fff;color:${color};font-size:10px;font-weight:900;line-height:14px;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 1px 2px rgba(16,24,32,.12);`
     );
-    rankCell.appendChild(badge);
+    parsed.rankCell.appendChild(badge);
     annotated++;
   }
 

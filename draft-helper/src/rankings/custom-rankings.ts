@@ -1,3 +1,5 @@
+import type { PlatformId } from "../content/adapters";
+
 export interface CustomRanking {
   name: string;
   position: string;
@@ -15,7 +17,7 @@ export interface RankingImportResult {
   skipped: number;
 }
 
-const STORAGE_KEY = 'dh_custom_rankings';
+const STORAGE_KEY_PREFIX = 'dh_custom_rankings';
 
 const TEAM_ALIASES: Record<string, string> = {
   LA: 'LAR',
@@ -30,6 +32,10 @@ function chromeStorage() {
   return globalThis.chrome?.storage?.local ?? null;
 }
 
+function storageKey(platformId: PlatformId): string {
+  return `${STORAGE_KEY_PREFIX}_${platformId}`;
+}
+
 export function normalizeRankingTeam(team: string): string {
   const normalized = team.trim().toUpperCase();
   return TEAM_ALIASES[normalized] ?? normalized;
@@ -40,12 +46,13 @@ export function normalizeRankingPosition(position: string): string {
   return POSITION_ALIASES[normalized] ?? normalized;
 }
 
-export async function getCustomRankings(): Promise<CustomRankingsData | null> {
+export async function getCustomRankings(platformId: PlatformId = "draftkings"): Promise<CustomRankingsData | null> {
+  const key = storageKey(platformId);
   const storage = chromeStorage();
   if (storage) {
     try {
-      const result = await storage.get(STORAGE_KEY);
-      const data = (result[STORAGE_KEY] ?? null) as CustomRankingsData | null;
+      const result = await storage.get(key);
+      const data = (result[key] ?? null) as CustomRankingsData | null;
       if (data) return data;
     } catch {
       // Fall through to localStorage.
@@ -53,39 +60,41 @@ export async function getCustomRankings(): Promise<CustomRankingsData | null> {
   }
 
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     return raw ? (JSON.parse(raw) as CustomRankingsData) : null;
   } catch {
     return null;
   }
 }
 
-export async function saveCustomRankings(rankings: CustomRanking[]): Promise<CustomRankingsData> {
+export async function saveCustomRankings(rankings: CustomRanking[], platformId: PlatformId = "draftkings"): Promise<CustomRankingsData> {
+  const key = storageKey(platformId);
   const data: CustomRankingsData = { rankings, updatedAt: Date.now() };
   const storage = chromeStorage();
   if (storage) {
     try {
-      await storage.set({ [STORAGE_KEY]: data });
+      await storage.set({ [key]: data });
       return data;
     } catch {
       // Fall through to localStorage.
     }
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  localStorage.setItem(key, JSON.stringify(data));
   return data;
 }
 
-export async function clearCustomRankings(): Promise<void> {
+export async function clearCustomRankings(platformId: PlatformId = "draftkings"): Promise<void> {
+  const key = storageKey(platformId);
   const storage = chromeStorage();
   if (storage) {
     try {
-      await storage.remove(STORAGE_KEY);
+      await storage.remove(key);
     } catch {
       // Keep clearing localStorage below.
     }
   }
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(key);
 }
 
 export function parseRankingsCsv(csv: string): RankingImportResult {

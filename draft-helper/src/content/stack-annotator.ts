@@ -3,6 +3,7 @@ import type { Player, RosterPick } from './types';
 import { getOpponents } from "../data/schedule";
 import { attachOverlayTooltip, createOverlayTooltip, tooltipLabelStyle } from './overlay-tooltip';
 import { isNflTeam, normalizeTeam } from '../utils/teams';
+import type { DraftPlatformAdapter } from './adapters';
 
 const badgeRowStyle = [
   'display:flex',
@@ -93,6 +94,7 @@ function addTooltip(row: HTMLElement, stacks: string[], week17: string[]) {
 }
 
 export const annotateStackTargets = (
+  adapter: DraftPlatformAdapter,
   roster: ReadonlyArray<RosterPick>,
   available: ReadonlyArray<Player>,
 ): Effect.Effect<void> =>
@@ -126,34 +128,19 @@ export const annotateStackTargets = (
       if (names.length > 0) teamPlayers.set(team, names);
     }
 
-    let body: Element | null = null;
-    const mobileSection = document.querySelector('.DraftablePlayersTable-Mobile_draftable-players');
-    if (mobileSection) {
-      body = mobileSection.querySelector('.BaseTable__body');
-      if (!body) {
-        const allTables = mobileSection.querySelectorAll('.BaseTable__body');
-        body = allTables[0] ?? null;
-      }
-    } else {
-      const desktopSection = document.querySelector('.LiveDraft_draftable-players');
-      if (desktopSection) {
-        body = desktopSection.querySelector('.BaseTable__body');
-      }
-    }
-
+    const body = adapter.ui.findAvailablePlayersBody();
     if (!body) {
       console.log('[DraftHelper] No available players table body found for stack annotations');
       return;
     }
 
     let annotated = 0;
-    const rows = body.querySelectorAll('.BaseTable__row');
+    const rows = adapter.ui.getAvailablePlayerRows(body);
     for (const row of rows) {
-      const cells = row.querySelectorAll('.BaseTable__row-cell');
-      if (cells.length < 6) continue;
+      const parsed = adapter.ui.parseAvailablePlayerRow(row);
+      if (!parsed) continue;
 
-      const teamEl = cells[2]?.querySelector('.PlayerCell_player-team div');
-      const team = normalizeTeam(teamEl?.textContent?.trim() ?? '');
+      const team = normalizeTeam(parsed.team);
       if (!isNflTeam(team)) continue;
 
       const stackNames = teamPlayers.get(team) ?? [];
@@ -163,8 +150,7 @@ export const annotateStackTargets = (
 
       if (stackNames.length === 0 && week17Names.length === 0) continue;
 
-      const container = cells[2]?.querySelector('.PlayerCell_player-details-container');
-      if (!container) continue;
+      if (!parsed.detailsContainer) continue;
 
       const badgeRow = document.createElement('div');
       badgeRow.className = 'dh-overlay-row';
@@ -193,7 +179,7 @@ export const annotateStackTargets = (
       }
 
       addTooltip(badgeRow, stackNames, week17Names);
-      container.appendChild(badgeRow);
+      parsed.detailsContainer.appendChild(badgeRow);
       annotated++;
     }
 

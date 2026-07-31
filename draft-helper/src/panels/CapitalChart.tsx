@@ -1,19 +1,18 @@
 import React from 'react';
 import type { RosterPick, Position } from '../content/types';
-import { draftCapital } from '../utils/capital';
+import type { DraftPlatformAdapter } from '../content/adapters';
 import { color, positionColor } from './styles';
 
 interface Props {
   roster: RosterPick[];
   userPickNumber: number;
+  adapter: DraftPlatformAdapter;
 }
 
-const TEAMS = 12;
-
-function overallFromUserPick(rosterIndex: number, userPick: number): number {
+function overallFromUserPick(rosterIndex: number, userPick: number, teamCount: number): number {
   const round = rosterIndex + 1;
-  if (round % 2 === 1) return (round - 1) * TEAMS + userPick;
-  return round * TEAMS - userPick + 1;
+  if (round % 2 === 1) return (round - 1) * teamCount + userPick;
+  return round * teamCount - userPick + 1;
 }
 
 interface PosGroup {
@@ -23,26 +22,19 @@ interface PosGroup {
   pct: number;
 }
 
-const POS_GROUPS: { pos: Position[]; label: Position; maxCapital: number }[] = [
-  { pos: ['QB'], label: 'QB', maxCapital: 3000 },
-  { pos: ['RB'], label: 'RB', maxCapital: 9000 },
-  { pos: ['WR'], label: 'WR', maxCapital: 13000 },
-  { pos: ['TE'], label: 'TE', maxCapital: 3000 },
-];
-
 function formatCapital(val: number): string {
   if (val >= 1000) return `${(val / 1000).toFixed(1)}k`;
   return String(val);
 }
 
-export default function CapitalChart({ roster, userPickNumber }: Props) {
-  const groups: PosGroup[] = POS_GROUPS.map((g) => {
+export default function CapitalChart({ roster, userPickNumber, adapter }: Props) {
+  const groups: PosGroup[] = adapter.capitalCeilings.map((g) => {
     const players = roster.filter((p) => g.pos.includes(p.position));
     const capital = players.reduce(
       (sum, p) => {
         const rosterIndex = roster.indexOf(p);
-        const pk = overallFromUserPick(rosterIndex, userPickNumber);
-        const cap = draftCapital(pk);
+        const pk = overallFromUserPick(rosterIndex, userPickNumber, adapter.teamCount);
+        const cap = adapter.draftCapital(pk);
         return sum + cap;
       },
       0
@@ -60,6 +52,7 @@ export default function CapitalChart({ roster, userPickNumber }: Props) {
     <section style={styles.container} aria-label="Draft capital by position">
       <div style={styles.header}>
         <h3 style={styles.heading}>Draft Capital</h3>
+        <span style={styles.mode}>{adapter.roundCount} rounds</span>
       </div>
       <div style={styles.barList}>
         {groups.map((g) => {

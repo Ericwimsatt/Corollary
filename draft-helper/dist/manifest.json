@@ -2,12 +2,20 @@
   "manifest_version": 3,
   "name": "Draft Helper",
   "version": "1.0.0",
-  "description": "Overlay for DraftKings Bestball draft: roster tracker, stacking targets, draft capital chart, and opponent schedule.",
+  "description": "Overlay for best ball drafts: roster tracker, stacking targets, draft capital chart, and opponent schedule.",
   "permissions": ["storage"],
-  "host_permissions": ["https://www.draftkings.com/*"],
+  "host_permissions": [
+    "https://www.draftkings.com/*",
+    "https://underdogfantasy.com/*",
+    "https://www.underdogfantasy.com/*"
+  ],
   "content_scripts": [
     {
-      "matches": ["https://www.draftkings.com/*draft*"],
+      "matches": [
+        "https://www.draftkings.com/*draft*",
+        "https://underdogfantasy.com/*",
+        "https://www.underdogfantasy.com/*"
+      ],
       "js": ["assets/content.js"],
       "run_at": "document_idle",
       "world": "MAIN"
@@ -16,7 +24,11 @@
   "web_accessible_resources": [
     {
       "resources": ["assets/*"],
-      "matches": ["https://www.draftkings.com/*"]
+      "matches": [
+        "https://www.draftkings.com/*",
+        "https://underdogfantasy.com/*",
+        "https://www.underdogfantasy.com/*"
+      ]
     }
   ]
 }
