@@ -6,9 +6,16 @@ import { getActiveAdapter } from './adapters';
 const ROOT_ID = 'draft-helper-root';
 
 function inject() {
-  if (document.getElementById(ROOT_ID)) return;
-
   const adapter = getActiveAdapter();
+  const existing = document.getElementById(ROOT_ID);
+  if (existing) {
+    const mountPoint = adapter.ui.findMountPoint();
+    if (mountPoint && existing.parentElement !== mountPoint) {
+      adapter.ui.placeMount(existing, mountPoint);
+    }
+    return;
+  }
+
   console.log('[DraftHelper] inject() called');
 
   adapter.ui.injectPageStyles();
@@ -32,14 +39,14 @@ function inject() {
       display: block;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 13px;
-      color: #101820;
-      background: #edf2f5;
-      border: 1px solid #c9d6de;
+      color: var(--dh-text, #101820);
+      background: var(--dh-shell, #edf2f5);
+      border: 1px solid var(--dh-line-strong, #c9d6de);
       border-radius: 14px;
       padding: 16px;
       margin: 0;
       min-height: 50px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dh-panel, #ffffff) 62%, transparent);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     button, input {
@@ -47,7 +54,7 @@ function inject() {
     }
     button:focus-visible,
     input:focus-visible {
-      outline: 2px solid #1570d6;
+      outline: 2px solid var(--dh-qb, #1570d6);
       outline-offset: 2px;
     }
     input::-webkit-outer-spin-button,

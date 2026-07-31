@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Option } from "effect";
 import type { RosterPick, Player } from '../content/types';
 import { getOpponents } from '../data/schedule';
@@ -6,14 +7,42 @@ import type { OpponentRow } from '../data/schedule';
 import { getTeamInfo } from '../data/teams';
 import { color, positionColor, styles as sharedStyles } from './styles';
 
+const MATCHUP_HEADER_HEIGHT = 21;
+const MATCHUP_ROW_HEIGHT = 34;
+
 interface Props {
   roster: RosterPick[];
   available: Player[];
+  maxVisibleRows?: number;
+  startIndex?: number;
+  limit?: number;
+  title?: string;
+  showHeader?: boolean;
+  emptyMessage?: string;
 }
 
 function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
   const [show, setShow] = useState(false);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+  const anchorRef = useRef<HTMLDivElement | null>(null);
   const info = getTeamInfo(abbr);
+
+  const updateAnchorRect = () => {
+    setAnchorRect(anchorRef.current?.getBoundingClientRect() ?? null);
+  };
+
+  useEffect(() => {
+    if (!show) return;
+
+    updateAnchorRect();
+    window.addEventListener('scroll', updateAnchorRect, true);
+    window.addEventListener('resize', updateAnchorRect);
+    return () => {
+      window.removeEventListener('scroll', updateAnchorRect, true);
+      window.removeEventListener('resize', updateAnchorRect);
+    };
+  }, [show]);
+
   if (!info) return <span style={styles.missingOpponent}>{abbr}</span>;
   const textStyle = getPillTextStyle(info.primaryColor, info.secondaryColor);
 
@@ -22,10 +51,25 @@ function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
     .sort((a, b) => a.adp - b.adp)
     .slice(0, 5);
 
+  const tooltipContainer = anchorRef.current?.getRootNode() instanceof ShadowRoot
+    ? anchorRef.current.getRootNode() as ShadowRoot
+    : null;
+  const tooltipStyle = anchorRect
+    ? {
+        ...styles.tooltip,
+        top: anchorRect.bottom + 6,
+        left: anchorRect.left + anchorRect.width / 2,
+      }
+    : styles.tooltip;
+
   return (
     <div
+      ref={anchorRef}
       style={{ position: 'relative', display: 'inline-block' }}
-      onMouseEnter={() => setShow(true)}
+      onMouseEnter={() => {
+        updateAnchorRect();
+        setShow(true);
+      }}
       onMouseLeave={() => setShow(false)}
     >
       <span
@@ -37,8 +81,8 @@ function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
       >
         <span style={{ ...styles.pillText, ...textStyle }}>{abbr}</span>
       </span>
-      {show && top.length > 0 && (
-        <div style={styles.tooltip}>
+      {show && top.length > 0 && tooltipContainer ? createPortal(
+        <div style={tooltipStyle}>
           <div style={styles.tooltipTitle}>
             <span>{info.name}</span>
             <span style={styles.tooltipTeam}>{abbr}</span>
@@ -51,8 +95,9 @@ function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
               <span style={styles.tooltipAdp}>{p.adp.toFixed(1)}</span>
             </div>
           ))}
-        </div>
-      )}
+        </div>,
+        tooltipContainer,
+      ) : null}
     </div>
   );
 }
@@ -101,54 +146,74 @@ function hexToRgb(hex: string): [number, number, number] {
   ];
 }
 
-export default function OpponentsTable({ roster, available }: Props) {
+export default function OpponentsTable({
+  roster,
+  available,
+  maxVisibleRows,
+  startIndex = 0,
+  limit,
+  title = 'Playoff Matchups',
+  showHeader = true,
+  emptyMessage = 'Draft players to see playoff opponents.',
+}: Props) {
   const qbs = roster.filter(p => p.position === 'QB');
   const nonQbs = roster.filter(p => p.position !== 'QB');
-  const first15 = [...qbs, ...nonQbs].slice(0, 15);
+  const ordered = [...qbs, ...nonQbs].slice(0, 15);
+  const rows = ordered.slice(startIndex, limit ? startIndex + limit : undefined);
+  const tableWrapStyle = maxVisibleRows
+    ? {
+        ...styles.tableScroll,
+        maxHeight: MATCHUP_HEADER_HEIGHT + maxVisibleRows * MATCHUP_ROW_HEIGHT,
+      }
+    : undefined;
 
   return (
     <section style={styles.container} aria-label="Playoff opponents">
-      <div style={sharedStyles.sectionHeader}>
-        <h3 style={sharedStyles.heading}>Playoff Matchups</h3>
-      </div>
-      {first15.length === 0 ? (
-        <p style={sharedStyles.empty}>Draft players to see playoff opponents.</p>
+      {showHeader ? (
+        <div style={sharedStyles.sectionHeader}>
+          <h3 style={sharedStyles.heading}>{title}</h3>
+        </div>
+      ) : null}
+      {rows.length === 0 ? (
+        <p style={sharedStyles.empty}>{emptyMessage}</p>
       ) : (
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.th}>Player</th>
-              <th style={styles.th}>Wk 15</th>
-              <th style={styles.th}>Wk 16</th>
-              <th style={styles.th}>Wk 17</th>
-            </tr>
-          </thead>
-          <tbody>
-            {first15.map((pick, i) => {
-              const opps = pick.team
-                ? getOpponents(pick.team)
-                : Option.none<OpponentRow>();
-              const week15 = Option.isSome(opps) ? opps.value.week15 : '—';
-              const week16 = Option.isSome(opps) ? opps.value.week16 : '—';
-              const week17 = Option.isSome(opps) ? opps.value.week17 : '—';
-              return (
-                <tr key={i}>
-                  <td style={styles.td}>
-                    <div style={styles.playerCell}>
-                      <div style={styles.playerText}>
-                        <div style={{ ...styles.playerName, color: positionColor[pick.position] }}>{pick.name}</div>
-                        <div style={styles.playerTeam}>{pick.team ? getTeamInfo(pick.team)?.name ?? pick.team : pick.team}</div>
+        <div style={tableWrapStyle}>
+          <table style={styles.table}>
+            <thead>
+              <tr>
+                <th style={styles.th}>Player</th>
+                <th style={styles.th}>Wk 15</th>
+                <th style={styles.th}>Wk 16</th>
+                <th style={styles.th}>Wk 17</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((pick, i) => {
+                const opps = pick.team
+                  ? getOpponents(pick.team)
+                  : Option.none<OpponentRow>();
+                const week15 = Option.isSome(opps) ? opps.value.week15 : '—';
+                const week16 = Option.isSome(opps) ? opps.value.week16 : '—';
+                const week17 = Option.isSome(opps) ? opps.value.week17 : '—';
+                return (
+                  <tr key={`${pick.name}-${startIndex + i}`}>
+                    <td style={styles.td}>
+                      <div style={styles.playerCell}>
+                        <div style={styles.playerText}>
+                          <div style={{ ...styles.playerName, color: positionColor[pick.position] }}>{pick.name}</div>
+                          <div style={styles.playerTeam}>{pick.team ? getTeamInfo(pick.team)?.name ?? pick.team : pick.team}</div>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td style={styles.td}><Pill abbr={week15} players={available} /></td>
-                  <td style={styles.td}><Pill abbr={week16} players={available} /></td>
-                  <td style={styles.td}><Pill abbr={week17} players={available} /></td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td style={styles.td}><Pill abbr={week15} players={available} /></td>
+                    <td style={styles.td}><Pill abbr={week16} players={available} /></td>
+                    <td style={styles.td}><Pill abbr={week17} players={available} /></td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );
@@ -164,6 +229,11 @@ const styles: Record<string, React.CSSProperties> = {
     borderSpacing: 0,
     fontSize: 10.5,
   },
+  tableScroll: {
+    overflowY: 'auto',
+    overflowX: 'hidden',
+    paddingRight: 4,
+  },
   th: {
     textAlign: 'left',
     color: color.muted,
@@ -173,7 +243,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 9,
   },
   td: {
-    padding: '5px',
+    padding: '4px 5px',
     color: color.text,
     borderBottom: `1px solid ${color.line}`,
     verticalAlign: 'middle',
@@ -188,7 +258,7 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: 0,
   },
   playerName: {
-    fontSize: 10.5,
+    fontSize: 12,
     fontWeight: 900,
     lineHeight: 1.15,
     maxWidth: 126,
@@ -236,18 +306,16 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 800,
   },
   tooltip: {
-    position: 'absolute',
-    top: '100%',
-    left: '50%',
+    position: 'fixed',
     transform: 'translateX(-50%)',
-    marginTop: 4,
     background: color.panel,
     border: `1px solid ${color.lineStrong}`,
     borderRadius: 8,
     padding: '7px 9px',
-    zIndex: 100,
+    zIndex: 2147483647,
     whiteSpace: 'nowrap',
     boxShadow: '0 12px 26px rgba(0, 0, 0, 0.42)',
+    pointerEvents: 'none',
   },
   tooltipTitle: {
     display: 'flex',

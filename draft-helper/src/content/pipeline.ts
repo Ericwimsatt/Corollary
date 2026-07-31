@@ -15,6 +15,33 @@ export interface DraftData {
   readonly userPickNumber: number | null;
 }
 
+function rosterKey(pick: Pick<RosterPick, 'name' | 'team' | 'position'>): string {
+  return `${pick.name}::${pick.team}::${pick.position}`;
+}
+
+function mergeRosterForAnnotations(
+  fresh: ReadonlyArray<RosterPick>,
+  cached: ReadonlyArray<RosterPick>,
+): ReadonlyArray<RosterPick> {
+  const merged = new Map<string, RosterPick>();
+
+  for (const pick of fresh) {
+    merged.set(rosterKey(pick), pick);
+  }
+
+  for (const pick of cached) {
+    const key = rosterKey(pick);
+    const existing = merged.get(key);
+    if (!existing) {
+      merged.set(key, pick);
+    } else if (existing.byeWeek === 0 && pick.byeWeek !== 0) {
+      merged.set(key, { ...existing, byeWeek: pick.byeWeek });
+    }
+  }
+
+  return Array.from(merged.values()).sort((a, b) => a.overallPick - b.overallPick);
+}
+
 const refresh = Effect.gen(function*() {
   const adapter = getActiveAdapter();
   const draftId = yield* adapter.getDraftId;
@@ -42,11 +69,12 @@ const refresh = Effect.gen(function*() {
   yield* availableStore.update(available);
   yield* rosterCache.update(rosterWithByes);
   const cached = yield* rosterCache.getAll;
+  const rosterForAnnotations = mergeRosterForAnnotations(rosterWithByes, cached);
 
-  yield* annotateStackTargets(adapter, cached, available);
-  yield* annotateByeWeekCounts(adapter, cached, available, persistedAvailable);
+  yield* annotateStackTargets(adapter, rosterForAnnotations, available);
+  yield* annotateByeWeekCounts(adapter, rosterForAnnotations, available, persistedAvailable);
   yield* annotateExternalRankings(adapter);
-  return { adapter, draftId, roster: cached, available, userPickNumber } as const;
+  return { adapter, draftId, roster: rosterForAnnotations, available, userPickNumber } as const;
 });
 
 const appLayer: Layer.Layer<RosterCache | AvailableStore> =

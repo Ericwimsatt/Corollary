@@ -7,6 +7,7 @@ interface Props {
   roster: RosterPick[];
   userPickNumber: number;
   adapter: DraftPlatformAdapter;
+  fillHeight?: boolean;
 }
 
 function overallFromUserPick(rosterIndex: number, userPick: number, teamCount: number): number {
@@ -27,7 +28,7 @@ function formatCapital(val: number): string {
   return String(val);
 }
 
-export default function CapitalChart({ roster, userPickNumber, adapter }: Props) {
+export default function CapitalChart({ roster, userPickNumber, adapter, fillHeight = false }: Props) {
   const groups: PosGroup[] = adapter.capitalCeilings.map((g) => {
     const players = roster.filter((p) => g.pos.includes(p.position));
     const capital = players.reduce(
@@ -49,21 +50,22 @@ export default function CapitalChart({ roster, userPickNumber, adapter }: Props)
   });
 
   return (
-    <section style={styles.container} aria-label="Draft capital by position">
+    <section style={fillHeight ? { ...styles.container, ...styles.containerFill } : styles.container} aria-label="Draft capital by position">
       <div style={styles.header}>
         <h3 style={styles.heading}>Draft Capital</h3>
         <span style={styles.mode}>{adapter.roundCount} rounds</span>
       </div>
-      <div style={styles.barList}>
+      <div style={fillHeight ? { ...styles.barList, ...styles.barListFill } : styles.barList}>
         {groups.map((g) => {
           const posColor = positionColor[g.label];
           return (
-            <div key={g.label} style={styles.row}>
+            <div key={g.label} style={fillHeight ? { ...styles.row, ...styles.rowFill } : styles.row}>
               <span style={{ ...styles.label, color: posColor }}>{g.label}</span>
-              <div style={styles.barBg}>
+              <div style={fillHeight ? { ...styles.barBg, ...styles.barBgFill } : styles.barBg}>
                 <div
                   style={{
                     ...styles.barFill,
+                    ...(fillHeight ? styles.barFillStretch : {}),
                     width: `${Math.max(g.pct, 2)}%`,
                     backgroundColor: posColor,
                   }}
@@ -82,6 +84,9 @@ export default function CapitalChart({ roster, userPickNumber, adapter }: Props)
 const styles: Record<string, React.CSSProperties> = {
   container: {
     marginBottom: 12,
+  },
+  containerFill: {
+    marginBottom: 0,
   },
   header: {
     display: 'flex',
@@ -105,12 +110,18 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     gap: 4,
   },
+  barListFill: {
+    gap: 5,
+  },
   row: {
     display: 'grid',
     gridTemplateColumns: '26px minmax(128px, 1fr) 52px 18px',
     alignItems: 'center',
     gap: 7,
     minHeight: 20,
+  },
+  rowFill: {
+    minHeight: 29,
   },
   label: {
     fontSize: 11,
@@ -125,6 +136,10 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'relative',
     overflow: 'visible',
   },
+  barBgFill: {
+    height: 22,
+    minHeight: 22,
+  },
   barFill: {
     position: 'absolute',
     left: -1,
@@ -133,6 +148,9 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 14,
     borderRadius: 999,
     boxShadow: 'inset 0 -1px 0 rgba(0, 0, 0, 0.18)',
+  },
+  barFillStretch: {
+    minHeight: '100%',
   },
   capital: {
     position: 'relative',

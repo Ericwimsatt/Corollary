@@ -97,7 +97,7 @@ export const annotateByeWeekCounts = (
       const byeNumber = parsed.byeNumber;
       const byeNumberSpan = parsed.byeNumberSpan;
 
-      const visibleBye = readBye(byeNumberSpan?.textContent ?? byeCell.textContent ?? '');
+      const visibleBye = parsed.byeWeek || readBye(byeNumberSpan?.textContent ?? byeCell.textContent ?? '');
       const byeWeek = visibleBye || persistedByes.get(playerKey({ name, team, position })) || 0;
       const names = rosterIndex.get(`${position}::${byeWeek}`) ?? [];
 

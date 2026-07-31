@@ -11,7 +11,9 @@ const adapters: Record<PlatformId, DraftPlatformAdapter> = {
 
 export function getActiveAdapter(): DraftPlatformAdapter {
   const host = window.location.hostname.toLowerCase();
-  if (host.includes('underdogfantasy.com')) return adapters.underdog;
+  if (host.includes('underdogsports.com') || host.includes('underdogfantasy.com')) {
+    return adapters.underdog;
+  }
   return adapters.draftkings;
 }
 

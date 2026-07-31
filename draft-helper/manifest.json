@@ -6,6 +6,9 @@
   "permissions": ["storage"],
   "host_permissions": [
     "https://www.draftkings.com/*",
+    "https://app.underdogsports.com/*",
+    "https://underdogsports.com/*",
+    "https://www.underdogsports.com/*",
     "https://underdogfantasy.com/*",
     "https://www.underdogfantasy.com/*"
   ],
@@ -13,6 +16,9 @@
     {
       "matches": [
         "https://www.draftkings.com/*draft*",
+        "https://app.underdogsports.com/*",
+        "https://underdogsports.com/*",
+        "https://www.underdogsports.com/*",
         "https://underdogfantasy.com/*",
         "https://www.underdogfantasy.com/*"
       ],
@@ -26,6 +32,9 @@
       "resources": ["assets/*"],
       "matches": [
         "https://www.draftkings.com/*",
+        "https://app.underdogsports.com/*",
+        "https://underdogsports.com/*",
+        "https://www.underdogsports.com/*",
         "https://underdogfantasy.com/*",
         "https://www.underdogfantasy.com/*"
       ]

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Effect } from "effect";
 import type { RosterPick, Player } from '../content/types';
 import { runRefresh } from '../content/pipeline';
@@ -10,9 +10,18 @@ import {
   saveCustomRankings,
   type CustomRankingsData,
 } from '../rankings/custom-rankings';
+import {
+  defaultThemeSettings,
+  getPlatformTheme,
+  getThemeSettings,
+  saveThemeSettings,
+  type ThemeSettings,
+} from '../settings/theme-settings';
 import CapitalChart from './CapitalChart';
 import OpponentsTable from './OpponentsTable';
-import { color } from './styles';
+import { color, getThemeCssVariables, type ThemeMode } from './styles';
+
+const THREE_COLUMN_MIN_WIDTH = 1260;
 
 export default function App() {
   const [adapter, setAdapter] = useState<DraftPlatformAdapter>(() => getActiveAdapter());
@@ -24,8 +33,12 @@ export default function App() {
   const [rankingsData, setRankingsData] = useState<CustomRankingsData | null>(null);
   const [rankingsOpen, setRankingsOpen] = useState(false);
   const [rankingsTooltipOpen, setRankingsTooltipOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [rankingsText, setRankingsText] = useState('');
   const [rankingsMessage, setRankingsMessage] = useState('Paste a CSV with name, position, team, and rank columns.');
+  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
+  const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
+  const settingsRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
     let running = false;
@@ -73,6 +86,29 @@ export default function App() {
     getCustomRankings(adapter.id).then(setRankingsData);
   }, [adapter.id]);
 
+  useEffect(() => {
+    getThemeSettings().then(setThemeSettings);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!settingsOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const path = event.composedPath();
+      if (settingsRef.current && path.includes(settingsRef.current)) return;
+      setSettingsOpen(false);
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown, true);
+    return () => window.removeEventListener('pointerdown', handlePointerDown, true);
+  }, [settingsOpen]);
+
   const refreshRankingsAnnotations = () => {
     Effect.runPromise(runRefresh).catch(() => undefined);
   };
@@ -110,51 +146,139 @@ export default function App() {
     event.target.value = '';
   };
 
+  const isUnderdog = adapter.id === 'underdog';
+  const useThreeColumnUnderdog = isUnderdog && viewportWidth >= THREE_COLUMN_MIN_WIDTH;
+  const activeTheme = getPlatformTheme(themeSettings, adapter.id);
+  const themeVariables = getThemeCssVariables(activeTheme);
+
+  useEffect(() => {
+    const host = document.getElementById('draft-helper-root');
+    if (!host) return;
+    const variables = getThemeCssVariables(activeTheme) as Record<string, string>;
+    Object.entries(variables).forEach(([key, value]) => {
+      host.style.setProperty(key, value);
+    });
+    host.dataset.dhTheme = activeTheme;
+  }, [activeTheme]);
+
+  const updatePlatformTheme = (platformId: keyof ThemeSettings['platformThemes'], mode: ThemeMode) => {
+    const next = {
+      platformThemes: {
+        ...themeSettings.platformThemes,
+        [platformId]: mode,
+      },
+    };
+    setThemeSettings(next);
+    saveThemeSettings(next).catch(() => undefined);
+  };
+
+  const resetThemeDefaults = () => {
+    setThemeSettings(defaultThemeSettings);
+    saveThemeSettings(defaultThemeSettings).catch(() => undefined);
+  };
+
   return (
-    <div style={styles.app}>
-      <div style={styles.topbar}>
-        <div>
-          <div style={styles.titleRow}>
-            <div style={styles.title}>Draft Hand</div>
-            <span
-              style={styles.tooltipAnchor}
-              onMouseEnter={() => setRankingsTooltipOpen(true)}
-              onMouseLeave={() => setRankingsTooltipOpen(false)}
-            >
-              <button
-                type="button"
-                style={styles.rankingsButton}
-                aria-describedby={rankingsTooltipOpen ? 'dh-rankings-tooltip' : undefined}
-                onFocus={() => setRankingsTooltipOpen(true)}
-                onBlur={() => setRankingsTooltipOpen(false)}
-                onClick={() => {
-                  setRankingsTooltipOpen(false);
-                  setRankingsOpen(true);
-                }}
+    <div style={{ ...(isUnderdog ? (useThreeColumnUnderdog ? styles.appWideThree : styles.appWideTwo) : styles.app), ...themeVariables }}>
+      <div style={isUnderdog ? styles.leftColumn : undefined}>
+        <div style={styles.topbar}>
+          <div>
+            <div style={styles.titleRow}>
+              <div style={styles.title}>Draft Hand</div>
+              <span
+                style={styles.tooltipAnchor}
+                onMouseEnter={() => setRankingsTooltipOpen(true)}
+                onMouseLeave={() => setRankingsTooltipOpen(false)}
               >
-                Rankings
-              </button>
-              {rankingsTooltipOpen ? (
-                <span id="dh-rankings-tooltip" role="tooltip" style={styles.tooltip}>
-                  Import {adapter.label} rankings
-                </span>
-              ) : null}
-            </span>
+                <button
+                  type="button"
+                  style={styles.rankingsButton}
+                  aria-describedby={rankingsTooltipOpen ? 'dh-rankings-tooltip' : undefined}
+                  onFocus={() => setRankingsTooltipOpen(true)}
+                  onBlur={() => setRankingsTooltipOpen(false)}
+                  onClick={() => {
+                    setRankingsTooltipOpen(false);
+                    setRankingsOpen(true);
+                  }}
+                >
+                  Rankings
+                </button>
+                {rankingsTooltipOpen ? (
+                  <span id="dh-rankings-tooltip" role="tooltip" style={styles.tooltip}>
+                    Import {adapter.label} rankings
+                  </span>
+                ) : null}
+              </span>
+              <span ref={settingsRef} style={styles.settingsAnchor}>
+                <button
+                  type="button"
+                  style={styles.settingsButton}
+                  aria-label="Settings"
+                  aria-expanded={settingsOpen}
+                  aria-controls="dh-settings-menu"
+                  onClick={() => setSettingsOpen((open) => !open)}
+                >
+                  <SettingsIcon />
+                </button>
+                {settingsOpen ? (
+                  <div id="dh-settings-menu" style={styles.settingsMenu}>
+                    <div style={styles.settingsTitle}>Theme</div>
+                    <ThemeRow
+                      label="DraftKings"
+                      value={themeSettings.platformThemes.draftkings}
+                      onChange={(mode) => updatePlatformTheme('draftkings', mode)}
+                    />
+                    <ThemeRow
+                      label="Underdog"
+                      value={themeSettings.platformThemes.underdog}
+                      onChange={(mode) => updatePlatformTheme('underdog', mode)}
+                    />
+                    <button type="button" style={styles.resetButton} onClick={resetThemeDefaults}>
+                      Defaults
+                    </button>
+                  </div>
+                ) : null}
+              </span>
+            </div>
+          </div>
+          <div
+            style={styles.pickStatus}
+            title={`Detected from the active ${adapter.label} draft page. Synced ${loadCount} times.`}
+          >
+            Pick {userPickNumber}
           </div>
         </div>
-        <div
-          style={styles.pickStatus}
-          title={`Detected from the active ${adapter.label} draft page. Synced ${loadCount} times.`}
-        >
-          {adapter.label} Pick {userPickNumber}
-        </div>
+
+        <CapitalChart
+          roster={roster as RosterPick[]}
+          userPickNumber={userPickNumber}
+          adapter={adapter}
+          fillHeight={isUnderdog}
+        />
       </div>
 
-      <CapitalChart roster={roster as RosterPick[]} userPickNumber={userPickNumber} adapter={adapter} />
-      <OpponentsTable roster={roster as RosterPick[]} available={available as Player[]} />
+      <div style={isUnderdog ? styles.matchupsColumn : undefined}>
+        <OpponentsTable
+          roster={roster as RosterPick[]}
+          available={available as Player[]}
+          limit={useThreeColumnUnderdog ? 4 : undefined}
+          maxVisibleRows={isUnderdog ? (useThreeColumnUnderdog ? 4 : 6) : undefined}
+        />
+      </div>
+      {useThreeColumnUnderdog ? (
+        <div style={styles.matchupsColumn}>
+          <OpponentsTable
+            roster={roster as RosterPick[]}
+            available={available as Player[]}
+            startIndex={4}
+            maxVisibleRows={4}
+            showHeader={false}
+            emptyMessage="More picks will appear here."
+          />
+        </div>
+      ) : null}
       {rankingsOpen ? (
-        <div style={styles.modalBackdrop} role="presentation">
-          <div style={styles.modal} role="dialog" aria-modal="true" aria-labelledby="dh-rankings-title">
+        <div style={styles.modalBackdrop} role="presentation" onClick={() => setRankingsOpen(false)}>
+          <div style={styles.modal} role="dialog" aria-modal="true" aria-labelledby="dh-rankings-title" onClick={(event) => event.stopPropagation()}>
             <div style={styles.modalHeader}>
               <div>
                 <div id="dh-rankings-title" style={styles.modalTitle}>{adapter.label} Rankings</div>
@@ -199,9 +323,80 @@ export default function App() {
   );
 }
 
+function SettingsIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false" style={styles.settingsIcon}>
+      <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" />
+      <path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z" />
+    </svg>
+  );
+}
+
+function ThemeRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: ThemeMode;
+  onChange: (mode: ThemeMode) => void;
+}) {
+  return (
+    <div style={styles.themeRow}>
+      <span style={styles.themeLabel}>{label}</span>
+      <span style={styles.segmentedControl}>
+        <button
+          type="button"
+          style={value === 'light' ? { ...styles.segmentButton, ...styles.segmentButtonActive } : styles.segmentButton}
+          onClick={() => onChange('light')}
+        >
+          Light
+        </button>
+        <button
+          type="button"
+          style={value === 'dark' ? { ...styles.segmentButton, ...styles.segmentButtonActive } : styles.segmentButton}
+          onClick={() => onChange('dark')}
+        >
+          Dark
+        </button>
+      </span>
+    </div>
+  );
+}
+
 const styles: Record<string, React.CSSProperties> = {
   app: {
     minWidth: 300,
+  },
+  appWideThree: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(280px, 360px) repeat(2, minmax(360px, 520px))',
+    gap: 12,
+    alignItems: 'start',
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: 1424,
+    margin: '0 auto',
+    minWidth: 0,
+  },
+  appWideTwo: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(280px, 360px) minmax(360px, 560px)',
+    gap: 12,
+    alignItems: 'start',
+    justifyContent: 'center',
+    width: '100%',
+    maxWidth: 932,
+    margin: '0 auto',
+    minWidth: 0,
+  },
+  leftColumn: {
+    minWidth: 0,
+    maxWidth: 360,
+  },
+  matchupsColumn: {
+    minWidth: 0,
+    maxWidth: 520,
   },
   topbar: {
     display: 'flex',
@@ -253,6 +448,103 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 900,
     lineHeight: 1,
     cursor: 'pointer',
+  },
+  settingsAnchor: {
+    position: 'relative',
+    display: 'inline-flex',
+    alignItems: 'center',
+  },
+  settingsButton: {
+    appearance: 'none',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 24,
+    height: 24,
+    border: '0',
+    borderRadius: 8,
+    background: 'transparent',
+    color: color.faint,
+    cursor: 'pointer',
+  },
+  settingsIcon: {
+    display: 'block',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.9,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  },
+  settingsMenu: {
+    position: 'absolute',
+    top: 'calc(100% + 7px)',
+    left: 0,
+    zIndex: 30,
+    width: 244,
+    padding: 10,
+    border: '0',
+    borderRadius: 10,
+    background: color.panel,
+    color: color.text,
+    boxShadow: '0 14px 28px rgba(0, 0, 0, 0.26)',
+  },
+  settingsTitle: {
+    color: color.text,
+    fontSize: 11,
+    fontWeight: 900,
+    lineHeight: 1,
+    marginBottom: 9,
+  },
+  themeRow: {
+    display: 'grid',
+    gridTemplateColumns: '74px 1fr',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  themeLabel: {
+    color: color.muted,
+    fontSize: 10,
+    fontWeight: 850,
+    lineHeight: 1,
+  },
+  segmentedControl: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    padding: 2,
+    border: `1px solid ${color.line}`,
+    borderRadius: 8,
+    background: color.panelSoft,
+  },
+  segmentButton: {
+    appearance: 'none',
+    border: '0',
+    borderRadius: 6,
+    background: 'transparent',
+    color: color.muted,
+    minHeight: 24,
+    padding: '0 7px',
+    fontSize: 10,
+    fontWeight: 900,
+    cursor: 'pointer',
+  },
+  segmentButtonActive: {
+    background: color.text,
+    color: color.panel,
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.18)',
+  },
+  resetButton: {
+    appearance: 'none',
+    width: '100%',
+    height: 26,
+    border: `1px solid ${color.lineStrong}`,
+    borderRadius: 8,
+    background: color.panelRaised,
+    color: color.text,
+    fontSize: 10,
+    fontWeight: 900,
+    cursor: 'pointer',
+    marginTop: 2,
   },
   tooltipAnchor: {
     position: 'relative',
