@@ -22,6 +22,7 @@ import OpponentsTable from './OpponentsTable';
 import { color, getThemeCssVariables, type ThemeMode } from './styles';
 
 const THREE_COLUMN_MIN_WIDTH = 1260;
+const DRAFTKINGS_HORIZONTAL_MIN_WIDTH = 720;
 
 export default function App() {
   const [adapter, setAdapter] = useState<DraftPlatformAdapter>(() => getActiveAdapter());
@@ -147,7 +148,12 @@ export default function App() {
   };
 
   const isUnderdog = adapter.id === 'underdog';
+  const isDraftKings = adapter.id === 'draftkings';
   const useThreeColumnUnderdog = isUnderdog && viewportWidth >= THREE_COLUMN_MIN_WIDTH;
+  const useDraftKingsHorizontal =
+    isDraftKings &&
+    themeSettings.draftKingsPane === 'horizontal' &&
+    viewportWidth >= DRAFTKINGS_HORIZONTAL_MIN_WIDTH;
   const activeTheme = getPlatformTheme(themeSettings, adapter.id);
   const themeVariables = getThemeCssVariables(activeTheme);
 
@@ -163,6 +169,7 @@ export default function App() {
 
   const updatePlatformTheme = (platformId: keyof ThemeSettings['platformThemes'], mode: ThemeMode) => {
     const next = {
+      ...themeSettings,
       platformThemes: {
         ...themeSettings.platformThemes,
         [platformId]: mode,
@@ -177,9 +184,24 @@ export default function App() {
     saveThemeSettings(defaultThemeSettings).catch(() => undefined);
   };
 
+  const updateDraftKingsPane = (pane: ThemeSettings['draftKingsPane']) => {
+    const next = {
+      ...themeSettings,
+      draftKingsPane: pane,
+    };
+    setThemeSettings(next);
+    saveThemeSettings(next).catch(() => undefined);
+  };
+
+  const appStyle = useDraftKingsHorizontal
+    ? styles.appDraftKingsHorizontal
+    : isUnderdog
+      ? (useThreeColumnUnderdog ? styles.appWideThree : styles.appWideTwo)
+      : styles.app;
+
   return (
-    <div style={{ ...(isUnderdog ? (useThreeColumnUnderdog ? styles.appWideThree : styles.appWideTwo) : styles.app), ...themeVariables }}>
-      <div style={isUnderdog ? styles.leftColumn : undefined}>
+    <div style={{ ...appStyle, ...themeVariables }}>
+      <div style={isUnderdog || useDraftKingsHorizontal ? styles.leftColumn : undefined}>
         <div style={styles.topbar}>
           <div>
             <div style={styles.titleRow}>
@@ -232,6 +254,9 @@ export default function App() {
                       value={themeSettings.platformThemes.underdog}
                       onChange={(mode) => updatePlatformTheme('underdog', mode)}
                     />
+                    <div style={styles.settingsDivider} />
+                    <div style={styles.settingsTitle}>DraftKings pane</div>
+                    <PaneRow value={themeSettings.draftKingsPane} onChange={updateDraftKingsPane} />
                     <button type="button" style={styles.resetButton} onClick={resetThemeDefaults}>
                       Defaults
                     </button>
@@ -256,12 +281,12 @@ export default function App() {
         />
       </div>
 
-      <div style={isUnderdog ? styles.matchupsColumn : undefined}>
+      <div style={isUnderdog || useDraftKingsHorizontal ? styles.matchupsColumn : undefined}>
         <OpponentsTable
           roster={roster as RosterPick[]}
           available={available as Player[]}
           limit={useThreeColumnUnderdog ? 4 : undefined}
-          maxVisibleRows={isUnderdog ? (useThreeColumnUnderdog ? 4 : 6) : undefined}
+          maxVisibleRows={isUnderdog ? (useThreeColumnUnderdog ? 4 : 6) : useDraftKingsHorizontal ? 6 : undefined}
         />
       </div>
       {useThreeColumnUnderdog ? (
@@ -364,9 +389,46 @@ function ThemeRow({
   );
 }
 
+function PaneRow({
+  value,
+  onChange,
+}: {
+  value: ThemeSettings['draftKingsPane'];
+  onChange: (pane: ThemeSettings['draftKingsPane']) => void;
+}) {
+  return (
+    <div style={styles.paneRow}>
+      <span style={styles.segmentedControl}>
+        <button
+          type="button"
+          style={value === 'vertical' ? { ...styles.segmentButton, ...styles.segmentButtonActive } : styles.segmentButton}
+          onClick={() => onChange('vertical')}
+        >
+          Vertical
+        </button>
+        <button
+          type="button"
+          style={value === 'horizontal' ? { ...styles.segmentButton, ...styles.segmentButtonActive } : styles.segmentButton}
+          onClick={() => onChange('horizontal')}
+        >
+          Horizontal
+        </button>
+      </span>
+    </div>
+  );
+}
+
 const styles: Record<string, React.CSSProperties> = {
   app: {
     minWidth: 300,
+  },
+  appDraftKingsHorizontal: {
+    display: 'grid',
+    gridTemplateColumns: 'minmax(292px, 360px) minmax(360px, 560px)',
+    gap: 12,
+    alignItems: 'start',
+    width: '100%',
+    minWidth: 0,
   },
   appWideThree: {
     display: 'grid',
@@ -501,6 +563,14 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 8,
     marginBottom: 8,
+  },
+  paneRow: {
+    marginBottom: 8,
+  },
+  settingsDivider: {
+    height: 1,
+    background: color.line,
+    margin: '2px 0 10px',
   },
   themeLabel: {
     color: color.muted,

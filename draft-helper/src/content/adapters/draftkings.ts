@@ -241,12 +241,12 @@ export const draftKingsAdapter: DraftPlatformAdapter = {
         #draft-helper-root {
           padding: 10px 12px 12px !important;
           margin: 10px 10px 12px 0 !important;
-          background: #dfe8ee !important;
-          border: 1px solid #b6c5cf !important;
+          background: var(--dh-shell, #dfe8ee) !important;
+          border: 1px solid var(--dh-line-strong, #b6c5cf) !important;
           border-radius: 16px !important;
           box-shadow:
-            0 0 0 2px rgba(255, 255, 255, 0.82),
-            0 16px 34px rgba(16, 24, 32, 0.3) !important;
+            0 0 0 1px color-mix(in srgb, var(--dh-panel, #ffffff) 70%, transparent),
+            0 16px 34px rgba(16, 24, 32, 0.32) !important;
         }
         .LiveDraft_live-draft,
         .LiveDraft-Mobile_live-draft-mobile__body {
@@ -273,4 +273,3 @@ export const draftKingsAdapter: DraftPlatformAdapter = {
     parseAvailablePlayerRow,
   },
 };
-

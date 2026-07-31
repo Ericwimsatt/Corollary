@@ -63,7 +63,7 @@ function readBye(text: string): number {
 
 function addTooltip(target: HTMLElement, count: number, position: Position, byeWeek: number, names: string[]) {
   const tooltip = createOverlayTooltip('dh-bye-tooltip');
-  tooltip.textContent = `${count} ${position} have a week ${byeWeek} bye.\n${names.length > 0 ? names.join(', ') : 'None'}`;
+  tooltip.textContent = `${count} ${position}s have a week ${byeWeek} bye.\n${names.length > 0 ? names.join(', ') : 'None'}`;
   attachOverlayTooltip(target, tooltip);
 }
 
