@@ -1,0 +1,1120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Draft Helper Palette Mockups</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f4f1eb;
+      color: #182027;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.12)),
+        #f4f1eb;
+      color: #182027;
+    }
+
+    .page {
+      width: min(1440px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 26px 0 32px;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 3vw, 40px);
+      line-height: 1;
+      letter-spacing: 0;
+      font-weight: 950;
+    }
+
+    .note {
+      margin: 0;
+      max-width: 62ch;
+      color: #4f5d66;
+      font-size: 13px;
+      line-height: 1.45;
+      font-weight: 650;
+    }
+
+    .variants {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+
+    .variant {
+      --shell: #eef3f1;
+      --panel: #ffffff;
+      --raised: #f7faf8;
+      --soft: #e8efec;
+      --line: #d6e0dc;
+      --line-strong: #aebeb8;
+      --text: #111b18;
+      --muted: #4c5f59;
+      --faint: #7a8b85;
+      --warning: #975a12;
+      --qb: #1769c2;
+      --rb: #168253;
+      --wr: #b76418;
+      --te: #7251b5;
+      --shadow: rgba(21, 31, 28, 0.18);
+      --outside: #e1e9e5;
+      display: grid;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .variant[data-theme="sideline"] {
+      --shell: #ecf4ee;
+      --panel: #ffffff;
+      --raised: #f7fbf7;
+      --soft: #dfeae3;
+      --line: #ccdcd2;
+      --line-strong: #9ab0a3;
+      --text: #101914;
+      --muted: #4a5d50;
+      --faint: #77877d;
+      --warning: #935a0d;
+      --qb: #1165b7;
+      --rb: #004c54;
+      --wr: #bd6414;
+      --te: #6f4ab0;
+      --outside: #dce8df;
+    }
+
+    .variant[data-theme="slate"] {
+      --shell: #151b20;
+      --panel: #202930;
+      --raised: #29343d;
+      --soft: #13191e;
+      --line: #34424b;
+      --line-strong: #52636d;
+      --text: #f1f5ed;
+      --muted: #b8c3b7;
+      --faint: #899588;
+      --warning: #f1b74c;
+      --qb: #58aaf2;
+      --rb: #56c887;
+      --wr: #f0a34a;
+      --te: #c29cff;
+      --shadow: rgba(0, 0, 0, 0.35);
+      --outside: #101519;
+      color-scheme: dark;
+    }
+
+    .variant[data-theme="paper"] {
+      --shell: #f6f1e7;
+      --panel: #fffdf7;
+      --raised: #fbf7ed;
+      --soft: #eee5d5;
+      --line: #dfd2bd;
+      --line-strong: #b9a88f;
+      --text: #221b12;
+      --muted: #665744;
+      --faint: #958570;
+      --warning: #8f5600;
+      --qb: #1d68b3;
+      --rb: #22744d;
+      --wr: #aa5f13;
+      --te: #7650a8;
+      --shadow: rgba(54, 42, 24, 0.18);
+      --outside: #ede3d2;
+    }
+
+    .variant[data-theme="night"] {
+      --shell: #111416;
+      --panel: #191e21;
+      --raised: #22292d;
+      --soft: #0d1012;
+      --line: #30383c;
+      --line-strong: #5a666b;
+      --text: #f4f1e8;
+      --muted: #c4c0b4;
+      --faint: #928e83;
+      --warning: #ffd46c;
+      --qb: #66b4ff;
+      --rb: #59d08a;
+      --wr: #ffb052;
+      --te: #bf9cff;
+      --shadow: rgba(0, 0, 0, 0.46);
+      --outside: #0b0d0e;
+      color-scheme: dark;
+    }
+
+    .variant[data-theme="ice"] {
+      --shell: #eef7fb;
+      --panel: #fbfeff;
+      --raised: #f4fbfe;
+      --soft: #dcecf3;
+      --line: #c6dbe4;
+      --line-strong: #8fb0bd;
+      --text: #10202a;
+      --muted: #405c68;
+      --faint: #718992;
+      --warning: #955a08;
+      --qb: #006fc9;
+      --rb: #0b7f68;
+      --wr: #c75b21;
+      --te: #7257c6;
+      --shadow: rgba(18, 42, 52, 0.16);
+      --outside: #d7e9f0;
+    }
+
+    .variant[data-theme="signal"] {
+      --shell: #f3f7dd;
+      --panel: #fffff8;
+      --raised: #f9fbeb;
+      --soft: #e6edbf;
+      --line: #cfd996;
+      --line-strong: #9bac49;
+      --text: #17200e;
+      --muted: #4f5d28;
+      --faint: #7d8948;
+      --warning: #9d4c04;
+      --qb: #005fd4;
+      --rb: #007b4b;
+      --wr: #cc4d1d;
+      --te: #8c28a8;
+      --shadow: rgba(48, 62, 11, 0.18);
+      --outside: #dce79d;
+    }
+
+    .variant[data-theme="violet"] {
+      --shell: #171220;
+      --panel: #211a2c;
+      --raised: #2c2338;
+      --soft: #100c17;
+      --line: #40334f;
+      --line-strong: #695979;
+      --text: #f6f0ff;
+      --muted: #c9bdd6;
+      --faint: #9487a3;
+      --warning: #ffd166;
+      --qb: #73c7ff;
+      --rb: #64d98a;
+      --wr: #ff9f57;
+      --te: #d8a6ff;
+      --shadow: rgba(0, 0, 0, 0.48);
+      --outside: #100b18;
+      color-scheme: dark;
+    }
+
+    .variant[data-theme="redzone"] {
+      --shell: #1a1212;
+      --panel: #241b1a;
+      --raised: #302421;
+      --soft: #110c0b;
+      --line: #463734;
+      --line-strong: #72554d;
+      --text: #fff3ea;
+      --muted: #d0bbb0;
+      --faint: #9d877c;
+      --warning: #ffd36a;
+      --qb: #68b8ff;
+      --rb: #58d28a;
+      --wr: #ff7b45;
+      --te: #cba0ff;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --outside: #110b0a;
+      color-scheme: dark;
+    }
+
+    .variant[data-theme="signal"] .host {
+      background:
+        linear-gradient(135deg, rgba(23, 32, 14, 0.08) 0 24%, transparent 24% 46%, rgba(204, 77, 29, 0.14) 46% 54%, transparent 54%),
+        var(--outside);
+    }
+
+    .variant[data-theme="violet"] .host {
+      background:
+        radial-gradient(circle at 18% 10%, rgba(216, 166, 255, 0.18), transparent 30%),
+        linear-gradient(145deg, rgba(115, 199, 255, 0.12), transparent 42%),
+        var(--outside);
+    }
+
+    .variant[data-theme="redzone"] .host {
+      background:
+        linear-gradient(145deg, rgba(255, 123, 69, 0.16), transparent 38%),
+        linear-gradient(28deg, transparent 0 64%, rgba(255, 211, 106, 0.08) 64% 70%, transparent 70%),
+        var(--outside);
+    }
+
+    .variant-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding: 0 2px;
+    }
+
+    .variant-label h2 {
+      margin: 0;
+      color: #182027;
+      font-size: 15px;
+      line-height: 1.1;
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+
+    .variant-label span {
+      color: #657079;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .host {
+      padding: 13px;
+      border-radius: 10px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.03)),
+        var(--outside);
+    }
+
+    .overlay {
+      min-width: 0;
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--shell);
+      color: var(--text);
+      box-shadow: 0 14px 30px var(--shadow);
+    }
+
+    .topbar,
+    .section-head,
+    .matchup-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .topbar {
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .title-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .title {
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 950;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .button,
+    .pick {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 24px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--raised);
+      color: var(--text);
+      padding: 4px 8px;
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .gear {
+      width: 24px;
+      padding: 0;
+      color: var(--faint);
+      background: transparent;
+      border-color: transparent;
+    }
+
+    .gear svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .pick {
+      border-radius: 999px;
+      background: var(--panel);
+      font-size: 11px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .section {
+      margin-bottom: 12px;
+    }
+
+    .section-head {
+      margin-bottom: 7px;
+    }
+
+    h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bars {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 26px minmax(110px, 1fr) 52px 18px;
+      align-items: center;
+      gap: 7px;
+      min-height: 20px;
+    }
+
+    .pos {
+      font-size: 11px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .track {
+      position: relative;
+      height: 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--panel);
+      overflow: visible;
+    }
+
+    .fill {
+      position: absolute;
+      left: -1px;
+      top: -1px;
+      height: 100%;
+      min-height: 14px;
+      border-radius: 999px;
+      box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+    }
+
+    .money {
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 850;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 850;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .matchups {
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 10.5px;
+    }
+
+    th {
+      padding: 0 5px 5px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 850;
+      text-align: left;
+    }
+
+    td {
+      padding: 4px 5px;
+      border-bottom: 1px solid var(--line);
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    .player-name {
+      max-width: 128px;
+      overflow: hidden;
+      color: var(--wr);
+      font-size: 12px;
+      font-weight: 950;
+      line-height: 1.15;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .player-team {
+      max-width: 128px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 700;
+      line-height: 1.15;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .team-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 39px;
+      min-height: 20px;
+      padding: 2px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--team-a) 0 58%, var(--team-b) 58% 100%);
+    }
+
+    .team-pill span {
+      display: block;
+      min-width: 30px;
+      padding: 3px 5px 2px;
+      border: 1px solid var(--pill-border, rgba(255, 255, 255, 0.3));
+      border-radius: 6px;
+      background: var(--pill-bg, rgba(16, 24, 32, 0.62));
+      color: var(--pill-text, #fff);
+      font-size: 10px;
+      font-weight: 950;
+      line-height: 1;
+      text-align: center;
+      text-shadow: var(--pill-shadow, 0 1px 1px rgba(0, 0, 0, 0.65));
+      font-variant-numeric: tabular-nums;
+    }
+
+    .team-pill.light span {
+      --pill-bg: rgba(255, 255, 255, 0.8);
+      --pill-text: #101820;
+      --pill-border: rgba(16, 24, 32, 0.18);
+      --pill-shadow: none;
+    }
+
+    .swatches {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 3px;
+      margin-top: 10px;
+    }
+
+    .swatch {
+      height: 12px;
+      border-radius: 4px;
+      background: var(--c);
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+    }
+
+    .pill-lab {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #111416;
+      color: #f5f2ea;
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .pill-lab-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .pill-lab h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 950;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .pill-lab p {
+      margin: 0;
+      max-width: 70ch;
+      color: #c7c1b8;
+      font-size: 12px;
+      font-weight: 650;
+      line-height: 1.4;
+    }
+
+    .pill-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .pill-option {
+      min-width: 0;
+      padding: 12px;
+      border-radius: 10px;
+      background: #1a1f22;
+    }
+
+    .pill-option h3 {
+      margin-bottom: 10px;
+      color: #f5f2ea;
+    }
+
+    .pill-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 28px;
+      border-top: 1px solid #30383c;
+      padding: 6px 0;
+      color: #c7c1b8;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .pill-sample-name {
+      min-width: 52px;
+    }
+
+    .pill-alt {
+      --team-a: #00338d;
+      --team-b: #c60c30;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      min-height: 22px;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 950;
+      line-height: 1;
+      text-align: center;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.62);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .pill-alt.diagonal {
+      padding: 3px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--team-a) 0 56%, var(--team-b) 56% 100%);
+    }
+
+    .pill-alt.diagonal span {
+      min-width: 30px;
+      padding: 4px 5px 3px;
+      border-radius: 6px;
+      background: rgba(16, 24, 32, 0.62);
+    }
+
+    .pill-alt.endcap {
+      justify-content: space-between;
+      overflow: hidden;
+      border-radius: 7px;
+      background: var(--team-a);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+    }
+
+    .pill-alt.endcap span {
+      padding: 0 6px;
+    }
+
+    .pill-alt.endcap::after {
+      content: "";
+      width: 9px;
+      align-self: stretch;
+      background: var(--team-b);
+    }
+
+    .pill-alt.ribbon {
+      position: relative;
+      overflow: hidden;
+      border-radius: 5px;
+      background: var(--team-a);
+      box-shadow: inset 0 -5px 0 var(--team-b), inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
+
+    .pill-alt.ribbon span {
+      position: relative;
+      z-index: 1;
+      padding: 4px 7px 8px;
+    }
+
+    .pill-alt.ring {
+      min-width: 46px;
+      padding: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--team-a), var(--team-b));
+    }
+
+    .pill-alt.ring span {
+      min-width: 34px;
+      padding: 4px 7px 3px;
+      border-radius: 999px;
+      background: #101820;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+    }
+
+    @media (max-width: 860px) {
+      .page {
+        width: min(520px, calc(100vw - 24px));
+        padding-top: 18px;
+      }
+
+      .page-header {
+        display: block;
+      }
+
+      .note {
+        margin-top: 8px;
+      }
+
+      .variants {
+        grid-template-columns: 1fr;
+      }
+
+      .pill-lab-head {
+        display: block;
+      }
+
+      .pill-lab p {
+        margin-top: 7px;
+      }
+
+      .pill-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 420px) {
+      .page {
+        width: calc(100vw - 16px);
+      }
+
+      .host {
+        padding: 8px;
+      }
+
+      .overlay {
+        padding: 10px;
+      }
+
+      .bar-row {
+        grid-template-columns: 24px minmax(78px, 1fr) 46px 16px;
+        gap: 5px;
+      }
+
+      .title-row {
+        gap: 5px;
+      }
+
+      .button {
+        padding-left: 6px;
+        padding-right: 6px;
+      }
+
+      .pill-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <h1>Draft Helper Palette Mockups</h1>
+      <p class="note">Eight alternate color directions using the current compact overlay structure. Each option keeps the playoff matchup table visible, followed by four separate team-pill treatments using both opponent colors.</p>
+    </header>
+
+    <section class="variants" aria-label="Palette choices">
+      <article class="variant" data-theme="sideline">
+        <div class="variant-label">
+          <h2>A. Sideline Ledger</h2>
+          <span>light, field-neutral</span>
+        </div>
+        <div class="host">
+          <div class="overlay">
+            <div class="topbar">
+              <div class="title-row">
+                <div class="title">Draft Hand</div>
+                <div class="button">Rankings</div>
+                <div class="button gear" aria-label="Settings">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z"></path></svg>
+                </div>
+              </div>
+              <div class="pick">Pick 7</div>
+            </div>
+            <section class="section">
+              <div class="section-head">
+                <h3>Draft Capital</h3>
+                <span class="meta">20 rounds</span>
+              </div>
+              <div class="bars">
+                <div class="bar-row"><span class="pos" style="color:var(--qb)">QB</span><span class="track"><span class="fill" style="width:64%;background:var(--qb)"></span></span><span class="money">$128</span><span class="count">2</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--rb)">RB</span><span class="track"><span class="fill" style="width:78%;background:var(--rb)"></span></span><span class="money">$212</span><span class="count">5</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--wr)">WR</span><span class="track"><span class="fill" style="width:92%;background:var(--wr)"></span></span><span class="money">$438</span><span class="count">7</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--te)">TE</span><span class="track"><span class="fill" style="width:42%;background:var(--te)"></span></span><span class="money">$84</span><span class="count">1</span></div>
+              </div>
+            </section>
+            <section class="matchups">
+              <div class="matchup-head"><h3>Playoff Matchups</h3></div>
+              <table>
+                <thead><tr><th>Player</th><th>Wk 15</th><th>Wk 16</th><th>Wk 17</th></tr></thead>
+                <tbody>
+                  <tr><td><div class="player-name">Ja'Marr Chase</div><div class="player-team">Cincinnati Bengals</div></td><td><span class="team-pill" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></td><td><span class="team-pill light" style="--team-a:#002244;--team-b:#869397"><span>DAL</span></span></td><td><span class="team-pill" style="--team-a:#0b162a;--team-b:#c83803"><span>CHI</span></span></td></tr>
+                  <tr><td><div class="player-name" style="color:var(--rb)">Jahmyr Gibbs</div><div class="player-team">Detroit Lions</div></td><td><span class="team-pill light" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></td><td><span class="team-pill" style="--team-a:#4f2683;--team-b:#ffc62f"><span>MIN</span></span></td><td><span class="team-pill" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></td></tr>
+                  <tr><td><div class="player-name" style="color:var(--qb)">Josh Allen</div><div class="player-team">Buffalo Bills</div></td><td><span class="team-pill" style="--team-a:#002244;--team-b:#c60c30"><span>NE</span></span></td><td><span class="team-pill" style="--team-a:#008e97;--team-b:#fc4c02"><span>MIA</span></span></td><td><span class="team-pill" style="--team-a:#125740;--team-b:#000"><span>NYJ</span></span></td></tr>
+                </tbody>
+              </table>
+            </section>
+            <div class="swatches"><span class="swatch" style="--c:var(--shell)"></span><span class="swatch" style="--c:var(--panel)"></span><span class="swatch" style="--c:var(--text)"></span><span class="swatch" style="--c:var(--qb)"></span><span class="swatch" style="--c:var(--rb)"></span><span class="swatch" style="--c:var(--wr)"></span><span class="swatch" style="--c:var(--te)"></span><span class="swatch" style="--c:var(--line-strong)"></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="variant" data-theme="slate">
+        <div class="variant-label">
+          <h2>B. Film Room Slate</h2>
+          <span>dark, broadcast-analytic</span>
+        </div>
+        <div class="host">
+          <div class="overlay">
+            <div class="topbar">
+              <div class="title-row">
+                <div class="title">Draft Hand</div>
+                <div class="button">Rankings</div>
+                <div class="button gear" aria-label="Settings">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z"></path></svg>
+                </div>
+              </div>
+              <div class="pick">Pick 7</div>
+            </div>
+            <section class="section">
+              <div class="section-head">
+                <h3>Draft Capital</h3>
+                <span class="meta">20 rounds</span>
+              </div>
+              <div class="bars">
+                <div class="bar-row"><span class="pos" style="color:var(--qb)">QB</span><span class="track"><span class="fill" style="width:64%;background:var(--qb)"></span></span><span class="money">$128</span><span class="count">2</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--rb)">RB</span><span class="track"><span class="fill" style="width:78%;background:var(--rb)"></span></span><span class="money">$212</span><span class="count">5</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--wr)">WR</span><span class="track"><span class="fill" style="width:92%;background:var(--wr)"></span></span><span class="money">$438</span><span class="count">7</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--te)">TE</span><span class="track"><span class="fill" style="width:42%;background:var(--te)"></span></span><span class="money">$84</span><span class="count">1</span></div>
+              </div>
+            </section>
+            <section class="matchups">
+              <div class="matchup-head"><h3>Playoff Matchups</h3></div>
+              <table>
+                <thead><tr><th>Player</th><th>Wk 15</th><th>Wk 16</th><th>Wk 17</th></tr></thead>
+                <tbody>
+                  <tr><td><div class="player-name">Ja'Marr Chase</div><div class="player-team">Cincinnati Bengals</div></td><td><span class="team-pill" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></td><td><span class="team-pill light" style="--team-a:#002244;--team-b:#869397"><span>DAL</span></span></td><td><span class="team-pill" style="--team-a:#0b162a;--team-b:#c83803"><span>CHI</span></span></td></tr>
+                  <tr><td><div class="player-name" style="color:var(--rb)">Jahmyr Gibbs</div><div class="player-team">Detroit Lions</div></td><td><span class="team-pill light" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></td><td><span class="team-pill" style="--team-a:#4f2683;--team-b:#ffc62f"><span>MIN</span></span></td><td><span class="team-pill" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></td></tr>
+                  <tr><td><div class="player-name" style="color:var(--qb)">Josh Allen</div><div class="player-team">Buffalo Bills</div></td><td><span class="team-pill" style="--team-a:#002244;--team-b:#c60c30"><span>NE</span></span></td><td><span class="team-pill" style="--team-a:#008e97;--team-b:#fc4c02"><span>MIA</span></span></td><td><span class="team-pill" style="--team-a:#125740;--team-b:#000"><span>NYJ</span></span></td></tr>
+                </tbody>
+              </table>
+            </section>
+            <div class="swatches"><span class="swatch" style="--c:var(--shell)"></span><span class="swatch" style="--c:var(--panel)"></span><span class="swatch" style="--c:var(--text)"></span><span class="swatch" style="--c:var(--qb)"></span><span class="swatch" style="--c:var(--rb)"></span><span class="swatch" style="--c:var(--wr)"></span><span class="swatch" style="--c:var(--te)"></span><span class="swatch" style="--c:var(--line-strong)"></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="variant" data-theme="paper">
+        <div class="variant-label">
+          <h2>C. Cream Sheet</h2>
+          <span>warm, draft-board paper</span>
+        </div>
+        <div class="host">
+          <div class="overlay">
+            <div class="topbar">
+              <div class="title-row">
+                <div class="title">Draft Hand</div>
+                <div class="button">Rankings</div>
+                <div class="button gear" aria-label="Settings">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z"></path></svg>
+                </div>
+              </div>
+              <div class="pick">Pick 7</div>
+            </div>
+            <section class="section">
+              <div class="section-head">
+                <h3>Draft Capital</h3>
+                <span class="meta">20 rounds</span>
+              </div>
+              <div class="bars">
+                <div class="bar-row"><span class="pos" style="color:var(--qb)">QB</span><span class="track"><span class="fill" style="width:64%;background:var(--qb)"></span></span><span class="money">$128</span><span class="count">2</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--rb)">RB</span><span class="track"><span class="fill" style="width:78%;background:var(--rb)"></span></span><span class="money">$212</span><span class="count">5</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--wr)">WR</span><span class="track"><span class="fill" style="width:92%;background:var(--wr)"></span></span><span class="money">$438</span><span class="count">7</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--te)">TE</span><span class="track"><span class="fill" style="width:42%;background:var(--te)"></span></span><span class="money">$84</span><span class="count">1</span></div>
+              </div>
+            </section>
+            <section class="matchups">
+              <div class="matchup-head"><h3>Playoff Matchups</h3></div>
+              <table>
+                <thead><tr><th>Player</th><th>Wk 15</th><th>Wk 16</th><th>Wk 17</th></tr></thead>
+                <tbody>
+                  <tr><td><div class="player-name">Ja'Marr Chase</div><div class="player-team">Cincinnati Bengals</div></td><td><span class="team-pill" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></td><td><span class="team-pill light" style="--team-a:#002244;--team-b:#869397"><span>DAL</span></span></td><td><span class="team-pill" style="--team-a:#0b162a;--team-b:#c83803"><span>CHI</span></span></td></tr>
+                  <tr><td><div class="player-name" style="color:var(--rb)">Jahmyr Gibbs</div><div class="player-team">Detroit Lions</div></td><td><span class="team-pill light" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></td><td><span class="team-pill" style="--team-a:#4f2683;--team-b:#ffc62f"><span>MIN</span></span></td><td><span class="team-pill" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></td></tr>
+                  <tr><td><div class="player-name" style="color:var(--qb)">Josh Allen</div><div class="player-team">Buffalo Bills</div></td><td><span class="team-pill" style="--team-a:#002244;--team-b:#c60c30"><span>NE</span></span></td><td><span class="team-pill" style="--team-a:#008e97;--team-b:#fc4c02"><span>MIA</span></span></td><td><span class="team-pill" style="--team-a:#125740;--team-b:#000"><span>NYJ</span></span></td></tr>
+                </tbody>
+              </table>
+            </section>
+            <div class="swatches"><span class="swatch" style="--c:var(--shell)"></span><span class="swatch" style="--c:var(--panel)"></span><span class="swatch" style="--c:var(--text)"></span><span class="swatch" style="--c:var(--qb)"></span><span class="swatch" style="--c:var(--rb)"></span><span class="swatch" style="--c:var(--wr)"></span><span class="swatch" style="--c:var(--te)"></span><span class="swatch" style="--c:var(--line-strong)"></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="variant" data-theme="night">
+        <div class="variant-label">
+          <h2>D. Booth Black</h2>
+          <span>dark, high-contrast</span>
+        </div>
+        <div class="host">
+          <div class="overlay">
+            <div class="topbar">
+              <div class="title-row">
+                <div class="title">Draft Hand</div>
+                <div class="button">Rankings</div>
+                <div class="button gear" aria-label="Settings">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z"></path></svg>
+                </div>
+              </div>
+              <div class="pick">Pick 7</div>
+            </div>
+            <section class="section">
+              <div class="section-head">
+                <h3>Draft Capital</h3>
+                <span class="meta">20 rounds</span>
+              </div>
+              <div class="bars">
+                <div class="bar-row"><span class="pos" style="color:var(--qb)">QB</span><span class="track"><span class="fill" style="width:64%;background:var(--qb)"></span></span><span class="money">$128</span><span class="count">2</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--rb)">RB</span><span class="track"><span class="fill" style="width:78%;background:var(--rb)"></span></span><span class="money">$212</span><span class="count">5</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--wr)">WR</span><span class="track"><span class="fill" style="width:92%;background:var(--wr)"></span></span><span class="money">$438</span><span class="count">7</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--te)">TE</span><span class="track"><span class="fill" style="width:42%;background:var(--te)"></span></span><span class="money">$84</span><span class="count">1</span></div>
+              </div>
+            </section>
+            <section class="matchups">
+              <div class="matchup-head"><h3>Playoff Matchups</h3></div>
+              <table>
+                <thead><tr><th>Player</th><th>Wk 15</th><th>Wk 16</th><th>Wk 17</th></tr></thead>
+                <tbody>
+                  <tr><td><div class="player-name">Ja'Marr Chase</div><div class="player-team">Cincinnati Bengals</div></td><td><span class="team-pill" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></td><td><span class="team-pill light" style="--team-a:#002244;--team-b:#869397"><span>DAL</span></span></td><td><span class="team-pill" style="--team-a:#0b162a;--team-b:#c83803"><span>CHI</span></span></td></tr>
+                  <tr><td><div class="player-name" style="color:var(--rb)">Jahmyr Gibbs</div><div class="player-team">Detroit Lions</div></td><td><span class="team-pill light" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></td><td><span class="team-pill" style="--team-a:#4f2683;--team-b:#ffc62f"><span>MIN</span></span></td><td><span class="team-pill" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></td></tr>
+                  <tr><td><div class="player-name" style="color:var(--qb)">Josh Allen</div><div class="player-team">Buffalo Bills</div></td><td><span class="team-pill" style="--team-a:#002244;--team-b:#c60c30"><span>NE</span></span></td><td><span class="team-pill" style="--team-a:#008e97;--team-b:#fc4c02"><span>MIA</span></span></td><td><span class="team-pill" style="--team-a:#125740;--team-b:#000"><span>NYJ</span></span></td></tr>
+                </tbody>
+              </table>
+            </section>
+            <div class="swatches"><span class="swatch" style="--c:var(--shell)"></span><span class="swatch" style="--c:var(--panel)"></span><span class="swatch" style="--c:var(--text)"></span><span class="swatch" style="--c:var(--qb)"></span><span class="swatch" style="--c:var(--rb)"></span><span class="swatch" style="--c:var(--wr)"></span><span class="swatch" style="--c:var(--te)"></span><span class="swatch" style="--c:var(--line-strong)"></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="variant" data-theme="ice">
+        <div class="variant-label">
+          <h2>E. Icebox Sheet</h2>
+          <span>light, crisp blue</span>
+        </div>
+        <div class="host">
+          <div class="overlay">
+            <div class="topbar">
+              <div class="title-row"><div class="title">Draft Hand</div><div class="button">Rankings</div><div class="button gear" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z"></path></svg></div></div>
+              <div class="pick">Pick 7</div>
+            </div>
+            <section class="section">
+              <div class="section-head"><h3>Draft Capital</h3><span class="meta">20 rounds</span></div>
+              <div class="bars">
+                <div class="bar-row"><span class="pos" style="color:var(--qb)">QB</span><span class="track"><span class="fill" style="width:64%;background:var(--qb)"></span></span><span class="money">$128</span><span class="count">2</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--rb)">RB</span><span class="track"><span class="fill" style="width:78%;background:var(--rb)"></span></span><span class="money">$212</span><span class="count">5</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--wr)">WR</span><span class="track"><span class="fill" style="width:92%;background:var(--wr)"></span></span><span class="money">$438</span><span class="count">7</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--te)">TE</span><span class="track"><span class="fill" style="width:42%;background:var(--te)"></span></span><span class="money">$84</span><span class="count">1</span></div>
+              </div>
+            </section>
+            <section class="matchups">
+              <div class="matchup-head"><h3>Playoff Matchups</h3></div>
+              <table><thead><tr><th>Player</th><th>Wk 15</th><th>Wk 16</th><th>Wk 17</th></tr></thead><tbody>
+                <tr><td><div class="player-name">Ja'Marr Chase</div><div class="player-team">Cincinnati Bengals</div></td><td><span class="team-pill" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></td><td><span class="team-pill light" style="--team-a:#002244;--team-b:#869397"><span>DAL</span></span></td><td><span class="team-pill" style="--team-a:#0b162a;--team-b:#c83803"><span>CHI</span></span></td></tr>
+                <tr><td><div class="player-name" style="color:var(--rb)">Jahmyr Gibbs</div><div class="player-team">Detroit Lions</div></td><td><span class="team-pill light" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></td><td><span class="team-pill" style="--team-a:#4f2683;--team-b:#ffc62f"><span>MIN</span></span></td><td><span class="team-pill" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></td></tr>
+                <tr><td><div class="player-name" style="color:var(--qb)">Josh Allen</div><div class="player-team">Buffalo Bills</div></td><td><span class="team-pill" style="--team-a:#002244;--team-b:#c60c30"><span>NE</span></span></td><td><span class="team-pill" style="--team-a:#008e97;--team-b:#fc4c02"><span>MIA</span></span></td><td><span class="team-pill" style="--team-a:#125740;--team-b:#000"><span>NYJ</span></span></td></tr>
+              </tbody></table>
+            </section>
+            <div class="swatches"><span class="swatch" style="--c:var(--shell)"></span><span class="swatch" style="--c:var(--panel)"></span><span class="swatch" style="--c:var(--text)"></span><span class="swatch" style="--c:var(--qb)"></span><span class="swatch" style="--c:var(--rb)"></span><span class="swatch" style="--c:var(--wr)"></span><span class="swatch" style="--c:var(--te)"></span><span class="swatch" style="--c:var(--line-strong)"></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="variant" data-theme="signal">
+        <div class="variant-label">
+          <h2>F. Signal Chalk</h2>
+          <span>light, riskier high-vis</span>
+        </div>
+        <div class="host">
+          <div class="overlay">
+            <div class="topbar">
+              <div class="title-row"><div class="title">Draft Hand</div><div class="button">Rankings</div><div class="button gear" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z"></path></svg></div></div>
+              <div class="pick">Pick 7</div>
+            </div>
+            <section class="section">
+              <div class="section-head"><h3>Draft Capital</h3><span class="meta">20 rounds</span></div>
+              <div class="bars">
+                <div class="bar-row"><span class="pos" style="color:var(--qb)">QB</span><span class="track"><span class="fill" style="width:64%;background:var(--qb)"></span></span><span class="money">$128</span><span class="count">2</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--rb)">RB</span><span class="track"><span class="fill" style="width:78%;background:var(--rb)"></span></span><span class="money">$212</span><span class="count">5</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--wr)">WR</span><span class="track"><span class="fill" style="width:92%;background:var(--wr)"></span></span><span class="money">$438</span><span class="count">7</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--te)">TE</span><span class="track"><span class="fill" style="width:42%;background:var(--te)"></span></span><span class="money">$84</span><span class="count">1</span></div>
+              </div>
+            </section>
+            <section class="matchups">
+              <div class="matchup-head"><h3>Playoff Matchups</h3></div>
+              <table><thead><tr><th>Player</th><th>Wk 15</th><th>Wk 16</th><th>Wk 17</th></tr></thead><tbody>
+                <tr><td><div class="player-name">Ja'Marr Chase</div><div class="player-team">Cincinnati Bengals</div></td><td><span class="team-pill" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></td><td><span class="team-pill light" style="--team-a:#002244;--team-b:#869397"><span>DAL</span></span></td><td><span class="team-pill" style="--team-a:#0b162a;--team-b:#c83803"><span>CHI</span></span></td></tr>
+                <tr><td><div class="player-name" style="color:var(--rb)">Jahmyr Gibbs</div><div class="player-team">Detroit Lions</div></td><td><span class="team-pill light" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></td><td><span class="team-pill" style="--team-a:#4f2683;--team-b:#ffc62f"><span>MIN</span></span></td><td><span class="team-pill" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></td></tr>
+                <tr><td><div class="player-name" style="color:var(--qb)">Josh Allen</div><div class="player-team">Buffalo Bills</div></td><td><span class="team-pill" style="--team-a:#002244;--team-b:#c60c30"><span>NE</span></span></td><td><span class="team-pill" style="--team-a:#008e97;--team-b:#fc4c02"><span>MIA</span></span></td><td><span class="team-pill" style="--team-a:#125740;--team-b:#000"><span>NYJ</span></span></td></tr>
+              </tbody></table>
+            </section>
+            <div class="swatches"><span class="swatch" style="--c:var(--shell)"></span><span class="swatch" style="--c:var(--panel)"></span><span class="swatch" style="--c:var(--text)"></span><span class="swatch" style="--c:var(--qb)"></span><span class="swatch" style="--c:var(--rb)"></span><span class="swatch" style="--c:var(--wr)"></span><span class="swatch" style="--c:var(--te)"></span><span class="swatch" style="--c:var(--line-strong)"></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="variant" data-theme="violet">
+        <div class="variant-label">
+          <h2>G. Ultraviolet Board</h2>
+          <span>dark, riskier electric</span>
+        </div>
+        <div class="host">
+          <div class="overlay">
+            <div class="topbar">
+              <div class="title-row"><div class="title">Draft Hand</div><div class="button">Rankings</div><div class="button gear" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z"></path></svg></div></div>
+              <div class="pick">Pick 7</div>
+            </div>
+            <section class="section">
+              <div class="section-head"><h3>Draft Capital</h3><span class="meta">20 rounds</span></div>
+              <div class="bars">
+                <div class="bar-row"><span class="pos" style="color:var(--qb)">QB</span><span class="track"><span class="fill" style="width:64%;background:var(--qb)"></span></span><span class="money">$128</span><span class="count">2</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--rb)">RB</span><span class="track"><span class="fill" style="width:78%;background:var(--rb)"></span></span><span class="money">$212</span><span class="count">5</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--wr)">WR</span><span class="track"><span class="fill" style="width:92%;background:var(--wr)"></span></span><span class="money">$438</span><span class="count">7</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--te)">TE</span><span class="track"><span class="fill" style="width:42%;background:var(--te)"></span></span><span class="money">$84</span><span class="count">1</span></div>
+              </div>
+            </section>
+            <section class="matchups">
+              <div class="matchup-head"><h3>Playoff Matchups</h3></div>
+              <table><thead><tr><th>Player</th><th>Wk 15</th><th>Wk 16</th><th>Wk 17</th></tr></thead><tbody>
+                <tr><td><div class="player-name">Ja'Marr Chase</div><div class="player-team">Cincinnati Bengals</div></td><td><span class="team-pill" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></td><td><span class="team-pill light" style="--team-a:#002244;--team-b:#869397"><span>DAL</span></span></td><td><span class="team-pill" style="--team-a:#0b162a;--team-b:#c83803"><span>CHI</span></span></td></tr>
+                <tr><td><div class="player-name" style="color:var(--rb)">Jahmyr Gibbs</div><div class="player-team">Detroit Lions</div></td><td><span class="team-pill light" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></td><td><span class="team-pill" style="--team-a:#4f2683;--team-b:#ffc62f"><span>MIN</span></span></td><td><span class="team-pill" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></td></tr>
+                <tr><td><div class="player-name" style="color:var(--qb)">Josh Allen</div><div class="player-team">Buffalo Bills</div></td><td><span class="team-pill" style="--team-a:#002244;--team-b:#c60c30"><span>NE</span></span></td><td><span class="team-pill" style="--team-a:#008e97;--team-b:#fc4c02"><span>MIA</span></span></td><td><span class="team-pill" style="--team-a:#125740;--team-b:#000"><span>NYJ</span></span></td></tr>
+              </tbody></table>
+            </section>
+            <div class="swatches"><span class="swatch" style="--c:var(--shell)"></span><span class="swatch" style="--c:var(--panel)"></span><span class="swatch" style="--c:var(--text)"></span><span class="swatch" style="--c:var(--qb)"></span><span class="swatch" style="--c:var(--rb)"></span><span class="swatch" style="--c:var(--wr)"></span><span class="swatch" style="--c:var(--te)"></span><span class="swatch" style="--c:var(--line-strong)"></span></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="variant" data-theme="redzone">
+        <div class="variant-label">
+          <h2>H. Red Zone Noir</h2>
+          <span>dark, riskier warm</span>
+        </div>
+        <div class="host">
+          <div class="overlay">
+            <div class="topbar">
+              <div class="title-row"><div class="title">Draft Hand</div><div class="button">Rankings</div><div class="button gear" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z"></path><path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z"></path></svg></div></div>
+              <div class="pick">Pick 7</div>
+            </div>
+            <section class="section">
+              <div class="section-head"><h3>Draft Capital</h3><span class="meta">20 rounds</span></div>
+              <div class="bars">
+                <div class="bar-row"><span class="pos" style="color:var(--qb)">QB</span><span class="track"><span class="fill" style="width:64%;background:var(--qb)"></span></span><span class="money">$128</span><span class="count">2</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--rb)">RB</span><span class="track"><span class="fill" style="width:78%;background:var(--rb)"></span></span><span class="money">$212</span><span class="count">5</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--wr)">WR</span><span class="track"><span class="fill" style="width:92%;background:var(--wr)"></span></span><span class="money">$438</span><span class="count">7</span></div>
+                <div class="bar-row"><span class="pos" style="color:var(--te)">TE</span><span class="track"><span class="fill" style="width:42%;background:var(--te)"></span></span><span class="money">$84</span><span class="count">1</span></div>
+              </div>
+            </section>
+            <section class="matchups">
+              <div class="matchup-head"><h3>Playoff Matchups</h3></div>
+              <table><thead><tr><th>Player</th><th>Wk 15</th><th>Wk 16</th><th>Wk 17</th></tr></thead><tbody>
+                <tr><td><div class="player-name">Ja'Marr Chase</div><div class="player-team">Cincinnati Bengals</div></td><td><span class="team-pill" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></td><td><span class="team-pill light" style="--team-a:#002244;--team-b:#869397"><span>DAL</span></span></td><td><span class="team-pill" style="--team-a:#0b162a;--team-b:#c83803"><span>CHI</span></span></td></tr>
+                <tr><td><div class="player-name" style="color:var(--rb)">Jahmyr Gibbs</div><div class="player-team">Detroit Lions</div></td><td><span class="team-pill light" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></td><td><span class="team-pill" style="--team-a:#4f2683;--team-b:#ffc62f"><span>MIN</span></span></td><td><span class="team-pill" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></td></tr>
+                <tr><td><div class="player-name" style="color:var(--qb)">Josh Allen</div><div class="player-team">Buffalo Bills</div></td><td><span class="team-pill" style="--team-a:#002244;--team-b:#c60c30"><span>NE</span></span></td><td><span class="team-pill" style="--team-a:#008e97;--team-b:#fc4c02"><span>MIA</span></span></td><td><span class="team-pill" style="--team-a:#125740;--team-b:#000"><span>NYJ</span></span></td></tr>
+              </tbody></table>
+            </section>
+            <div class="swatches"><span class="swatch" style="--c:var(--shell)"></span><span class="swatch" style="--c:var(--panel)"></span><span class="swatch" style="--c:var(--text)"></span><span class="swatch" style="--c:var(--qb)"></span><span class="swatch" style="--c:var(--rb)"></span><span class="swatch" style="--c:var(--wr)"></span><span class="swatch" style="--c:var(--te)"></span><span class="swatch" style="--c:var(--line-strong)"></span></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="pill-lab" aria-label="Playoff opponent pill options">
+      <div class="pill-lab-head">
+        <h2>Playoff Opponent Pill Options</h2>
+        <p>Four alternate treatments for the same opponent abbreviations. Each keeps both team colors visible while changing the read: current split, compact endcap, scoreboard ribbon, and ring.</p>
+      </div>
+      <div class="pill-grid">
+        <div class="pill-option">
+          <h3>Diagonal Split</h3>
+          <div class="pill-row"><span class="pill-sample-name">Week 15</span><span class="pill-alt diagonal" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></div>
+          <div class="pill-row"><span class="pill-sample-name">Week 16</span><span class="pill-alt diagonal" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></div>
+          <div class="pill-row"><span class="pill-sample-name">Week 17</span><span class="pill-alt diagonal" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></div>
+        </div>
+        <div class="pill-option">
+          <h3>Color Endcap</h3>
+          <div class="pill-row"><span class="pill-sample-name">Week 15</span><span class="pill-alt endcap" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></div>
+          <div class="pill-row"><span class="pill-sample-name">Week 16</span><span class="pill-alt endcap" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></div>
+          <div class="pill-row"><span class="pill-sample-name">Week 17</span><span class="pill-alt endcap" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></div>
+        </div>
+        <div class="pill-option">
+          <h3>Scoreboard Ribbon</h3>
+          <div class="pill-row"><span class="pill-sample-name">Week 15</span><span class="pill-alt ribbon" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></div>
+          <div class="pill-row"><span class="pill-sample-name">Week 16</span><span class="pill-alt ribbon" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></div>
+          <div class="pill-row"><span class="pill-sample-name">Week 17</span><span class="pill-alt ribbon" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></div>
+        </div>
+        <div class="pill-option">
+          <h3>Team Ring</h3>
+          <div class="pill-row"><span class="pill-sample-name">Week 15</span><span class="pill-alt ring" style="--team-a:#00143f;--team-b:#a71930"><span>HOU</span></span></div>
+          <div class="pill-row"><span class="pill-sample-name">Week 16</span><span class="pill-alt ring" style="--team-a:#00338d;--team-b:#c60c30"><span>BUF</span></span></div>
+          <div class="pill-row"><span class="pill-sample-name">Week 17</span><span class="pill-alt ring" style="--team-a:#203731;--team-b:#ffb612"><span>GB</span></span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

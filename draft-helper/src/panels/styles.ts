@@ -32,7 +32,7 @@ export const themePalettes: Record<ThemeMode, ThemePalette> = {
     faint: '#77877d',
     warning: '#935a0d',
     qb: '#1165b7',
-    rb: '#05613d',
+    rb: '#004c54',
     wr: '#bd6414',
     te: '#6f4ab0',
   },
