@@ -29,6 +29,33 @@ function draftCapital(pick: number): number {
   return Math.round(5000 * Math.exp(-Math.pow((pick - 1) / 57.5, 0.74)));
 }
 
+function virtualRowIndex(row: Element, fallbackIndex: number): number {
+  const attrIndex =
+    row.getAttribute('data-row-index')
+    ?? row.getAttribute('aria-rowindex')
+    ?? row.getAttribute('data-index');
+  const parsedAttr = attrIndex !== null ? parseInt(attrIndex, 10) : NaN;
+  if (Number.isFinite(parsedAttr)) {
+    if (row.getAttribute('aria-rowindex')) return Math.max(0, parsedAttr - 1);
+    if (parsedAttr >= 0) return parsedAttr;
+  }
+
+  const htmlRow = row as HTMLElement;
+  const transform = htmlRow.style.transform;
+  const translateMatch = transform.match(/translate(?:3d|Y)?\([^,\d.-]*(-?\d+(?:\.\d+)?)px(?:,\s*(-?\d+(?:\.\d+)?)px)?/i);
+  const translatedY = translateMatch
+    ? parseFloat(translateMatch[2] ?? translateMatch[1])
+    : NaN;
+  const top = parseFloat(htmlRow.style.top);
+  const offset = Number.isFinite(translatedY) ? translatedY : top;
+  const height = htmlRow.offsetHeight || parseFloat(htmlRow.style.height);
+  if (Number.isFinite(offset) && Number.isFinite(height) && height > 0) {
+    return Math.max(0, Math.round(offset / height));
+  }
+
+  return fallbackIndex;
+}
+
 function findAvailablePlayersBody(): Element | null {
   const mobileSection = document.querySelector('.DraftablePlayersTable-Mobile_draftable-players');
   if (mobileSection) {
@@ -94,8 +121,6 @@ const readRoster: Effect.Effect<ReadonlyArray<RosterPick>> =
     yield* Effect.logDebug(`Roster containers found: ${containers.length}`);
 
     const picks: RosterPick[] = [];
-    let pickNumber = 0;
-
     for (let ci = 0; ci < containers.length; ci++) {
       const container = containers[ci];
       const bodies = yield* Effect.sync(() =>
@@ -140,11 +165,12 @@ const readRoster: Effect.Effect<ReadonlyArray<RosterPick>> =
 
           if (!position || !name) continue;
 
-          pickNumber++;
+          const rosterIndex = virtualRowIndex(row, picks.length);
+          const overallPick = rosterIndex + 1;
           picks.push({
-            round: 0,
-            pick: 0,
-            overallPick: pickNumber,
+            round: overallPick,
+            pick: overallPick,
+            overallPick,
             name,
             position,
             team,
@@ -233,10 +259,12 @@ export const draftKingsAdapter: DraftPlatformAdapter = {
   readUserPickNumber,
   ui: {
     injectPageStyles: () => {
+      document.querySelectorAll('[data-dh-platform-style="draftkings"]').forEach((el) => el.remove());
       const style = document.createElement('style');
+      style.dataset.dhPlatformStyle = 'draftkings';
       style.textContent = `
         [class*="SnakeDraft_snake-draft-inner-container"] {
-          max-width: none !important;
+          max-width: min(100vw, 1440px) !important;
         }
         #draft-helper-root {
           padding: 10px 12px 12px !important;
@@ -248,9 +276,37 @@ export const draftKingsAdapter: DraftPlatformAdapter = {
             0 0 0 1px color-mix(in srgb, var(--dh-panel, #ffffff) 70%, transparent),
             0 16px 34px rgba(16, 24, 32, 0.32) !important;
         }
+        #draft-helper-root[data-dh-pane="horizontal"] {
+          width: 100% !important;
+          max-width: none !important;
+          margin: 0 0 10px 0 !important;
+          flex: 0 0 100% !important;
+          align-self: stretch !important;
+          grid-column: 1 / -1 !important;
+          order: -1 !important;
+        }
+        [data-dh-draftkings-layout="horizontal"] {
+          display: flex !important;
+          flex-wrap: wrap !important;
+          align-items: flex-start !important;
+          gap: 0 12px !important;
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        [data-dh-draftkings-layout="horizontal"] > [class*="LiveDraft_draft-table"] {
+          flex: 1 1 min(880px, calc(100% - 332px)) !important;
+          min-width: 640px !important;
+        }
+        [data-dh-draftkings-layout="horizontal"] > [class*="LiveDraft_queue"] {
+          flex: 0 0 320px !important;
+          min-width: 300px !important;
+        }
         .LiveDraft_live-draft,
         .LiveDraft-Mobile_live-draft-mobile__body {
-          padding: 0 24px !important;
+          box-sizing: border-box !important;
+          width: 100% !important;
+          max-width: 100vw !important;
+          padding: 0 16px !important;
         }
       `;
       document.head.appendChild(style);

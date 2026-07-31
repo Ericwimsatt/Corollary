@@ -167,6 +167,47 @@ export default function App() {
     host.dataset.dhTheme = activeTheme;
   }, [activeTheme]);
 
+  useEffect(() => {
+    const host = document.getElementById('draft-helper-root');
+    if (!host) return;
+
+    if (adapter.id !== 'draftkings') {
+      delete host.dataset.dhPane;
+      document.querySelectorAll('[data-dh-draftkings-layout]').forEach((el) => {
+        delete (el as HTMLElement).dataset.dhDraftkingsLayout;
+      });
+      return;
+    }
+
+    host.dataset.dhPane = themeSettings.draftKingsPane;
+    document.querySelectorAll('[data-dh-draftkings-layout]').forEach((el) => {
+      delete (el as HTMLElement).dataset.dhDraftkingsLayout;
+    });
+
+    if (themeSettings.draftKingsPane === 'horizontal') {
+      const draftTable = document.querySelector('[class*="LiveDraft_draft-table"]');
+      const queue = document.querySelector('[class*="LiveDraft_queue"]');
+      const parent = draftTable?.parentElement ?? queue?.parentElement ?? null;
+      if (!parent) return;
+
+      (parent as HTMLElement).dataset.dhDraftkingsLayout = 'horizontal';
+      const firstDraftArea = [draftTable, queue]
+        .filter((el): el is Element => el !== null)
+        .sort((a, b) => {
+          if (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+          return -1;
+        })[0];
+      parent.insertBefore(host, firstDraftArea ?? parent.firstChild);
+      return;
+    }
+
+    delete host.dataset.dhPane;
+    const mountPoint = adapter.ui.findMountPoint();
+    if (mountPoint && host.parentElement !== mountPoint) {
+      adapter.ui.placeMount(host, mountPoint);
+    }
+  }, [adapter, themeSettings.draftKingsPane]);
+
   const updatePlatformTheme = (platformId: keyof ThemeSettings['platformThemes'], mode: ThemeMode) => {
     const next = {
       ...themeSettings,
@@ -269,7 +310,7 @@ export default function App() {
             style={styles.pickStatus}
             title={`Detected from the active ${adapter.label} draft page. Synced ${loadCount} times.`}
           >
-            Pick {userPickNumber}
+            Pick #{userPickNumber}
           </div>
         </div>
 

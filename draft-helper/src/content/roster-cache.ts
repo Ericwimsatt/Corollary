@@ -118,18 +118,30 @@ const updateImpl = (picks: ReadonlyArray<RosterPick>) =>
             position: pick.position,
             round: pick.round,
             pick: pick.pick,
-            overallPick: current.size + 1,
+            overallPick: pick.overallPick > 0 ? pick.overallPick : current.size + 1,
             byeWeek: pick.byeWeek,
             firstSeen: now,
             lastSeen: now,
             seenCount: 1,
           });
           added = true;
-        } else if (existing.byeWeek === 0 && pick.byeWeek !== 0) {
-          existing.byeWeek = pick.byeWeek;
-          existing.lastSeen = now;
-          existing.seenCount += 1;
-          added = true;
+        } else {
+          let changed = false;
+          if (pick.overallPick > 0 && existing.overallPick !== pick.overallPick) {
+            existing.overallPick = pick.overallPick;
+            existing.round = pick.round;
+            existing.pick = pick.pick;
+            changed = true;
+          }
+          if (existing.byeWeek === 0 && pick.byeWeek !== 0) {
+            existing.byeWeek = pick.byeWeek;
+            changed = true;
+          }
+          if (changed) {
+            existing.lastSeen = now;
+            existing.seenCount += 1;
+            added = true;
+          }
         }
       }
       return all;

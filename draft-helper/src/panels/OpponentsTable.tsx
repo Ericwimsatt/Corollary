@@ -44,7 +44,7 @@ function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
   }, [show]);
 
   if (!info) return <span style={styles.missingOpponent}>{abbr}</span>;
-  const textStyle = getPillTextStyle(info.primaryColor, info.secondaryColor);
+  const textStyle = getPillTextStyle(info.primaryColor);
 
   const top = [...players]
     .filter(p => p.team === abbr && p.adp > 0)
@@ -75,11 +75,12 @@ function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
       <span
         style={{
           ...styles.pill,
-          background: `linear-gradient(135deg, ${info.primaryColor} 0 58%, ${info.secondaryColor} 58% 100%)`,
+          backgroundColor: info.primaryColor,
           borderColor: textStyle.borderColor,
         }}
       >
         <span style={{ ...styles.pillText, ...textStyle }}>{abbr}</span>
+        <span aria-hidden="true" style={{ ...styles.pillEndcap, backgroundColor: info.secondaryColor }} />
       </span>
       {show && top.length > 0 && tooltipContainer ? createPortal(
         <div style={tooltipStyle}>
@@ -102,20 +103,18 @@ function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
   );
 }
 
-function getPillTextStyle(primary: string, secondary: string): React.CSSProperties {
-  const blackMin = Math.min(contrastRatio('#101820', primary), contrastRatio('#101820', secondary));
-  const whiteMin = Math.min(contrastRatio('#ffffff', primary), contrastRatio('#ffffff', secondary));
-  if (blackMin >= whiteMin) {
+function getPillTextStyle(background: string): React.CSSProperties {
+  const blackContrast = contrastRatio('#000000', background);
+  const whiteContrast = contrastRatio('#ffffff', background);
+  if (blackContrast >= whiteContrast) {
     return {
-      color: '#101820',
-      background: 'rgba(255, 255, 255, 0.78)',
+      color: '#000000',
       borderColor: 'rgba(16, 24, 32, 0.18)',
       textShadow: 'none',
     };
   }
   return {
     color: '#ffffff',
-    background: 'rgba(16, 24, 32, 0.62)',
     borderColor: 'rgba(255, 255, 255, 0.3)',
     textShadow: '0 1px 1px rgba(0, 0, 0, 0.65)',
   };
@@ -279,26 +278,31 @@ const styles: Record<string, React.CSSProperties> = {
   pill: {
     display: 'inline-flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    minWidth: 39,
-    minHeight: 20,
-    padding: 2,
-    borderRadius: 8,
+    justifyContent: 'space-between',
+    minWidth: 44,
+    minHeight: 22,
+    overflow: 'hidden',
+    borderRadius: 7,
     border: '1px solid transparent',
     lineHeight: 1,
     cursor: 'default',
+    boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.12)',
   },
   pillText: {
     display: 'block',
-    minWidth: 30,
-    padding: '3px 5px 2px',
-    borderRadius: 6,
-    border: '1px solid transparent',
+    minWidth: 34,
+    padding: '5px 6px 4px',
     fontSize: 10,
     fontWeight: 900,
     lineHeight: 1,
     textAlign: 'center',
     fontVariantNumeric: 'tabular-nums',
+  },
+  pillEndcap: {
+    alignSelf: 'stretch',
+    width: 9,
+    minHeight: 20,
+    flex: '0 0 9px',
   },
   missingOpponent: {
     color: color.faint,

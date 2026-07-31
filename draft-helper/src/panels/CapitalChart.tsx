@@ -33,7 +33,9 @@ export default function CapitalChart({ roster, userPickNumber, adapter, fillHeig
     const players = roster.filter((p) => g.pos.includes(p.position));
     const capital = players.reduce(
       (sum, p) => {
-        const rosterIndex = roster.indexOf(p);
+        const rosterIndex = adapter.id === 'draftkings' && p.overallPick > 0
+          ? p.overallPick - 1
+          : roster.indexOf(p);
         const pk = overallFromUserPick(rosterIndex, userPickNumber, adapter.teamCount);
         const cap = adapter.draftCapital(pk);
         return sum + cap;
