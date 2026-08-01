@@ -33,9 +33,10 @@ export default function CapitalChart({ roster, userPickNumber, adapter, fillHeig
     const players = roster.filter((p) => g.pos.includes(p.position));
     const capital = players.reduce(
       (sum, p) => {
-        const rosterIndex = adapter.id === 'draftkings' && p.overallPick > 0
-          ? p.overallPick - 1
-          : roster.indexOf(p);
+        // The chart receives this user's picks in draft order. DraftKings' overallPick
+        // is only the row index within its roster table, so use the roster order for
+        // both adapters instead of treating that value as a league-wide pick.
+        const rosterIndex = roster.indexOf(p);
         const pk = overallFromUserPick(rosterIndex, userPickNumber, adapter.teamCount);
         const cap = adapter.draftCapital(pk);
         return sum + cap;
@@ -164,11 +165,13 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 2,
   },
   count: {
+    position: 'relative',
     color: color.muted,
     fontSize: 10,
     fontWeight: 800,
     textAlign: 'right',
     fontVariantNumeric: 'tabular-nums',
+    zIndex: 3,
   },
   warning: {
     color: color.warning,

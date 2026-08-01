@@ -1,21 +1,21 @@
 ---
-name: Draft Helper
+name: Corollary
 description: Minimal analyst overlay for live DraftKings best ball draft decisions.
 colors:
-  sheet-bg: "#edf2f5"
+  sheet-bg: "#ecf4ee"
   sheet-panel: "#ffffff"
-  sheet-panel-raised: "#f7fafb"
-  sheet-panel-soft: "#f1f5f7"
-  sheet-line: "#d8e1e7"
-  sheet-line-strong: "#b7c6d0"
-  ink: "#101820"
-  muted-ink: "#536273"
-  faint-ink: "#7b8794"
-  warning-ink: "#9b6200"
-  qb-blue: "#1570d6"
-  rb-green: "#168a52"
-  wr-orange: "#c96d00"
-  te-purple: "#7b43c4"
+  sheet-panel-raised: "#f7fbf7"
+  sheet-panel-soft: "#dfeae3"
+  sheet-line: "#ccdcd2"
+  sheet-line-strong: "#9ab0a3"
+  ink: "#101914"
+  muted-ink: "#4a5d50"
+  faint-ink: "#77877d"
+  warning-ink: "#935a0d"
+  qb-blue: "#1165b7"
+  rb-green: "#004c54"
+  wr-orange: "#bd6414"
+  te-purple: "#6f4ab0"
   success-green: "#1fbf75"
 typography:
   title:
@@ -71,13 +71,13 @@ components:
     padding: "{spacing.lg}"
 ---
 
-# Design System: Draft Helper
+# Design System: Corollary
 
 ## Overview
 
 **Creative North Star: "Draft Sheet"**
 
-Draft Helper should feel like a compact analyst sheet embedded inside the draft room: direct, tabular, and built for fast comparison. The surface can be pleasant and polished, but it should never ask the drafter to parse a theme before reading the data.
+Corollary should feel like a compact analyst sheet embedded inside the draft room: direct, tabular, and built for fast comparison. The surface can be pleasant and polished, but it should never ask the drafter to parse a theme before reading the data.
 
 The system is minimal by default. Roster construction is understood through visual allocation bars, not secondary interpretation labels. Playoff matchups are understood through prominent opponent team colors with high-contrast abbreviations. Supporting metadata stays quiet and narrow.
 
@@ -90,7 +90,9 @@ The system is minimal by default. Roster construction is understood through visu
 
 ## Colors
 
-The palette is a neutral light sheet with restrained position accents and full-strength NFL team colors only where team recognition matters.
+The selected light palette is **Sideline Ledger**: a field-neutral analyst sheet with green-tinted neutrals, restrained position accents, and full-strength NFL team colors only where team recognition matters.
+
+The selected dark palette is **Red Zone Noir**: a warm, high-contrast booth palette with brown-black surfaces, cream text, and bright position accents tuned for night drafting.
 
 ### Primary
 - **Ink Black:** Primary text, selected controls, and the strongest structural emphasis.
@@ -175,8 +177,8 @@ Shapes are compact and functional. The outer shell is gently rounded, controls u
 - **Behavior:** Bars are target-based and explain allocation on their own. Do not add percentages or interpretive labels like "heavy", "thin", or "ok".
 
 ### Matchup Pills
-- **Style:** Compact team-color capsules with high-contrast abbreviations.
-- **Color:** Use both opponent colors when possible. If one team color is too light for text, choose the text color algorithmically for contrast.
+- **Style:** Compact color-endcap capsules with high-contrast abbreviations on the team's primary color and a narrow secondary-color endcap.
+- **Color:** Use both opponent colors. Choose the abbreviation text color algorithmically against the primary color, using pure black or white for maximum contrast without an added backdrop.
 - **State:** Hover opens the available-player tooltip.
 
 ### Tooltip

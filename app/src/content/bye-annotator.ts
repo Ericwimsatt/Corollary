@@ -123,6 +123,6 @@ export const annotateByeWeekCounts = (
     }
 
     if (annotated > 0) {
-      console.log(`[DraftHelper] Annotated ${annotated} rows with bye week counts`);
+      console.log(`[Corollary] Annotated ${annotated} rows with bye week counts`);
     }
   });

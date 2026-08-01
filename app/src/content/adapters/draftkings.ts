@@ -113,7 +113,7 @@ function parseAvailablePlayerRow(row: Element): AvailablePlayerRow | null {
 
 const readRoster: Effect.Effect<ReadonlyArray<RosterPick>> =
   Effect.gen(function*() {
-    yield* Effect.logDebug("[DraftHelper] DraftKings readRoster");
+    yield* Effect.logDebug("[Corollary] DraftKings readRoster");
 
     const containers = yield* Effect.sync(() =>
       document.querySelectorAll('[class*="RosterTable"]')
@@ -209,7 +209,7 @@ const readUserPickNumber: Effect.Effect<number | null> =
 
 const readAvailablePlayers: Effect.Effect<ReadonlyArray<Player>> =
   Effect.gen(function*() {
-    yield* Effect.logDebug("[DraftHelper] DraftKings readAvailablePlayers");
+    yield* Effect.logDebug("[Corollary] DraftKings readAvailablePlayers");
     const body = yield* Effect.sync(findAvailablePlayersBody);
 
     if (!body) {

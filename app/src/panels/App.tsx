@@ -246,7 +246,7 @@ export default function App() {
         <div style={styles.topbar}>
           <div>
             <div style={styles.titleRow}>
-              <div style={styles.title}>Draft Hand</div>
+              <div style={styles.title}>Corollary</div>
               <span
                 style={styles.tooltipAnchor}
                 onMouseEnter={() => setRankingsTooltipOpen(true)}

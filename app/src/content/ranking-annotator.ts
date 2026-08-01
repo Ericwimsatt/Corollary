@@ -81,6 +81,6 @@ function annotateRankings(adapter: DraftPlatformAdapter, rankings: ReadonlyArray
   }
 
   if (annotated > 0) {
-    console.log(`[DraftHelper] Annotated ${annotated} rows with custom rankings`);
+    console.log(`[Corollary] Annotated ${annotated} rows with custom rankings`);
   }
 }

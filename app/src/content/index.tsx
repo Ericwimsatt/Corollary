@@ -16,7 +16,7 @@ function inject() {
     return;
   }
 
-  console.log('[DraftHelper] inject() called');
+  console.log('[Corollary] inject() called');
 
   adapter.ui.injectPageStyles();
 
@@ -25,7 +25,7 @@ function inject() {
 
   const mountPoint = adapter.ui.findMountPoint();
   if (!mountPoint) {
-    console.log(`[DraftHelper] No ${adapter.label} layout found, retrying in 1s`);
+    console.log(`[Corollary] No ${adapter.label} layout found, retrying in 1s`);
     setTimeout(inject, 1000);
     return;
   }
@@ -69,7 +69,7 @@ function inject() {
 
   const root = createRoot(mount);
   root.render(React.createElement(App));
-  console.log('[DraftHelper] Mounted');
+  console.log('[Corollary] Mounted');
 }
 
 if (document.readyState === 'loading') {

@@ -130,7 +130,7 @@ export const annotateStackTargets = (
 
     const body = adapter.ui.findAvailablePlayersBody();
     if (!body) {
-      console.log('[DraftHelper] No available players table body found for stack annotations');
+      console.log('[Corollary] No available players table body found for stack annotations');
       return;
     }
 
@@ -184,6 +184,6 @@ export const annotateStackTargets = (
     }
 
     if (annotated > 0) {
-      console.log(`[DraftHelper] Annotated ${annotated} rows with stack info`);
+      console.log(`[Corollary] Annotated ${annotated} rows with stack info`);
     }
   });

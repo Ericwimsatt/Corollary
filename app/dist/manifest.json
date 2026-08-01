@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Draft Helper",
+  "name": "Corollary",
   "version": "1.0.0",
   "description": "Overlay for best ball drafts: roster tracker, stacking targets, draft capital chart, and opponent schedule.",
   "permissions": ["storage"],

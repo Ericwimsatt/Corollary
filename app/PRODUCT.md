@@ -8,17 +8,17 @@ web
 
 ## Users
 
-Draft Helper is for the creator and other fantasy football drafters using DraftKings best ball draft rooms. Users are actively drafting, scanning quickly, and trying to make better picks under time pressure.
+Corollary is for the creator and other fantasy football drafters using DraftKings best ball draft rooms. Users are actively drafting, scanning quickly, and trying to make better picks under time pressure.
 
 ## Product Purpose
 
-Draft Helper is a Chrome browser extension overlay for DraftKings best ball drafts. It combines roster construction, external ranking signals, draft capital, available-player context, and playoff schedule/correlation information so drafters can build the best possible team while the draft is in progress.
+Corollary is a Chrome browser extension overlay for DraftKings best ball drafts. It combines roster construction, external ranking signals, draft capital, available-player context, and playoff schedule/correlation information so drafters can build the best possible team while the draft is in progress.
 
 Success means the drafter can understand their roster shape and key decision signals at a glance without leaving the draft room or doing manual cross-checking.
 
 ## Positioning
 
-Draft Helper's useful mechanism is the combination of live DraftKings page data with opinionated fantasy-football decision layers: roster construction clarity first, ranking edges second, and playoff stack or correlation edges third.
+Corollary's useful mechanism is the combination of live DraftKings page data with opinionated fantasy-football decision layers: roster construction clarity first, ranking edges second, and playoff stack or correlation edges third.
 
 ## Operating Context
 
@@ -40,17 +40,17 @@ The product is used during an active draft, where glanceability, density, and fa
 
 ## Brand Commitments
 
-The working product name is Draft Helper. The desired personality is minimal, no-nonsense, organized, and exceedingly obvious about what is being shown. Visual theme is allowed only when it supports clarity; decorative or overly playful treatment should not compete with the data.
+The product name is Corollary. The desired personality is minimal, no-nonsense, organized, and exceedingly obvious about what is being shown. Visual theme is allowed only when it supports clarity; decorative or overly playful treatment should not compete with the data.
 
 ## Evidence on Hand
 
-- Extension manifest: `draft-helper/manifest.json`
-- Main injected panel: `draft-helper/src/content/index.tsx`
-- Panel app: `draft-helper/src/panels/App.tsx`
-- Draft capital display: `draft-helper/src/panels/CapitalChart.tsx`
-- Playoff schedule display: `draft-helper/src/panels/OpponentsTable.tsx`
-- External rankings data: `draft-helper/src/data/rankings.ts`
-- Schedule data: `draft-helper/src/data/schedule.json`
+- Extension manifest: `manifest.json`
+- Main injected panel: `src/content/index.tsx`
+- Panel app: `src/panels/App.tsx`
+- Draft capital display: `src/panels/CapitalChart.tsx`
+- Playoff schedule display: `src/panels/OpponentsTable.tsx`
+- External rankings data: `src/data/rankings.ts`
+- Schedule data: `src/data/schedule.json`
 
 No customer claims, performance benchmarks, testimonials, logos, or official DraftKings partnership claims are established.
 

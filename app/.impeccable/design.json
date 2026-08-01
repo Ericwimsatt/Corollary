@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedAt": "2026-07-30T12:57:31-07:00",
-  "title": "Design System: Draft Helper",
+  "title": "Design System: Corollary",
   "extensions": {
     "colorMeta": {
       "sheet-bg": {
@@ -112,7 +112,7 @@
   ],
   "narrative": {
     "northStar": "Draft Sheet",
-    "overview": "Draft Helper should feel like a compact analyst sheet embedded inside the draft room: direct, tabular, and built for fast comparison. The surface can be pleasant and polished, but it should never ask the drafter to parse a theme before reading the data.\n\nThe system is minimal by default. Roster construction is understood through visual allocation bars, not secondary interpretation labels. Playoff matchups are understood through prominent opponent team colors with high-contrast abbreviations. Supporting metadata stays quiet and narrow.",
+    "overview": "Corollary should feel like a compact analyst sheet embedded inside the draft room: direct, tabular, and built for fast comparison. The surface can be pleasant and polished, but it should never ask the drafter to parse a theme before reading the data.\n\nThe system is minimal by default. Roster construction is understood through visual allocation bars, not secondary interpretation labels. Playoff matchups are understood through prominent opponent team colors with high-contrast abbreviations. Supporting metadata stays quiet and narrow.",
     "keyCharacteristics": [
       "Minimal analyst-sheet presentation.",
       "Roster allocation bars carry the main meaning.",
