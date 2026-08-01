@@ -18,11 +18,11 @@ Success means the drafter can understand their roster shape and key decision sig
 
 ## Positioning
 
-Corollary's useful mechanism is the combination of live DraftKings page data with opinionated fantasy-football decision layers: roster construction clarity first, ranking edges second, and playoff stack or correlation edges third.
+Corollary's useful mechanism is the combination of live DraftKings and Underdog page data with opinionated fantasy-football decision layers: roster construction clarity first, ranking edges second, and playoff stack or correlation edges third.
 
 ## Operating Context
 
-The extension runs directly on DraftKings draft pages as a compact analyst overlay. It reads the live draft room DOM, tracks the user's roster and available players, annotates rows with external ranking and stack information, and shows draft capital by position plus playoff opponent context.
+The extension runs directly on DraftKings and UnderDog draft pages as a compact analyst overlay. It reads the live draft room DOM, tracks the user's roster and available players, annotates rows with external ranking and stack information, and shows draft capital by position plus playoff opponent context.
 
 The product is used during an active draft, where glanceability, density, and fast comparison matter more than onboarding or broad explanation.
 
