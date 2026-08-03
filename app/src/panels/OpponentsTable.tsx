@@ -10,6 +10,8 @@ import { playerKey } from '../content/player-key';
 
 const MATCHUP_HEADER_HEIGHT = 21;
 const MATCHUP_ROW_HEIGHT = 34;
+const COMPACT_MATCHUP_HEADER_HEIGHT = 18;
+const COMPACT_MATCHUP_ROW_HEIGHT = 25;
 
 interface Props {
   roster: RosterPick[];
@@ -20,9 +22,11 @@ interface Props {
   title?: string;
   showHeader?: boolean;
   emptyMessage?: string;
+  flushTop?: boolean;
+  compactRows?: boolean;
 }
 
-function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
+function Pill({ abbr, players, compact = false }: { abbr: string; players: Player[]; compact?: boolean }) {
   const [show, setShow] = useState(false);
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
   const anchorRef = useRef<HTMLDivElement | null>(null);
@@ -76,12 +80,20 @@ function Pill({ abbr, players }: { abbr: string; players: Player[] }) {
       <span
         style={{
           ...styles.pill,
+          ...(compact ? styles.pillCompact : {}),
           backgroundColor: info.primaryColor,
           borderColor: textStyle.borderColor,
         }}
       >
-        <span style={{ ...styles.pillText, ...textStyle }}>{abbr}</span>
-        <span aria-hidden="true" style={{ ...styles.pillEndcap, backgroundColor: info.secondaryColor }} />
+        <span style={{ ...styles.pillText, ...(compact ? styles.pillTextCompact : {}), ...textStyle }}>{abbr}</span>
+        <span
+          aria-hidden="true"
+          style={{
+            ...styles.pillEndcap,
+            ...(compact ? styles.pillEndcapCompact : {}),
+            backgroundColor: info.secondaryColor,
+          }}
+        />
       </span>
       {show && top.length > 0 && tooltipContainer ? createPortal(
         <div style={tooltipStyle}>
@@ -155,6 +167,8 @@ export default function OpponentsTable({
   title = 'Playoff Matchups',
   showHeader = true,
   emptyMessage = 'Draft players to see playoff opponents.',
+  flushTop = false,
+  compactRows = false,
 }: Props) {
   // Display ordering belongs here, not in the persisted roster. QBs form the
   // first group; draft order is preserved explicitly within both groups.
@@ -166,12 +180,16 @@ export default function OpponentsTable({
   const tableWrapStyle = maxVisibleRows
     ? {
         ...styles.tableScroll,
-        maxHeight: MATCHUP_HEADER_HEIGHT + maxVisibleRows * MATCHUP_ROW_HEIGHT,
+        maxHeight: (compactRows ? COMPACT_MATCHUP_HEADER_HEIGHT : MATCHUP_HEADER_HEIGHT)
+          + maxVisibleRows * (compactRows ? COMPACT_MATCHUP_ROW_HEIGHT : MATCHUP_ROW_HEIGHT),
       }
     : undefined;
 
   return (
-    <section style={styles.container} aria-label="Playoff opponents">
+    <section
+      style={flushTop ? { ...styles.container, ...styles.containerFlush } : styles.container}
+      aria-label="Playoff opponents"
+    >
       {showHeader ? (
         <div style={sharedStyles.sectionHeader}>
           <h3 style={sharedStyles.heading}>{title}</h3>
@@ -200,17 +218,36 @@ export default function OpponentsTable({
                 const week17 = Option.isSome(opps) ? opps.value.week17 : '—';
                 return (
                   <tr key={`${playerKey(pick)}-${pick.overallPick}-${startIndex + i}`}>
-                    <td style={styles.td}>
+                    <td style={compactRows ? { ...styles.td, ...styles.tdCompact } : styles.td}>
                       <div style={styles.playerCell}>
                         <div style={styles.playerText}>
-                          <div style={{ ...styles.playerName, color: positionColor[pick.position] }}>{pick.name}</div>
-                          <div style={styles.playerTeam}>{pick.team ? getTeamInfo(pick.team)?.name ?? pick.team : pick.team}</div>
+                          {compactRows ? (
+                            <div style={styles.compactPlayerLine}>
+                              <span style={{ ...styles.playerNameCompact, color: positionColor[pick.position] }}>
+                                {pick.name}
+                              </span>
+                              {pick.team ? <span style={styles.compactTeam}>· {pick.team}</span> : null}
+                            </div>
+                          ) : (
+                            <>
+                              <div style={{ ...styles.playerName, color: positionColor[pick.position] }}>{pick.name}</div>
+                              <div style={styles.playerTeam}>
+                                {pick.team ? getTeamInfo(pick.team)?.name ?? pick.team : pick.team}
+                              </div>
+                            </>
+                          )}
                         </div>
                       </div>
                     </td>
-                    <td style={styles.td}><Pill abbr={week15} players={available} /></td>
-                    <td style={styles.td}><Pill abbr={week16} players={available} /></td>
-                    <td style={styles.td}><Pill abbr={week17} players={available} /></td>
+                    <td style={compactRows ? { ...styles.td, ...styles.tdCompact } : styles.td}>
+                      <Pill abbr={week15} players={available} compact={compactRows} />
+                    </td>
+                    <td style={compactRows ? { ...styles.td, ...styles.tdCompact } : styles.td}>
+                      <Pill abbr={week16} players={available} compact={compactRows} />
+                    </td>
+                    <td style={compactRows ? { ...styles.td, ...styles.tdCompact } : styles.td}>
+                      <Pill abbr={week17} players={available} compact={compactRows} />
+                    </td>
                   </tr>
                 );
               })}
@@ -225,6 +262,10 @@ export default function OpponentsTable({
 const styles: Record<string, React.CSSProperties> = {
   container: {
     ...sharedStyles.section,
+  },
+  containerFlush: {
+    paddingTop: 0,
+    borderTop: 0,
   },
   table: {
     width: '100%',
@@ -251,6 +292,9 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: `1px solid ${color.line}`,
     verticalAlign: 'middle',
   },
+  tdCompact: {
+    padding: '2px 5px',
+  },
   playerCell: {
     display: 'flex',
     alignItems: 'center',
@@ -269,6 +313,15 @@ const styles: Record<string, React.CSSProperties> = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
   },
+  playerNameCompact: {
+    fontSize: 10.5,
+    fontWeight: 900,
+    lineHeight: 1.05,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+  },
   playerTeam: {
     color: color.muted,
     fontSize: 9,
@@ -278,6 +331,20 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
+  },
+  compactPlayerLine: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: 3,
+    minWidth: 0,
+  },
+  compactTeam: {
+    color: color.muted,
+    fontSize: 8.5,
+    fontWeight: 700,
+    lineHeight: 1,
+    whiteSpace: 'nowrap',
+    flex: '0 0 auto',
   },
   pill: {
     display: 'inline-flex',
@@ -292,6 +359,9 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'default',
     boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.12)',
   },
+  pillCompact: {
+    minHeight: 20,
+  },
   pillText: {
     display: 'block',
     minWidth: 34,
@@ -302,11 +372,18 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'center',
     fontVariantNumeric: 'tabular-nums',
   },
+  pillTextCompact: {
+    padding: '4px 6px 3px',
+    fontSize: 9.5,
+  },
   pillEndcap: {
     alignSelf: 'stretch',
     width: 9,
     minHeight: 20,
     flex: '0 0 9px',
+  },
+  pillEndcapCompact: {
+    minHeight: 18,
   },
   missingOpponent: {
     color: color.faint,

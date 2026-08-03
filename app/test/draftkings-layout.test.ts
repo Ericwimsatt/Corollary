@@ -6,23 +6,17 @@ describe('DraftKings layout styles', () => {
     document.head.innerHTML = '';
   });
 
-  it('lets the DraftKings page span the viewport in vertical mode', () => {
+  it('does not include the removed vertical DraftKings layout rules', () => {
     draftKingsAdapter.ui.injectPageStyles();
 
     const styles = document.querySelector<HTMLStyleElement>(
       '[data-dh-platform-style="draftkings"]',
     )?.textContent;
 
-    expect(styles).toContain(
-      `[class*="SnakeDraft_snake-draft-inner-container"]:has(
-          #draft-helper-root[data-dh-pane="vertical"]
-        ) {
-          max-width: 100% !important;
-        }`,
-    );
     expect(styles).not.toContain(
       `[class*="SnakeDraft_snake-draft-inner-container"]:has(
-          #draft-helper-root[data-dh-pane="horizontal"]`,
+          #draft-helper-root[data-dh-pane="vertical"]`,
     );
+    expect(styles).toContain('[data-dh-draftkings-layout="horizontal"]');
   });
 });

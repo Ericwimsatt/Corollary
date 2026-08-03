@@ -24,7 +24,7 @@ import OpponentsTable from './OpponentsTable';
 import { color, getThemeCssVariables, type ThemeMode } from './styles';
 
 const THREE_COLUMN_MIN_WIDTH = 1260;
-const DRAFTKINGS_HORIZONTAL_MIN_WIDTH = 720;
+const DRAFTKINGS_HORIZONTAL_DATA_HEIGHT = 164;
 
 function isHelperNode(node: Node): boolean {
   const element = node instanceof Element ? node : node.parentElement;
@@ -188,10 +188,7 @@ export default function App() {
   const isUnderdog = adapter.id === 'underdog';
   const isDraftKings = adapter.id === 'draftkings';
   const useThreeColumnUnderdog = isUnderdog && viewportWidth >= THREE_COLUMN_MIN_WIDTH;
-  const useDraftKingsHorizontal =
-    isDraftKings &&
-    themeSettings.draftKingsPane === 'horizontal' &&
-    viewportWidth >= DRAFTKINGS_HORIZONTAL_MIN_WIDTH;
+  const useDraftKingsHorizontal = isDraftKings;
   const activeTheme = getPlatformTheme(themeSettings, adapter.id);
   const themeVariables = getThemeCssVariables(activeTheme);
 
@@ -217,33 +214,25 @@ export default function App() {
       return;
     }
 
-    host.dataset.dhPane = themeSettings.draftKingsPane;
+    host.dataset.dhPane = 'horizontal';
     document.querySelectorAll('[data-dh-draftkings-layout]').forEach((el) => {
       delete (el as HTMLElement).dataset.dhDraftkingsLayout;
     });
 
-    if (themeSettings.draftKingsPane === 'horizontal') {
-      const draftTable = document.querySelector('[class*="LiveDraft_draft-table"]');
-      const queue = document.querySelector('[class*="LiveDraft_queue"]');
-      const parent = draftTable?.parentElement ?? queue?.parentElement ?? null;
-      if (!parent) return;
+    const draftTable = document.querySelector('[class*="LiveDraft_draft-table"]');
+    const queue = document.querySelector('[class*="LiveDraft_queue"]');
+    const parent = draftTable?.parentElement ?? queue?.parentElement ?? null;
+    if (!parent) return;
 
-      (parent as HTMLElement).dataset.dhDraftkingsLayout = 'horizontal';
-      const firstDraftArea = [draftTable, queue]
-        .filter((el): el is Element => el !== null)
-        .sort((a, b) => {
-          if (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) return 1;
-          return -1;
-        })[0];
-      parent.insertBefore(host, firstDraftArea ?? parent.firstChild);
-      return;
-    }
-
-    const mountPoint = adapter.ui.findMountPoint();
-    if (mountPoint && host.parentElement !== mountPoint) {
-      adapter.ui.placeMount(host, mountPoint);
-    }
-  }, [adapter, themeSettings.draftKingsPane]);
+    (parent as HTMLElement).dataset.dhDraftkingsLayout = 'horizontal';
+    const firstDraftArea = [draftTable, queue]
+      .filter((el): el is Element => el !== null)
+      .sort((a, b) => {
+        if (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+        return -1;
+      })[0];
+    parent.insertBefore(host, firstDraftArea ?? parent.firstChild);
+  }, [adapter]);
 
   const updatePlatformTheme = (platformId: keyof ThemeSettings['platformThemes'], mode: ThemeMode) => {
     const next = {
@@ -262,15 +251,6 @@ export default function App() {
     saveThemeSettings(defaultThemeSettings).catch(() => undefined);
   };
 
-  const updateDraftKingsPane = (pane: ThemeSettings['draftKingsPane']) => {
-    const next = {
-      ...themeSettings,
-      draftKingsPane: pane,
-    };
-    setThemeSettings(next);
-    saveThemeSettings(next).catch(() => undefined);
-  };
-
   const appStyle = useDraftKingsHorizontal
     ? styles.appDraftKingsHorizontal
     : isUnderdog
@@ -279,8 +259,14 @@ export default function App() {
 
   return (
     <div style={{ ...appStyle, ...themeVariables }}>
-      <div style={isUnderdog || useDraftKingsHorizontal ? styles.leftColumn : undefined}>
-        <div style={styles.topbar}>
+      <div
+        style={useDraftKingsHorizontal
+          ? styles.horizontalTopbar
+          : isUnderdog
+            ? styles.leftColumn
+            : undefined}
+      >
+        <div style={useDraftKingsHorizontal ? { ...styles.topbar, marginBottom: 0 } : styles.topbar}>
           <div>
             <div style={styles.titleRow}>
               <div style={styles.title}>Corollary</div>
@@ -332,9 +318,6 @@ export default function App() {
                       value={themeSettings.platformThemes.underdog}
                       onChange={(mode) => updatePlatformTheme('underdog', mode)}
                     />
-                    <div style={styles.settingsDivider} />
-                    <div style={styles.settingsTitle}>DraftKings pane</div>
-                    <PaneRow value={themeSettings.draftKingsPane} onChange={updateDraftKingsPane} />
                     <button type="button" style={styles.resetButton} onClick={resetThemeDefaults}>
                       Defaults
                     </button>
@@ -351,31 +334,66 @@ export default function App() {
           </div>
         </div>
 
-        <NextBestPick
-          roster={roster as RosterPick[]}
-          available={available as Player[]}
-          customRankings={rankingsData ? rankingsData.rankings : null}
-          adapter={adapter}
-          userPickNumber={userPickNumber}
-        />
+        {!useDraftKingsHorizontal ? (
+          <>
+            <NextBestPick
+              roster={roster as RosterPick[]}
+              available={available as Player[]}
+              customRankings={rankingsData ? rankingsData.rankings : null}
+              adapter={adapter}
+              userPickNumber={userPickNumber}
+            />
 
-        <CapitalChart
-          roster={roster as RosterPick[]}
-          userPickNumber={userPickNumber}
-          adapter={adapter}
-          fillHeight={isUnderdog}
-        />
+            <CapitalChart
+              roster={roster as RosterPick[]}
+              userPickNumber={userPickNumber}
+              adapter={adapter}
+              fillHeight={isUnderdog}
+            />
+          </>
+        ) : null}
       </div>
 
-      <div style={isUnderdog || useDraftKingsHorizontal ? styles.matchupsColumn : undefined}>
-        <OpponentsTable
-          roster={roster as RosterPick[]}
-          available={available as Player[]}
-          limit={useThreeColumnUnderdog ? 4 : undefined}
-          maxVisibleRows={isUnderdog ? (useThreeColumnUnderdog ? 4 : 6) : useDraftKingsHorizontal ? 6 : undefined}
-        />
-      </div>
-      {useThreeColumnUnderdog ? (
+      {useDraftKingsHorizontal ? (
+        <>
+          <div style={styles.horizontalDataColumn}>
+            <NextBestPick
+              roster={roster as RosterPick[]}
+              available={available as Player[]}
+              customRankings={rankingsData ? rankingsData.rankings : null}
+              adapter={adapter}
+              userPickNumber={userPickNumber}
+            />
+          </div>
+          <div style={styles.horizontalDataColumn}>
+            <CapitalChart
+              roster={roster as RosterPick[]}
+              userPickNumber={userPickNumber}
+              adapter={adapter}
+              fillHeight
+            />
+          </div>
+          <div style={styles.horizontalMatchupsColumn}>
+            <OpponentsTable
+              roster={roster as RosterPick[]}
+              available={available as Player[]}
+              maxVisibleRows={5}
+              flushTop
+              compactRows
+            />
+          </div>
+        </>
+      ) : (
+        <div style={isUnderdog ? styles.matchupsColumn : undefined}>
+          <OpponentsTable
+            roster={roster as RosterPick[]}
+            available={available as Player[]}
+            limit={useThreeColumnUnderdog ? 4 : undefined}
+            maxVisibleRows={isUnderdog ? (useThreeColumnUnderdog ? 4 : 6) : undefined}
+          />
+        </div>
+      )}
+      {!useDraftKingsHorizontal && useThreeColumnUnderdog ? (
         <div style={styles.matchupsColumn}>
           <OpponentsTable
             roster={roster as RosterPick[]}
@@ -475,44 +493,17 @@ function ThemeRow({
   );
 }
 
-function PaneRow({
-  value,
-  onChange,
-}: {
-  value: ThemeSettings['draftKingsPane'];
-  onChange: (pane: ThemeSettings['draftKingsPane']) => void;
-}) {
-  return (
-    <div style={styles.paneRow}>
-      <span style={styles.segmentedControl}>
-        <button
-          type="button"
-          style={value === 'vertical' ? { ...styles.segmentButton, ...styles.segmentButtonActive } : styles.segmentButton}
-          onClick={() => onChange('vertical')}
-        >
-          Vertical
-        </button>
-        <button
-          type="button"
-          style={value === 'horizontal' ? { ...styles.segmentButton, ...styles.segmentButtonActive } : styles.segmentButton}
-          onClick={() => onChange('horizontal')}
-        >
-          Horizontal
-        </button>
-      </span>
-    </div>
-  );
-}
-
 const styles: Record<string, React.CSSProperties> = {
   app: {
     minWidth: 300,
   },
   appDraftKingsHorizontal: {
     display: 'grid',
-    gridTemplateColumns: 'minmax(292px, 360px) minmax(360px, 560px)',
-    gap: 12,
-    alignItems: 'start',
+    gridTemplateColumns: 'minmax(240px, 0.95fr) minmax(280px, 1fr) minmax(340px, 1.35fr)',
+    gridTemplateRows: `auto ${DRAFTKINGS_HORIZONTAL_DATA_HEIGHT}px`,
+    columnGap: 12,
+    rowGap: 8,
+    alignItems: 'stretch',
     width: '100%',
     minWidth: 0,
   },
@@ -541,6 +532,20 @@ const styles: Record<string, React.CSSProperties> = {
   leftColumn: {
     minWidth: 0,
     maxWidth: 360,
+  },
+  horizontalTopbar: {
+    gridColumn: '1 / -1',
+    minWidth: 0,
+  },
+  horizontalDataColumn: {
+    minWidth: 0,
+    height: DRAFTKINGS_HORIZONTAL_DATA_HEIGHT,
+    overflow: 'hidden',
+  },
+  horizontalMatchupsColumn: {
+    minWidth: 0,
+    height: DRAFTKINGS_HORIZONTAL_DATA_HEIGHT,
+    overflow: 'hidden',
   },
   matchupsColumn: {
     minWidth: 0,

@@ -5,7 +5,6 @@ const STORAGE_KEY = 'dh_theme_settings';
 
 export interface ThemeSettings {
   readonly platformThemes: Record<PlatformId, ThemeMode>;
-  readonly draftKingsPane: 'vertical' | 'horizontal';
 }
 
 export const defaultThemeSettings: ThemeSettings = {
@@ -13,7 +12,6 @@ export const defaultThemeSettings: ThemeSettings = {
     draftkings: 'light',
     underdog: 'dark',
   },
-  draftKingsPane: 'vertical',
 };
 
 function chromeStorage() {
@@ -24,10 +22,6 @@ function normalizeTheme(value: unknown): ThemeMode | null {
   return value === 'light' || value === 'dark' ? value : null;
 }
 
-function normalizeDraftKingsPane(value: unknown): ThemeSettings['draftKingsPane'] {
-  return value === 'horizontal' || value === 'vertical' ? value : defaultThemeSettings.draftKingsPane;
-}
-
 function normalizeSettings(value: unknown): ThemeSettings {
   const candidate = value as Partial<ThemeSettings> | null;
   return {
@@ -35,7 +29,6 @@ function normalizeSettings(value: unknown): ThemeSettings {
       draftkings: normalizeTheme(candidate?.platformThemes?.draftkings) ?? defaultThemeSettings.platformThemes.draftkings,
       underdog: normalizeTheme(candidate?.platformThemes?.underdog) ?? defaultThemeSettings.platformThemes.underdog,
     },
-    draftKingsPane: normalizeDraftKingsPane(candidate?.draftKingsPane),
   };
 }
 

@@ -382,11 +382,6 @@ export const draftKingsAdapter: DraftPlatformAdapter = {
         [class*="SnakeDraft_snake-draft-inner-container"] {
           max-width: min(100vw, 1440px) !important;
         }
-        [class*="SnakeDraft_snake-draft-inner-container"]:has(
-          #draft-helper-root[data-dh-pane="vertical"]
-        ) {
-          max-width: 100% !important;
-        }
         #draft-helper-root {
           padding: 10px 12px 12px !important;
           margin: 10px 10px 12px 0 !important;

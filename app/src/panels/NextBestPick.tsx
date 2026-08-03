@@ -52,6 +52,7 @@ export default function NextBestPick({
             <thead>
               <tr>
                 <th style={styles.th}>Player</th>
+                <th style={styles.thRight}>ADP</th>
                 <th style={styles.thRight}>Pos</th>
                 <th style={styles.thRight}>Stacks</th>
                 <th style={styles.thRight}>Wk17</th>
@@ -66,9 +67,14 @@ export default function NextBestPick({
                     <td style={styles.td}>
                       <div style={styles.playerCell}>
                         <span style={{ ...styles.pos, color: positionColor[pos] }}>{pos}</span>
-                        <span style={styles.playerName}>{s.player.name}</span>
-                        <span style={styles.playerTeam}>· {team}</span>
+                        <span style={styles.playerIdentity}>
+                          <span style={styles.playerName}>{s.player.name}</span>
+                          {team && <span style={styles.playerTeam}>· {team}</span>}
+                        </span>
                       </div>
+                    </td>
+                    <td style={styles.tdRight}>
+                      <span style={styles.num}>{fmtAdp(s.player.adp)}</span>
                     </td>
                     <td style={styles.tdRight}>
                       <span style={styles.num}>{fmtScore(s.breakdown.need)}</span>
@@ -141,6 +147,14 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 5,
     minWidth: 0,
   },
+  playerIdentity: {
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: 3,
+    minWidth: 0,
+    flex: '1 1 auto',
+    overflow: 'hidden',
+  },
   pos: {
     fontSize: 10,
     fontWeight: 900,
@@ -155,7 +169,7 @@ const styles: Record<string, React.CSSProperties> = {
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     minWidth: 0,
-    flex: '1 1 auto',
+    flex: '0 1 auto',
   },
   playerTeam: {
     color: color.faint,
@@ -176,6 +190,10 @@ function fmtScore(n: number): string {
   const v = Number.isFinite(n) ? n : 0;
   const sign = v > 0 ? '+' : '';
   return `${sign}${v.toFixed(1)}`;
+}
+
+function fmtAdp(adp: number): string {
+  return Number.isFinite(adp) && adp > 0 ? adp.toFixed(1) : '—';
 }
 
 function fmtStack(detail: StackDetail): string {

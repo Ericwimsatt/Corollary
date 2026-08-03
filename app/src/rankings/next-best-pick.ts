@@ -42,9 +42,15 @@ export const TARGET_MIN_COUNT: ReadonlyMap<Position, readonly [number, number]> 
   ['RB', [5, 190]],
   ['WR', [7, 190]],
 ]);
+export const POSITION_COUNT_CAP: ReadonlyMap<Position, number> = new Map([
+  ['QB', 3],
+  ['TE', 4],
+  ['RB', 7],
+  ['WR', 9],
+]);
 export const POSITIONAL_NEED_SCALE: ReadonlyMap<Position, number> = new Map([
-  ['QB', 5.0],
-  ['TE', 5.0],
+  ['QB', .5],
+  ['TE', .5],
   ['RB', 1],
   ['WR', 1],
 ]);
@@ -209,9 +215,12 @@ function scoreNeedComponent(
   if (draftPick > due_by_pick && need.count < target_count){
     count_need = (target_count - need.count) / target_count;
   }
+  const max_count = POSITION_COUNT_CAP.get(player.position) ?? 99;
+  if (need.count >= max_count) return -50;
 
   const need_index = deficit + count_need;
   const position_scale = POSITIONAL_NEED_SCALE.get(player.position) ?? 1;
+
   return need_index * position_scale;
 }
 
