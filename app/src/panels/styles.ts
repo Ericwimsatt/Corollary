@@ -13,6 +13,7 @@ export interface ThemePalette {
   muted: string;
   faint: string;
   warning: string;
+  success: string;
   qb: string;
   rb: string;
   wr: string;
@@ -31,6 +32,7 @@ export const themePalettes: Record<ThemeMode, ThemePalette> = {
     muted: '#4a5d50',
     faint: '#77877d',
     warning: '#935a0d',
+    success: '#168a52',
     qb: '#1165b7',
     rb: '#004c54',
     wr: '#bd6414',
@@ -47,6 +49,7 @@ export const themePalettes: Record<ThemeMode, ThemePalette> = {
     muted: '#d0bbb0',
     faint: '#9d877c',
     warning: '#ffd36a',
+    success: '#57d28a',
     qb: '#68b8ff',
     rb: '#58d28a',
     wr: '#ff7b45',
@@ -65,6 +68,7 @@ export const color = {
   muted: 'var(--dh-muted)',
   faint: 'var(--dh-faint)',
   warning: 'var(--dh-warning)',
+  success: 'var(--dh-success)',
   qb: 'var(--dh-qb)',
   rb: 'var(--dh-rb)',
   wr: 'var(--dh-wr)',
@@ -91,6 +95,7 @@ export function getThemeCssVariables(mode: ThemeMode): React.CSSProperties {
     '--dh-muted': palette.muted,
     '--dh-faint': palette.faint,
     '--dh-warning': palette.warning,
+    '--dh-success': palette.success,
     '--dh-qb': palette.qb,
     '--dh-rb': palette.rb,
     '--dh-wr': palette.wr,

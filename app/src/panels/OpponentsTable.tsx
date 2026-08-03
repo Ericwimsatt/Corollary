@@ -6,6 +6,7 @@ import { getOpponents } from '../data/schedule';
 import type { OpponentRow } from '../data/schedule';
 import { getTeamInfo } from '../data/teams';
 import { color, positionColor, styles as sharedStyles } from './styles';
+import { playerKey } from '../content/player-key';
 
 const MATCHUP_HEADER_HEIGHT = 21;
 const MATCHUP_ROW_HEIGHT = 34;
@@ -155,9 +156,12 @@ export default function OpponentsTable({
   showHeader = true,
   emptyMessage = 'Draft players to see playoff opponents.',
 }: Props) {
-  const qbs = roster.filter(p => p.position === 'QB');
-  const nonQbs = roster.filter(p => p.position !== 'QB');
-  const ordered = [...qbs, ...nonQbs].slice(0, 15);
+  // Display ordering belongs here, not in the persisted roster. QBs form the
+  // first group; draft order is preserved explicitly within both groups.
+  const ordered = [...roster].sort((a, b) => {
+    const positionDelta = Number(b.position === 'QB') - Number(a.position === 'QB');
+    return positionDelta || a.overallPick - b.overallPick;
+  }).slice(0, 15);
   const rows = ordered.slice(startIndex, limit ? startIndex + limit : undefined);
   const tableWrapStyle = maxVisibleRows
     ? {
@@ -195,7 +199,7 @@ export default function OpponentsTable({
                 const week16 = Option.isSome(opps) ? opps.value.week16 : '—';
                 const week17 = Option.isSome(opps) ? opps.value.week17 : '—';
                 return (
-                  <tr key={`${pick.name}-${startIndex + i}`}>
+                  <tr key={`${playerKey(pick)}-${pick.overallPick}-${startIndex + i}`}>
                     <td style={styles.td}>
                       <div style={styles.playerCell}>
                         <div style={styles.playerText}>

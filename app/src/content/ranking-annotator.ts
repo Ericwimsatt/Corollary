@@ -1,30 +1,10 @@
 import { Effect } from "effect";
 import {
   getCustomRankings,
-  normalizeRankingTeam,
   type CustomRanking,
 } from "../rankings/custom-rankings";
 import type { DraftPlatformAdapter } from "./adapters";
-
-const teamAliases: Record<string, string> = {
-  'LA': 'LAR',
-};
-
-function normalizeTeam(team: string): string {
-  const normalized = normalizeRankingTeam(team);
-  return teamAliases[normalized] ?? normalized;
-}
-
-const SUFFIXES = new Set(['jr', 'sr', 'ii', 'iii', 'iv', 'v']);
-
-function matchLastName(name: string): string {
-  const parts = name.trim().split(/\s+/);
-  for (let i = parts.length - 1; i >= 0; i--) {
-    const cleaned = parts[i].toLowerCase().replace(/\./g, '');
-    if (!SUFFIXES.has(cleaned)) return cleaned;
-  }
-  return '';
-}
+import { findMatchingPlayer } from './player-key';
 
 export const annotateExternalRankings = (adapter: DraftPlatformAdapter): Effect.Effect<void> =>
   Effect.tryPromise({
@@ -48,15 +28,7 @@ function annotateRankings(adapter: DraftPlatformAdapter, rankings: ReadonlyArray
     const parsed = adapter.ui.parseAvailablePlayerRow(row);
     if (!parsed?.rankCell) continue;
 
-    const platformLastName = matchLastName(parsed.name);
-    const platformTeam = normalizeTeam(parsed.team);
-
-    const match = rankings.find(r => {
-      if (r.position !== parsed.position) return false;
-      if (normalizeTeam(r.team) !== platformTeam) return false;
-      const csvLastName = matchLastName(r.name);
-      return csvLastName === platformLastName;
-    });
+    const match = findMatchingPlayer(rankings, parsed);
 
     if (!match) continue;
 

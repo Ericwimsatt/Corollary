@@ -3,6 +3,7 @@ import type { Player, Position, RosterPick } from './types';
 import { attachOverlayTooltip, createOverlayTooltip } from './overlay-tooltip';
 import { isFreeAgentTeam, isNflTeam, normalizeTeam } from '../utils/teams';
 import type { DraftPlatformAdapter } from './adapters';
+import { playerKey } from './player-key';
 
 function colorForByeCount(count: number): string {
   if (count === 0) return '#168a52';
@@ -28,10 +29,6 @@ function badgeStyle(count: number): string {
     'font-variant-numeric:tabular-nums',
     'box-shadow:0 1px 2px rgba(16,24,32,.12)',
   ].join(';');
-}
-
-function playerKey(player: Pick<Player, 'name' | 'team' | 'position'>): string {
-  return `${player.name}::${normalizeTeam(player.team)}::${player.position}`;
 }
 
 function availableByes(available: ReadonlyArray<Player>): Map<string, number> {

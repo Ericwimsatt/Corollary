@@ -1,10 +1,16 @@
 import { Effect } from "effect";
-import type { Player, Position, RosterPick } from "../types";
+import type { DraftedPlayerObservation, Player, Position, RosterPick } from "../types";
 import type { AvailablePlayerRow, DraftPlatformAdapter } from "./types";
 
 const ACTIVE_USER = '[class*="UserCard_is-active-user"]';
 const TEAMS = 12;
 const DRAFT_ID_PATTERN = /\/draft\/snake\/(\d+)/;
+
+function sourcePlayerIdFromImage(image: Element | null): string | null {
+  const src = image?.getAttribute('src') ?? '';
+  const match = src.match(/\/players\/\d+\/(\d+)\.(?:png|jpe?g|webp)(?:[?#]|$)/i);
+  return match ? `draftkings:${match[1]}` : null;
+}
 
 function parsePosition(text: string): Position | null {
   const p = text.trim().toUpperCase();
@@ -77,6 +83,7 @@ function parseAvailablePlayerRow(row: Element): AvailablePlayerRow | null {
   const rank = parseInt(rankText, 10) || 0;
   const playerCell = cells[2] ?? null;
   const nameEl = playerCell?.querySelector('.PlayerCell_player-name');
+  const playerImage = playerCell?.querySelector('img[alt^="Headshot for"]') ?? null;
   const posEl = playerCell?.querySelector('.player-position');
   const teamEl = playerCell?.querySelector('.PlayerCell_player-team div');
   const name = nameEl?.textContent?.trim() ?? '';
@@ -99,9 +106,11 @@ function parseAvailablePlayerRow(row: Element): AvailablePlayerRow | null {
     rankCell: cells[1] as HTMLElement,
     playerCell,
     detailsContainer: playerCell?.querySelector('.PlayerCell_player-details-container') as HTMLElement | null,
+    annotationContainer: playerCell?.querySelector('.PlayerCell_player-details-container') as HTMLElement | null,
     byeCell: byeCell ?? null,
     byeNumber,
     byeNumberSpan,
+    sourcePlayerId: sourcePlayerIdFromImage(playerImage),
     rank,
     name,
     position,
@@ -207,6 +216,17 @@ const readUserPickNumber: Effect.Effect<number | null> =
     return slotFromOverallPick(parseInt(pickMatch[1], 10));
   });
 
+function isUserOnClock(): boolean {
+  const onClockText = document.querySelector(
+    '[class*="PickOrder_pick-order__sticky-user-card-container"] [class*="UserCard_information-top"]',
+  )?.textContent ?? '';
+  const overallPick = parseInt(onClockText.match(/Pick\s+(\d+)/i)?.[1] ?? '', 10);
+  const currentSlot = slotFromOverallPick(overallPick);
+  if (currentSlot === null) return false;
+
+  return Effect.runSync(readUserPickNumber) === currentSlot;
+}
+
 const readAvailablePlayers: Effect.Effect<ReadonlyArray<Player>> =
   Effect.gen(function*() {
     yield* Effect.logDebug("[Corollary] DraftKings readAvailablePlayers");
@@ -224,6 +244,7 @@ const readAvailablePlayers: Effect.Effect<ReadonlyArray<Player>> =
       const parsed = parseAvailablePlayerRow(row);
       if (!parsed) continue;
       players.push({
+        ...(parsed.sourcePlayerId ? { sourcePlayerId: parsed.sourcePlayerId } : {}),
         rank: parsed.rank,
         name: parsed.name,
         position: parsed.position,
@@ -237,6 +258,96 @@ const readAvailablePlayers: Effect.Effect<ReadonlyArray<Player>> =
     yield* Effect.logDebug(`Total players parsed: ${players.length}`);
     return players;
   });
+
+function readDraftTeam(column: Element): string | null {
+  const summary = column.querySelector('[class*="UserPickSummaryCard_summary-card"]');
+  if (!summary) return null;
+  const candidate = Array.from(summary.children).find(child => {
+    const className = typeof child.className === 'string' ? child.className : '';
+    return !/avatar|position-summary/i.test(className) && (child.textContent?.trim() ?? '') !== '';
+  });
+  return candidate?.textContent?.trim() || null;
+}
+
+function parseDraftBoardCell(
+  cell: Element,
+  draftSlot: number,
+  draftTeam: string | null,
+): DraftedPlayerObservation | null {
+  const overallPick = parseInt(cell.querySelector('[class*="CellHeader_pick-number"]')?.textContent ?? '', 10);
+  const details = cell.querySelector('[class*="PlayerCell_player-details"]');
+  const image = details?.querySelector('[class*="PlayerCell_player-thumbnail"]') ?? null;
+  const imageAlt = image?.getAttribute('alt')?.trim() ?? '';
+  const name = imageAlt.replace(/\s+icon$/i, '').trim()
+    || details?.querySelector('[class*="PlayerCell_player-name"]')?.textContent?.trim()
+    || '';
+  const positionAndTeam = details?.querySelector('[class*="PlayerCell_position-and-team"]');
+  const position = parsePosition(positionAndTeam?.children[0]?.textContent ?? '');
+  const team = positionAndTeam?.querySelector('[class*="PlayerCell_team"]')?.textContent?.trim() ?? '';
+  if (!Number.isFinite(overallPick) || overallPick < 1 || !name || !position || !team) return null;
+
+  return {
+    sourcePlayerId: sourcePlayerIdFromImage(image),
+    name,
+    position,
+    team,
+    overallPick,
+    round: Math.ceil(overallPick / TEAMS),
+    pick: ((overallPick - 1) % TEAMS) + 1,
+    draftSlot,
+    draftTeam,
+  };
+}
+
+function readDraftBoard(): ReadonlyArray<DraftedPlayerObservation> {
+  const board = document.querySelector('[class*="DraftBoard_draft-board"]');
+  if (!board) return [];
+  const columns = Array.from(board.querySelectorAll('[class*="DraftBoardColumn_draft-board-column"]'));
+  return columns.flatMap((column, index) => {
+    const draftTeam = readDraftTeam(column);
+    return Array.from(column.children)
+      .filter(child => typeof child.className === 'string' && child.className.includes('CellBase_draft-cell'))
+      .map(cell => parseDraftBoardCell(cell, index + 1, draftTeam))
+      .filter((event): event is DraftedPlayerObservation => event !== null);
+  });
+}
+
+function readPickOrderTeam(draftSlot: number): string | null {
+  const cards = Array.from(document.querySelectorAll('[class*="PickOrder_pick-order"] [class*="UserCard_user-card"]'));
+  for (const card of cards) {
+    const overall = parseInt(card.querySelector('[class*="UserCard_information-top"]')?.textContent?.match(/Pick\s+(\d+)/i)?.[1] ?? '', 10);
+    if (slotFromOverallPick(overall) !== draftSlot) continue;
+    const name = card.querySelector('[class*="UserCard_user-name"]')?.textContent?.trim();
+    if (name) return name;
+  }
+  return null;
+}
+
+function readLatestPick(): ReadonlyArray<DraftedPlayerObservation> {
+  const latest = document.querySelector('[class*="PickOrder_pick-order__last-drafted-player"]');
+  const value = latest?.children[1]?.textContent?.trim() ?? '';
+  const match = value.match(/^(.+?)\s*\|\s*(QB|RB|WR|TE)\s+([A-Z]{2,3})$/i);
+  const onClockText = document.querySelector(
+    '[class*="PickOrder_pick-order__sticky-user-card-container"] [class*="UserCard_information-top"]',
+  )?.textContent ?? '';
+  const nextOverallPick = parseInt(onClockText.match(/Pick\s+(\d+)/i)?.[1] ?? '', 10);
+  const overallPick = nextOverallPick - 1;
+  if (!match || overallPick < 1) return [];
+  const draftSlot = slotFromOverallPick(overallPick);
+  if (draftSlot === null) return [];
+
+  return [{
+    sourcePlayerId: null,
+    name: match[1].trim(),
+    position: match[2].toUpperCase() as Position,
+    team: match[3].toUpperCase(),
+    overallPick,
+    round: Math.ceil(overallPick / TEAMS),
+    pick: ((overallPick - 1) % TEAMS) + 1,
+    draftSlot,
+    draftTeam: readPickOrderTeam(draftSlot),
+  }];
+}
 
 export const draftKingsAdapter: DraftPlatformAdapter = {
   id: "draftkings",
@@ -256,7 +367,12 @@ export const draftKingsAdapter: DraftPlatformAdapter = {
   }),
   readRoster,
   readAvailablePlayers,
+  draftedPlayerSources: [
+    { id: 'live-panel', read: Effect.sync(readLatestPick) },
+    { id: 'draft-board', read: Effect.sync(readDraftBoard) },
+  ],
   readUserPickNumber,
+  isUserOnClock,
   ui: {
     injectPageStyles: () => {
       document.querySelectorAll('[data-dh-platform-style="draftkings"]').forEach((el) => el.remove());
@@ -265,6 +381,11 @@ export const draftKingsAdapter: DraftPlatformAdapter = {
       style.textContent = `
         [class*="SnakeDraft_snake-draft-inner-container"] {
           max-width: min(100vw, 1440px) !important;
+        }
+        [class*="SnakeDraft_snake-draft-inner-container"]:has(
+          #draft-helper-root[data-dh-pane="vertical"]
+        ) {
+          max-width: 100% !important;
         }
         #draft-helper-root {
           padding: 10px 12px 12px !important;

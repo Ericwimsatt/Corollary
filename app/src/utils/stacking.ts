@@ -1,5 +1,6 @@
 import { type Player, type RosterPick, type StackTarget } from '../content/types';
 import { isFreeAgentTeam, isNflTeam, normalizeTeam } from './teams';
+import { normalizePlayerName } from '../content/player-key';
 
 export function calcStackTargets(
   roster: RosterPick[],
@@ -56,20 +57,7 @@ function toPlayer(pick: RosterPick): Player {
 }
 
 function guessTeam(playerName: string, allPlayers: Player[]): string | null {
-  const nameParts = playerName.toLowerCase().split(/\s+/);
-
-  for (const p of allPlayers) {
-    const pLower = p.name.toLowerCase();
-    const lastName = nameParts[nameParts.length - 1];
-    if (lastName && pLower.endsWith(lastName)) return normalizeTeam(p.team);
-  }
-
-  for (const p of allPlayers) {
-    const pLower = p.name.toLowerCase();
-    const firstName = nameParts[0];
-    if (firstName && (pLower.startsWith(firstName) || pLower.includes(firstName)))
-      return normalizeTeam(p.team);
-  }
-
-  return null;
+  const normalized = normalizePlayerName(playerName);
+  const match = allPlayers.find(p => normalizePlayerName(p.name) === normalized);
+  return match ? normalizeTeam(match.team) : null;
 }

@@ -82,9 +82,11 @@ function parseAvailablePlayerRow(row: Element): AvailablePlayerRow | null {
     rankCell: statCells[0] ?? null,
     playerCell: row,
     detailsContainer: row.querySelector('[class*="playerInfo"]') as HTMLElement | null,
+    annotationContainer: positionEl as HTMLElement | null,
     byeCell: positionEl as HTMLElement | null,
     byeNumber: positionEl as HTMLElement | null,
     byeNumberSpan: null,
+    sourcePlayerId: null,
     rank,
     name,
     position,
@@ -239,6 +241,12 @@ const readAvailablePlayers: Effect.Effect<ReadonlyArray<Player>> =
 const readUserPickNumber: Effect.Effect<number | null> =
   Effect.sync(() => readPickNumberFromRightColumn() ?? readPickNumberFromDraftBoard());
 
+function isUserOnClock(): boolean {
+  const draftingBar = document.querySelector('[class*="draftingBarWrapper"]');
+  const text = draftingBar?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
+  return /(?:you(?:'re| are)?|your)\s+(?:are\s+)?(?:on the clock|turn|pick)\b/i.test(text);
+}
+
 export const underdogAdapter: DraftPlatformAdapter = {
   id: "underdog",
   label: "Underdog",
@@ -257,7 +265,12 @@ export const underdogAdapter: DraftPlatformAdapter = {
   }),
   readRoster: readRosterEffect,
   readAvailablePlayers,
+  draftedPlayerSources: [
+    { id: 'live-panel', read: Effect.succeed([]) },
+    { id: 'draft-board', read: Effect.succeed([]) },
+  ],
   readUserPickNumber,
+  isUserOnClock,
   ui: {
     injectPageStyles: () => {
       document.querySelectorAll('[data-dh-platform-style="underdog"]').forEach((el) => el.remove());
@@ -267,7 +280,10 @@ export const underdogAdapter: DraftPlatformAdapter = {
         html,
         body {
           overflow-x: hidden !important;
+          overflow-y: auto !important;
           max-width: 100vw !important;
+          min-height: 100% !important;
+          background: #0f0f0f !important;
         }
         #draft-helper-root,
         #draft-helper-root * {
@@ -294,11 +310,14 @@ export const underdogAdapter: DraftPlatformAdapter = {
           padding-right: 12px !important;
           display: grid !important;
           grid-template-columns: minmax(0, 1fr) minmax(0, clamp(320px, 28vw, 500px)) minmax(0, clamp(280px, 22vw, 380px)) !important;
-          grid-template-rows: auto auto minmax(0, 1fr) !important;
+          grid-template-rows: auto auto minmax(max(720px, calc(100vh - 180px)), auto) !important;
+          height: auto !important;
+          min-height: 100vh !important;
           column-gap: clamp(8px, 1vw, 16px) !important;
           row-gap: 12px !important;
           align-items: stretch !important;
           overflow-x: hidden !important;
+          background: #0f0f0f !important;
         }
         [class*="draftingBarWrapper"] {
           grid-column: 1 / -1 !important;
@@ -329,18 +348,13 @@ export const underdogAdapter: DraftPlatformAdapter = {
           min-width: 0 !important;
           width: auto !important;
           max-width: 100% !important;
-          overflow-y: auto !important;
-          overflow-x: hidden !important;
+          overflow: visible !important;
         }
         [class*="playerListWrapper"],
         [class*="queueListWrapper"] {
           width: 100% !important;
           max-width: 100% !important;
           min-width: 0 !important;
-        }
-        [class*="leftColumnSection"] .ReactVirtualized__Grid,
-        [class*="centerColumnSection"] .ReactVirtualized__Grid {
-          max-width: 100% !important;
         }
       `;
       document.head.appendChild(style);

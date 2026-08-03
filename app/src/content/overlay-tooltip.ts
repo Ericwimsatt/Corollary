@@ -35,7 +35,10 @@ export function attachOverlayTooltip(target: HTMLElement, tooltip: HTMLElement) 
     tooltip.style.display = 'block';
     const tooltipRect = tooltip.getBoundingClientRect();
     const left = Math.min(rect.left, window.innerWidth - tooltipRect.width - 8);
-    const top = Math.min(rect.bottom + 6, window.innerHeight - tooltipRect.height - 8);
+    const spaceAbove = rect.top - 8;
+    const top = spaceAbove >= tooltipRect.height + 6
+      ? rect.top - tooltipRect.height - 6
+      : Math.min(rect.bottom + 6, window.innerHeight - tooltipRect.height - 8);
     tooltip.style.left = `${Math.max(8, left)}px`;
     tooltip.style.top = `${Math.max(8, top)}px`;
   };

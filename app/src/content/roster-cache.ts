@@ -1,9 +1,11 @@
 import { Context, Effect, Layer, Ref } from "effect";
 import { type Position, type RosterPick } from './types';
+import { playerKey } from './player-key';
 
 const STORAGE_KEY_PREFIX = 'dh_roster_';
 
 export interface CachedRosterPick {
+  sourcePlayerId?: string;
   name: string;
   team: string;
   position: Position;
@@ -57,9 +59,6 @@ const persistToChrome = (key: string, data: PersistedRoster): Effect.Effect<void
     ),
   );
 
-const playerKey = (name: string, team: string, position: Position): string =>
-  `${name}::${team}::${position}`;
-
 const storageKey = (draftId: string): string =>
   `${STORAGE_KEY_PREFIX}${draftId}`;
 
@@ -89,7 +88,7 @@ const switchDraftImpl = (draftId: string) =>
     const newMap = new Map<string, CachedRosterPick>();
     if (loaded) {
       for (const pick of loaded.picks) {
-        const k = playerKey(pick.name, pick.team, pick.position);
+        const k = playerKey(pick);
         newMap.set(k, pick);
       }
     }
@@ -109,10 +108,11 @@ const updateImpl = (picks: ReadonlyArray<RosterPick>) =>
       const current = all.get(id);
       if (!current) return all;
       for (const pick of picks) {
-        const k = playerKey(pick.name, pick.team, pick.position);
+        const k = playerKey(pick);
         const existing = current.get(k);
         if (!existing) {
           current.set(k, {
+            ...(pick.sourcePlayerId ? { sourcePlayerId: pick.sourcePlayerId } : {}),
             name: pick.name,
             team: pick.team,
             position: pick.position,
@@ -166,6 +166,7 @@ const getAllImpl = Effect.gen(function*() {
   const current = all.get(id);
   if (!current) return [];
   return Array.from(current.values()).map((e) => ({
+    ...(e.sourcePlayerId ? { sourcePlayerId: e.sourcePlayerId } : {}),
     name: e.name,
     team: e.team,
     position: e.position,

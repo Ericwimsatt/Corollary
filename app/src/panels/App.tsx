@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Effect } from "effect";
 import type { RosterPick, Player } from '../content/types';
 import { runRefresh } from '../content/pipeline';
+import { PickAlert } from '../content/pick-alert';
 import { getActiveAdapter, type DraftPlatformAdapter } from '../content/adapters';
 import {
   clearCustomRankings,
@@ -18,11 +19,28 @@ import {
   type ThemeSettings,
 } from '../settings/theme-settings';
 import CapitalChart from './CapitalChart';
+import NextBestPick from './NextBestPick';
 import OpponentsTable from './OpponentsTable';
 import { color, getThemeCssVariables, type ThemeMode } from './styles';
 
 const THREE_COLUMN_MIN_WIDTH = 1260;
 const DRAFTKINGS_HORIZONTAL_MIN_WIDTH = 720;
+
+function isHelperNode(node: Node): boolean {
+  const element = node instanceof Element ? node : node.parentElement;
+  if (!element) return false;
+  return Boolean(element.closest(
+    '#draft-helper-root, .dh-rank-badge, .dh-bye-count-badge, .dh-stack-badge, .dh-week17-badge, .dh-overlay-row, .dh-overlay-tooltip',
+  ));
+}
+
+function hasPlatformMutation(mutations: ReadonlyArray<MutationRecord>): boolean {
+  return mutations.some((mutation) => {
+    if (isHelperNode(mutation.target)) return false;
+    const changedNodes = [...mutation.addedNodes, ...mutation.removedNodes];
+    return changedNodes.some(node => !isHelperNode(node));
+  });
+}
 
 export default function App() {
   const [adapter, setAdapter] = useState<DraftPlatformAdapter>(() => getActiveAdapter());
@@ -40,24 +58,43 @@ export default function App() {
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
   const settingsRef = useRef<HTMLSpanElement | null>(null);
+  const pickAlertRef = useRef(new PickAlert());
 
   useEffect(() => {
     let running = false;
+    let queued = false;
     let disconnected = false;
     let currentDraftId: string | null = null;
 
-    const handler = () => {
-      if (running || disconnected) return;
+    const handler = (mutations?: MutationRecord[]) => {
+      if (disconnected) return;
+      if (mutations && !hasPlatformMutation(mutations)) return;
+      if (running) {
+        queued = true;
+        return;
+      }
       running = true;
+      queued = false;
+
+      const finish = () => {
+        running = false;
+        if (!queued || disconnected) return;
+        queued = false;
+        queueMicrotask(() => handler());
+      };
+
       Effect.runPromise(runRefresh).then(
         (data) => {
-          running = false;
-          if (disconnected) return;
+          if (disconnected) {
+            finish();
+            return;
+          }
           if (currentDraftId !== null && data.draftId !== currentDraftId) {
             setRoster([]);
             setAvailable([]);
           }
           currentDraftId = data.draftId;
+          pickAlertRef.current.update(data.draftId, data.isUserOnClock);
           setAdapter(data.adapter);
           setDraftId(data.draftId);
           if (data.userPickNumber !== null) {
@@ -66,9 +103,10 @@ export default function App() {
           setRoster(data.roster);
           setAvailable(data.available);
           setLoadCount((c) => c + 1);
+          finish();
         },
         () => {
-          running = false;
+          finish();
         },
       );
     };
@@ -201,7 +239,6 @@ export default function App() {
       return;
     }
 
-    delete host.dataset.dhPane;
     const mountPoint = adapter.ui.findMountPoint();
     if (mountPoint && host.parentElement !== mountPoint) {
       adapter.ui.placeMount(host, mountPoint);
@@ -313,6 +350,14 @@ export default function App() {
             Pick #{userPickNumber}
           </div>
         </div>
+
+        <NextBestPick
+          roster={roster as RosterPick[]}
+          available={available as Player[]}
+          customRankings={rankingsData ? rankingsData.rankings : null}
+          adapter={adapter}
+          userPickNumber={userPickNumber}
+        />
 
         <CapitalChart
           roster={roster as RosterPick[]}

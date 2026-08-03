@@ -1,84 +1,93 @@
 import { Effect, Layer } from "effect";
-import type { Player, RosterPick } from "./types";
+import type { DraftedPlayer, Player, RosterPick } from "./types";
 import { annotateStackTargets } from "./stack-annotator";
 import { annotateByeWeekCounts } from "./bye-annotator";
-import { annotateExternalRankings } from "./ranking-annotator";
 import { RosterCache, RosterCacheLive } from "./roster-cache";
 import { AvailableStore, AvailableStoreLive } from "./available-store";
 import { getActiveAdapter, type DraftPlatformAdapter } from "./adapters";
+import { normalizeTeam } from "../utils/teams";
+import { DraftedStore, DraftedStoreLive } from './drafted-store';
+import { findMatchingPlayer, playerKey } from './player-key';
+import { readDraftObservations } from './observations';
+import { mergeRosters, rosterFromDraftEvents } from './reconcile-draft';
 
 export interface DraftData {
   readonly adapter: DraftPlatformAdapter;
   readonly draftId: string;
   readonly roster: ReadonlyArray<RosterPick>;
   readonly available: ReadonlyArray<Player>;
+  readonly drafted: ReadonlyArray<DraftedPlayer>;
   readonly userPickNumber: number | null;
+  readonly isUserOnClock: boolean;
 }
 
-function rosterKey(pick: Pick<RosterPick, 'name' | 'team' | 'position'>): string {
-  return `${pick.name}::${pick.team}::${pick.position}`;
-}
-
-function mergeRosterForAnnotations(
-  fresh: ReadonlyArray<RosterPick>,
-  cached: ReadonlyArray<RosterPick>,
-): ReadonlyArray<RosterPick> {
-  const merged = new Map<string, RosterPick>();
-
-  for (const pick of fresh) {
-    merged.set(rosterKey(pick), pick);
-  }
-
-  for (const pick of cached) {
-    const key = rosterKey(pick);
-    const existing = merged.get(key);
-    if (!existing) {
-      merged.set(key, pick);
-    } else if (existing.byeWeek === 0 && pick.byeWeek !== 0) {
-      merged.set(key, { ...existing, byeWeek: pick.byeWeek });
-    }
-  }
-
-  return Array.from(merged.values()).sort((a, b) => a.overallPick - b.overallPick);
+function draftedKey(pick: {
+  readonly sourcePlayerId?: string | null;
+  readonly name: string;
+  readonly team: string;
+  readonly position: Player['position'];
+}) {
+  return {
+    sourcePlayerId: pick.sourcePlayerId,
+    name: pick.name,
+    team: normalizeTeam(pick.team),
+    position: pick.position,
+  };
 }
 
 const refresh = Effect.gen(function*() {
   const adapter = getActiveAdapter();
-  const draftId = yield* adapter.getDraftId;
+  const observations = yield* readDraftObservations(adapter);
+  const { draftId, userPickNumber, isUserOnClock } = observations;
   const rosterCache = yield* RosterCache;
   const availableStore = yield* AvailableStore;
+  const draftedStore = yield* DraftedStore;
 
   yield* availableStore.load;
-  const persistedAvailable = yield* availableStore.getAll;
+  yield* availableStore.switchDraft(draftId);
+  yield* draftedStore.switchDraft(draftId);
   yield* rosterCache.switchDraft(draftId);
-  const userPickNumber = yield* adapter.readUserPickNumber;
-  const roster = yield* adapter.readRoster;
-  const available = yield* adapter.readAvailablePlayers;
+  const rosterObservation = observations.roster;
+  const availableObservation = observations.availablePlayers;
+  const draftedObservation = observations.draftedPlayers;
+
+  yield* availableStore.merge(availableObservation);
+  yield* draftedStore.merge(draftedObservation);
+  const drafted = yield* draftedStore.getAll;
+  yield* availableStore.learnDraftedPlayers(drafted);
+  const catalog = yield* availableStore.getCatalog;
+  const inferredRoster = rosterFromDraftEvents(drafted, catalog, userPickNumber, adapter.teamCount);
+  // Draft events carry the exact pick; the roster DOM fills any missing rows/details.
+  const roster = mergeRosters(inferredRoster, rosterObservation);
+
   const availableByKey = new Map(
-    [...persistedAvailable, ...available].map((player) => [
-      `${player.name}::${player.team}::${player.position}`,
-      player,
-    ]),
+    catalog.map((player) => [playerKey(player), player]),
   );
   const rosterWithByes = roster.map((pick) => {
     if (pick.byeWeek !== 0) return pick;
-    const match = availableByKey.get(`${pick.name}::${pick.team}::${pick.position}`);
+    const match = availableByKey.get(playerKey(pick)) ?? findMatchingPlayer(catalog, pick);
     return match?.byeWeek ? { ...pick, byeWeek: match.byeWeek } : pick;
   });
 
-  yield* availableStore.update(available);
-  yield* rosterCache.update(rosterWithByes);
-  const cached = yield* rosterCache.getAll;
-  const rosterForAnnotations = mergeRosterForAnnotations(rosterWithByes, cached);
+  // Exclude this draft's picks from recommendations without deleting them
+  // from the cross-draft player catalog.
+  yield* availableStore.excludeDrafted([
+    ...drafted.map(draftedKey),
+    ...rosterWithByes.map(draftedKey),
+  ]);
+  const cachedAvailable = yield* availableStore.getAll;
 
-  yield* annotateStackTargets(adapter, rosterForAnnotations, available);
-  yield* annotateByeWeekCounts(adapter, rosterForAnnotations, available, persistedAvailable);
-  yield* annotateExternalRankings(adapter);
-  return { adapter, draftId, roster: rosterForAnnotations, available, userPickNumber } as const;
+  yield* rosterCache.update(rosterWithByes);
+  const cachedRoster = yield* rosterCache.getAll;
+  const rosterForAnnotations = mergeRosters(rosterWithByes, cachedRoster);
+
+  yield* annotateStackTargets(adapter, rosterForAnnotations, availableObservation);
+  yield* annotateByeWeekCounts(adapter, rosterForAnnotations, availableObservation, catalog);
+  return { adapter, draftId, roster: rosterForAnnotations, available: cachedAvailable, drafted, userPickNumber, isUserOnClock } as const;
 });
 
-const appLayer: Layer.Layer<RosterCache | AvailableStore> =
-  Layer.mergeAll(RosterCacheLive, AvailableStoreLive);
+const appLayer: Layer.Layer<RosterCache | AvailableStore | DraftedStore> =
+  Layer.mergeAll(RosterCacheLive, AvailableStoreLive, DraftedStoreLive);
 
 export const runRefresh: Effect.Effect<DraftData> =
   refresh.pipe(Effect.provide(appLayer));

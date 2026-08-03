@@ -16,6 +16,17 @@ const badgeRowStyle = [
   'max-width:100%',
 ].join(';');
 
+const inlineBadgeRowStyle = [
+  'display:inline-flex',
+  'align-items:center',
+  'gap:5px',
+  'flex-wrap:nowrap',
+  'margin-left:5px',
+  'position:relative',
+  'vertical-align:middle',
+  'max-width:100%',
+].join(';');
+
 const stackBadgeStyle = [
   'display:inline-flex',
   'align-items:center',
@@ -150,11 +161,11 @@ export const annotateStackTargets = (
 
       if (stackNames.length === 0 && week17Names.length === 0) continue;
 
-      if (!parsed.detailsContainer) continue;
+      if (!parsed.annotationContainer) continue;
 
       const badgeRow = document.createElement('div');
       badgeRow.className = 'dh-overlay-row';
-      badgeRow.setAttribute('style', badgeRowStyle);
+      badgeRow.setAttribute('style', adapter.id === 'underdog' ? inlineBadgeRowStyle : badgeRowStyle);
 
       const totalCount = stackNames.length + week17Names.length;
       const stackText = getInlineText(stackNames, totalCount);
@@ -179,7 +190,7 @@ export const annotateStackTargets = (
       }
 
       addTooltip(badgeRow, stackNames, week17Names);
-      parsed.detailsContainer.appendChild(badgeRow);
+      parsed.annotationContainer.appendChild(badgeRow);
       annotated++;
     }
 
