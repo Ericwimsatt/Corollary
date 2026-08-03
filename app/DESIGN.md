@@ -92,7 +92,7 @@ The system is minimal by default. Roster construction is understood through visu
 
 The selected light palette is **Sideline Ledger**: a field-neutral analyst sheet with green-tinted neutrals, restrained position accents, and full-strength NFL team colors only where team recognition matters.
 
-The selected dark palette is **Navy Green**: a cool, high-contrast analyst palette with deep blue-green surfaces, mint text, and restrained position accents tuned for night drafting.
+The selected dark palette is **Navy Green**: an off-black analyst palette with near-black green surfaces, deep green borders, neutral text, and restrained position accents tuned for night drafting.
 
 ### Primary
 - **Ink Black:** Primary text, selected controls, and the strongest structural emphasis.
