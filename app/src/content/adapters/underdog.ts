@@ -1,6 +1,7 @@
 import { Effect } from "effect";
-import type { Player, Position, RosterPick } from "../types";
+import type { DraftedPlayerObservation, Player, Position, RosterPick } from "../types";
 import type { AvailablePlayerRow, DraftPlatformAdapter } from "./types";
+import { findMatchingPlayer } from '../player-key';
 
 const TEAMS = 12;
 const DRAFT_ID_PATTERN = /\/draft\/([^/?#]+)/;
@@ -74,6 +75,7 @@ function parseAvailablePlayerRow(row: Element): AvailablePlayerRow | null {
   const myRankText = statCells[0]?.textContent?.trim() ?? '';
   const adp = parseNumber(statCells[1]?.textContent ?? '');
   const rank = parseInt(myRankText, 10) || Math.round(adp) || 0;
+  const platformId = row.getAttribute('data-id')?.trim() ?? '';
 
   if (!name || !position || !team) return null;
 
@@ -86,7 +88,7 @@ function parseAvailablePlayerRow(row: Element): AvailablePlayerRow | null {
     byeCell: positionEl as HTMLElement | null,
     byeNumber: positionEl as HTMLElement | null,
     byeNumberSpan: null,
-    sourcePlayerId: null,
+    sourcePlayerId: platformId ? `underdog:${platformId}` : null,
     rank,
     name,
     position,
@@ -132,7 +134,13 @@ function readRosterFromRightColumn(): RosterDetail[] {
     .filter((pick): pick is RosterDetail => pick !== null);
 }
 
-function parseDraftBoardPick(cell: Element): RosterPick | null {
+function draftSlotForPick(overallPick: number): number {
+  const round = Math.ceil(overallPick / TEAMS);
+  const pickInRound = ((overallPick - 1) % TEAMS) + 1;
+  return round % 2 === 1 ? pickInRound : TEAMS - pickInRound + 1;
+}
+
+function parseDraftBoardObservation(cell: Element): DraftedPlayerObservation | null {
   const roundPickText = cell.querySelector('[class*="roundAndPick"]')?.textContent ?? '';
   const overallPick = parseInt(roundPickText.split('|')[1] ?? '', 10) || 0;
   const name = cell.querySelector('[class*="pickName"]')?.textContent?.trim() ?? '';
@@ -143,30 +151,44 @@ function parseDraftBoardPick(cell: Element): RosterPick | null {
   if (!overallPick || !name || !position || !team) return null;
 
   return {
+    sourcePlayerId: null,
     round: Math.ceil(overallPick / TEAMS),
     pick: ((overallPick - 1) % TEAMS) + 1,
     overallPick,
     name,
     position,
     team,
+    draftSlot: draftSlotForPick(overallPick),
+    draftTeam: cell.querySelector('[class*="username"]')?.textContent?.trim() || null,
+  };
+}
+
+function parseDraftBoardPick(cell: Element): RosterPick | null {
+  const observation = parseDraftBoardObservation(cell);
+  if (!observation) return null;
+  return {
+    sourcePlayerId: observation.sourcePlayerId ?? undefined,
+    round: observation.round,
+    pick: observation.pick,
+    overallPick: observation.overallPick,
+    name: observation.name,
+    position: observation.position,
+    team: observation.team,
     byeWeek: 0,
     adp: 0,
   };
+}
+
+function readDraftBoard(): ReadonlyArray<DraftedPlayerObservation> {
+  return Array.from(document.querySelectorAll('[class*="draftingBar"] [class*="draftingCell"]'))
+    .map(parseDraftBoardObservation)
+    .filter((pick): pick is DraftedPlayerObservation => pick !== null);
 }
 
 function readRosterFromDraftBoard(): RosterPick[] {
   return Array.from(document.querySelectorAll('[class*="draftingCell"][class*="userCell"]'))
     .map(parseDraftBoardPick)
     .filter((pick): pick is RosterPick => pick !== null);
-}
-
-function samePlayer(left: RosterPick, right: RosterDetail): boolean {
-  const leftParts = left.name.trim().split(/\s+/);
-  const rightParts = right.name.trim().split(/\s+/);
-  const leftLast = leftParts[leftParts.length - 1]?.toLowerCase() ?? '';
-  const rightLast = rightParts[rightParts.length - 1]?.toLowerCase() ?? '';
-  const positionMatches = right.position === null || left.position === right.position;
-  return positionMatches && left.team === right.team && leftLast === rightLast;
 }
 
 function readRoster(): ReadonlyArray<RosterPick> {
@@ -188,7 +210,10 @@ function readRoster(): ReadonlyArray<RosterPick> {
   }
 
   return board.map((pick) => {
-    const detail = details.find((candidate) => samePlayer(pick, candidate));
+    const candidates = details.filter((candidate): candidate is RosterDetail & { readonly position: Position } =>
+      candidate.position !== null
+    );
+    const detail = findMatchingPlayer(candidates, pick);
     return detail
       ? { ...pick, name: detail.name, byeWeek: detail.byeWeek, adp: detail.adp }
       : pick;
@@ -228,6 +253,7 @@ const readAvailablePlayers: Effect.Effect<ReadonlyArray<Player>> =
       .map(parseAvailablePlayerRow)
       .filter((row): row is AvailablePlayerRow => row !== null)
       .map((row) => ({
+        sourcePlayerId: row.sourcePlayerId ?? undefined,
         rank: row.rank,
         name: row.name,
         position: row.position,
@@ -242,6 +268,9 @@ const readUserPickNumber: Effect.Effect<number | null> =
   Effect.sync(() => readPickNumberFromRightColumn() ?? readPickNumberFromDraftBoard());
 
 function isUserOnClock(): boolean {
+  if (document.querySelector('[class*="draftingCell"][class*="userCell"][class*="onTheClock"]')) {
+    return true;
+  }
   const draftingBar = document.querySelector('[class*="draftingBarWrapper"]');
   const text = draftingBar?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
   return /(?:you(?:'re| are)?|your)\s+(?:are\s+)?(?:on the clock|turn|pick)\b/i.test(text);
@@ -267,7 +296,7 @@ export const underdogAdapter: DraftPlatformAdapter = {
   readAvailablePlayers,
   draftedPlayerSources: [
     { id: 'live-panel', read: Effect.succeed([]) },
-    { id: 'draft-board', read: Effect.succeed([]) },
+    { id: 'draft-board', read: Effect.sync(readDraftBoard) },
   ],
   readUserPickNumber,
   isUserOnClock,

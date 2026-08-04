@@ -262,8 +262,8 @@ export default function App() {
       <div
         style={useDraftKingsHorizontal
           ? styles.horizontalTopbar
-          : isUnderdog
-            ? styles.leftColumn
+            : isUnderdog
+            ? (useThreeColumnUnderdog ? styles.underdogHeader : styles.leftColumn)
             : undefined}
       >
         <div style={useDraftKingsHorizontal ? { ...styles.topbar, marginBottom: 0 } : styles.topbar}>
@@ -334,7 +334,7 @@ export default function App() {
           </div>
         </div>
 
-        {!useDraftKingsHorizontal ? (
+        {!useDraftKingsHorizontal && !isUnderdog ? (
           <>
             <NextBestPick
               roster={roster as RosterPick[]}
@@ -383,28 +383,44 @@ export default function App() {
             />
           </div>
         </>
+      ) : isUnderdog && useThreeColumnUnderdog ? (
+        <>
+          <div style={styles.underdogColumn}>
+            <NextBestPick
+              roster={roster as RosterPick[]}
+              available={available as Player[]}
+              customRankings={rankingsData ? rankingsData.rankings : null}
+              adapter={adapter}
+              userPickNumber={userPickNumber}
+            />
+          </div>
+          <div style={styles.underdogColumn}>
+            <CapitalChart
+              roster={roster as RosterPick[]}
+              userPickNumber={userPickNumber}
+              adapter={adapter}
+              fillHeight
+            />
+          </div>
+          <div style={styles.matchupsColumn}>
+            <OpponentsTable
+              roster={roster as RosterPick[]}
+              available={available as Player[]}
+              maxVisibleRows={5}
+              compactRows
+            />
+          </div>
+        </>
       ) : (
         <div style={isUnderdog ? styles.matchupsColumn : undefined}>
           <OpponentsTable
             roster={roster as RosterPick[]}
             available={available as Player[]}
-            limit={useThreeColumnUnderdog ? 4 : undefined}
-            maxVisibleRows={isUnderdog ? (useThreeColumnUnderdog ? 4 : 6) : undefined}
+            limit={useThreeColumnUnderdog ? 5 : undefined}
+            maxVisibleRows={isUnderdog ? 5 : undefined}
           />
         </div>
       )}
-      {!useDraftKingsHorizontal && useThreeColumnUnderdog ? (
-        <div style={styles.matchupsColumn}>
-          <OpponentsTable
-            roster={roster as RosterPick[]}
-            available={available as Player[]}
-            startIndex={4}
-            maxVisibleRows={4}
-            showHeader={false}
-            emptyMessage="More picks will appear here."
-          />
-        </div>
-      ) : null}
       {rankingsOpen ? (
         <div style={styles.modalBackdrop} role="presentation" onClick={() => setRankingsOpen(false)}>
           <div style={styles.modal} role="dialog" aria-modal="true" aria-labelledby="dh-rankings-title" onClick={(event) => event.stopPropagation()}>
@@ -517,6 +533,14 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: 1424,
     margin: '0 auto',
     minWidth: 0,
+  },
+  underdogHeader: {
+    gridColumn: '1 / -1',
+    minWidth: 0,
+  },
+  underdogColumn: {
+    minWidth: 0,
+    maxWidth: 520,
   },
   appWideTwo: {
     display: 'grid',

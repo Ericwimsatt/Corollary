@@ -10,7 +10,7 @@ import {
 } from '../rankings/next-best-pick';
 import { color, positionColor, styles as sharedStyles } from './styles';
 
-const ROW_HEIGHT = 22;
+const ROW_HEIGHT = 24;
 const HEADER_HEIGHT = 19;
 const VISIBLE_ROWS = 5;
 
@@ -110,7 +110,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     borderCollapse: 'separate',
     borderSpacing: 0,
-    fontSize: 10.5,
+    fontSize: 12,
   },
   th: {
     textAlign: 'left',
@@ -156,14 +156,14 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
   },
   pos: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: 900,
     lineHeight: 1,
     flex: '0 0 auto',
   },
   playerName: {
-    fontSize: 11,
-    fontWeight: 900,
+    fontSize: 12,
+    fontWeight: 600,
     lineHeight: 1.15,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -173,14 +173,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
   playerTeam: {
     color: color.faint,
-    fontSize: 9.5,
-    fontWeight: 750,
+    fontSize: 11,
+    fontWeight: 400,
     whiteSpace: 'nowrap',
     flex: '0 0 auto',
   },
   num: {
-    fontWeight: 850,
-    fontSize: 11,
+    fontWeight: 600,
+    fontSize: 12,
     fontVariantNumeric: 'tabular-nums',
     whiteSpace: 'nowrap',
   },

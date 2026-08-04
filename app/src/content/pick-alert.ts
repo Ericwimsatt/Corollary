@@ -12,7 +12,7 @@ export function playPickAlertSound(): void {
       oscillator.type = 'sine';
       oscillator.frequency.setValueAtTime(880, start);
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.18, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(1, start + 0.015);
       gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.22);
 
       oscillator.connect(gain);

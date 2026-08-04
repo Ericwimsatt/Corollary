@@ -52,20 +52,36 @@ const refresh = Effect.gen(function*() {
   const draftedObservation = observations.draftedPlayers;
 
   yield* availableStore.merge(availableObservation);
-  yield* draftedStore.merge(draftedObservation);
+  const catalog = yield* availableStore.getCatalog;
+  // Some platforms expose only an abbreviated name in the draft feed. Resolve
+  // it against the persistent catalog here so every adapter can emit the same
+  // thin observation shape without owning identity or storage policy.
+  const canonicalDraftedObservation = draftedObservation.map((event) => {
+    const match = findMatchingPlayer(catalog, event);
+    return match
+      ? {
+          ...event,
+          sourcePlayerId: event.sourcePlayerId ?? match.sourcePlayerId ?? null,
+          name: match.name,
+          team: match.team,
+          position: match.position,
+        }
+      : event;
+  });
+  yield* draftedStore.merge(canonicalDraftedObservation);
   const drafted = yield* draftedStore.getAll;
   yield* availableStore.learnDraftedPlayers(drafted);
-  const catalog = yield* availableStore.getCatalog;
-  const inferredRoster = rosterFromDraftEvents(drafted, catalog, userPickNumber, adapter.teamCount);
+  const updatedCatalog = yield* availableStore.getCatalog;
+  const inferredRoster = rosterFromDraftEvents(drafted, updatedCatalog, userPickNumber, adapter.teamCount);
   // Draft events carry the exact pick; the roster DOM fills any missing rows/details.
   const roster = mergeRosters(inferredRoster, rosterObservation);
 
   const availableByKey = new Map(
-    catalog.map((player) => [playerKey(player), player]),
+    updatedCatalog.map((player) => [playerKey(player), player]),
   );
   const rosterWithByes = roster.map((pick) => {
     if (pick.byeWeek !== 0) return pick;
-    const match = availableByKey.get(playerKey(pick)) ?? findMatchingPlayer(catalog, pick);
+    const match = availableByKey.get(playerKey(pick)) ?? findMatchingPlayer(updatedCatalog, pick);
     return match?.byeWeek ? { ...pick, byeWeek: match.byeWeek } : pick;
   });
 
@@ -82,7 +98,7 @@ const refresh = Effect.gen(function*() {
   const rosterForAnnotations = mergeRosters(rosterWithByes, cachedRoster);
 
   yield* annotateStackTargets(adapter, rosterForAnnotations, availableObservation);
-  yield* annotateByeWeekCounts(adapter, rosterForAnnotations, availableObservation, catalog);
+  yield* annotateByeWeekCounts(adapter, rosterForAnnotations, availableObservation, updatedCatalog);
   return { adapter, draftId, roster: rosterForAnnotations, available: cachedAvailable, drafted, userPickNumber, isUserOnClock } as const;
 });
 

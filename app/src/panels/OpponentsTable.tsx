@@ -11,7 +11,7 @@ import { playerKey } from '../content/player-key';
 const MATCHUP_HEADER_HEIGHT = 21;
 const MATCHUP_ROW_HEIGHT = 34;
 const COMPACT_MATCHUP_HEADER_HEIGHT = 18;
-const COMPACT_MATCHUP_ROW_HEIGHT = 25;
+const COMPACT_MATCHUP_ROW_HEIGHT = 24;
 
 interface Props {
   roster: RosterPick[];
@@ -104,7 +104,7 @@ function Pill({ abbr, players, compact = false }: { abbr: string; players: Playe
           {top.map((p, i) => (
             <div key={i} style={styles.tooltipRow}>
               <span>
-                <span style={{ ...styles.pos, color: positionColor[p.position] }}>{p.position}</span> {p.name}
+                <span style={{ ...styles.tooltipPos, color: positionColor[p.position] }}>{p.position}</span> {p.name}
               </span>
               <span style={styles.tooltipAdp}>{p.adp.toFixed(1)}</span>
             </div>
@@ -191,7 +191,7 @@ export default function OpponentsTable({
       aria-label="Playoff opponents"
     >
       {showHeader ? (
-        <div style={sharedStyles.sectionHeader}>
+        <div style={styles.tableSectionHeader}>
           <h3 style={sharedStyles.heading}>{title}</h3>
         </div>
       ) : null}
@@ -220,23 +220,11 @@ export default function OpponentsTable({
                   <tr key={`${playerKey(pick)}-${pick.overallPick}-${startIndex + i}`}>
                     <td style={compactRows ? { ...styles.td, ...styles.tdCompact } : styles.td}>
                       <div style={styles.playerCell}>
-                        <div style={styles.playerText}>
-                          {compactRows ? (
-                            <div style={styles.compactPlayerLine}>
-                              <span style={{ ...styles.playerNameCompact, color: positionColor[pick.position] }}>
-                                {pick.name}
-                              </span>
-                              {pick.team ? <span style={styles.compactTeam}>· {pick.team}</span> : null}
-                            </div>
-                          ) : (
-                            <>
-                              <div style={{ ...styles.playerName, color: positionColor[pick.position] }}>{pick.name}</div>
-                              <div style={styles.playerTeam}>
-                                {pick.team ? getTeamInfo(pick.team)?.name ?? pick.team : pick.team}
-                              </div>
-                            </>
-                          )}
-                        </div>
+                        <span style={{ ...styles.pos, color: positionColor[pick.position] }}>{pick.position}</span>
+                        <span style={styles.playerIdentity}>
+                          <span style={styles.playerName}>{pick.name}</span>
+                          {pick.team ? <span style={styles.playerTeam}>· {pick.team}</span> : null}
+                        </span>
                       </div>
                     </td>
                     <td style={compactRows ? { ...styles.td, ...styles.tdCompact } : styles.td}>
@@ -262,6 +250,8 @@ export default function OpponentsTable({
 const styles: Record<string, React.CSSProperties> = {
   container: {
     ...sharedStyles.section,
+    paddingTop: 0,
+    borderTop: 0,
   },
   containerFlush: {
     paddingTop: 0,
@@ -273,6 +263,10 @@ const styles: Record<string, React.CSSProperties> = {
     borderSpacing: 0,
     fontSize: 10.5,
   },
+  tableSectionHeader: {
+    ...sharedStyles.sectionHeader,
+    marginBottom: 2,
+  },
   tableScroll: {
     overflowY: 'auto',
     overflowX: 'hidden',
@@ -282,7 +276,7 @@ const styles: Record<string, React.CSSProperties> = {
     textAlign: 'left',
     color: color.muted,
     fontWeight: 800,
-    padding: '0 5px 5px',
+    padding: '0 5px 3px',
     borderBottom: `1px solid ${color.line}`,
     fontSize: 9,
   },
@@ -293,56 +287,42 @@ const styles: Record<string, React.CSSProperties> = {
     verticalAlign: 'middle',
   },
   tdCompact: {
-    padding: '2px 5px',
+    padding: '3px 5px',
   },
   playerCell: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
+    gap: 5,
     minWidth: 0,
   },
-  playerText: {
-    minWidth: 0,
-  },
-  playerName: {
-    fontSize: 12,
-    fontWeight: 900,
-    lineHeight: 1.15,
-    maxWidth: 126,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  playerNameCompact: {
-    fontSize: 10.5,
-    fontWeight: 900,
-    lineHeight: 1.05,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    minWidth: 0,
-  },
-  playerTeam: {
-    color: color.muted,
-    fontSize: 9,
-    fontWeight: 650,
-    lineHeight: 1.15,
-    maxWidth: 126,
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-  },
-  compactPlayerLine: {
+  playerIdentity: {
     display: 'flex',
     alignItems: 'baseline',
     gap: 3,
     minWidth: 0,
+    flex: '1 1 auto',
+    overflow: 'hidden',
   },
-  compactTeam: {
-    color: color.muted,
-    fontSize: 8.5,
-    fontWeight: 700,
+  pos: {
+    fontSize: 12,
+    fontWeight: 900,
     lineHeight: 1,
+    flex: '0 0 auto',
+  },
+  playerName: {
+    fontSize: 12,
+    fontWeight: 600,
+    lineHeight: 1.15,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
+    flex: '0 1 auto',
+  },
+  playerTeam: {
+    color: color.faint,
+    fontSize: 11,
+    fontWeight: 400,
     whiteSpace: 'nowrap',
     flex: '0 0 auto',
   },
@@ -360,7 +340,7 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: 'inset 0 0 0 1px rgba(255, 255, 255, 0.12)',
   },
   pillCompact: {
-    minHeight: 20,
+    minHeight: 16,
   },
   pillText: {
     display: 'block',
@@ -373,7 +353,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontVariantNumeric: 'tabular-nums',
   },
   pillTextCompact: {
-    padding: '4px 6px 3px',
+    padding: '2px 6px 1px',
     fontSize: 9.5,
   },
   pillEndcap: {
@@ -383,7 +363,7 @@ const styles: Record<string, React.CSSProperties> = {
     flex: '0 0 9px',
   },
   pillEndcapCompact: {
-    minHeight: 18,
+    minHeight: 14,
   },
   missingOpponent: {
     color: color.faint,
@@ -432,7 +412,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 750,
     fontVariantNumeric: 'tabular-nums',
   },
-  pos: {
+  tooltipPos: {
     fontSize: 10,
     fontWeight: 900,
     marginRight: 2,

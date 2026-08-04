@@ -36,11 +36,11 @@ export const SCORE_WEIGHTS = {
 /** Maximum magnitude for normalized need scores. */
 export const NEED_CLAMP = 50;
 export const NEED_ENABLED_PICK = 25;
-export const TARGET_MIN_COUNT: ReadonlyMap<Position, readonly [number, number]> = new Map([
-  ['QB', [2, 110]],
-  ['TE', [2, 150]],
-  ['RB', [5, 190]],
-  ['WR', [7, 190]],
+export const TARGET_MIN_COUNT: ReadonlyMap<Position, ReadonlyArray<readonly [number, number]>> = new Map([
+  ['QB', [[2, 110]]],
+  ['TE', [[2, 150]]],
+  ['RB', [[5, 190]]],
+  ['WR', [[3, 60], [7, 190]]],
 ]);
 export const POSITION_COUNT_CAP: ReadonlyMap<Position, number> = new Map([
   ['QB', 3],
@@ -123,7 +123,7 @@ export function rankNextBestPicks(input: NextBestPickInput): ScoredPlayer[] {
 
   const myRankIndex = buildMyRankIndex(customRankings);
   const rosterInfo = collectRosterTeams(roster);
-  const { rosterTeams, qbTeams } = rosterInfo;
+  const { rosterTeams } = rosterInfo;
   const needByPosition = new Map<Position, PositionNeed>();
   for (const n of positionNeeds) needByPosition.set(n.position, n);
 
@@ -136,7 +136,7 @@ export function rankNextBestPicks(input: NextBestPickInput): ScoredPlayer[] {
       rank: 210 - myRank,
       adp: 210 - player.adp,
       need: scoreNeedComponent(player, need, currentPick),
-      stack: scoreStackComponent(player, rosterTeams, qbTeams),
+      stack: scoreStackComponent(player, roster),
       week17: scoreWeek17Component(player, rosterTeams),
     };
     const score =
@@ -210,10 +210,12 @@ function scoreNeedComponent(
   if (deficit > 0 && LATE_NEED_POSITIONS.has(player.position)) {
     if (draftPick < LATE_NEED_ENABLED_PICK) return 0;
   }
-  const [target_count, due_by_pick] = TARGET_MIN_COUNT.get(player.position) ?? [0, 0];
+  const milestones = TARGET_MIN_COUNT.get(player.position) ?? [];
   let count_need = 0;
-  if (draftPick > due_by_pick && need.count < target_count){
-    count_need = (target_count - need.count) / target_count;
+  for (const [target_count, due_by_pick] of milestones) {
+    if (draftPick > due_by_pick && need.count < target_count) {
+      count_need = Math.max(count_need, (target_count - need.count) / target_count);
+    }
   }
   const max_count = POSITION_COUNT_CAP.get(player.position) ?? 99;
   if (need.count >= max_count) return -50;
@@ -226,14 +228,24 @@ function scoreNeedComponent(
 
 function scoreStackComponent(
   player: Player,
-  rosterTeams: ReadonlySet<string>,
-  qbTeams: ReadonlySet<string>,
+  roster: ReadonlyArray<RosterPick>,
 ): number {
   const team = normalizeTeam(player.team);
   if (!team) return 0;
-  if (qbTeams.has(team)) return SCORE_WEIGHTS.stackAny + SCORE_WEIGHTS.stackQb;
-  if (rosterTeams.has(team)) return SCORE_WEIGHTS.stackAny;
-  return 0;
+  const team_matches = roster.filter((p) => normalizeTeam(p.team) === team);
+  let out = 0;
+  for (const p of team_matches) {
+    if (p.position !== player.position && p.position !== "WR") {
+      out -= SCORE_WEIGHTS.stackAny * 3;
+    } 
+    else if (p.position === "QB") {
+      out += SCORE_WEIGHTS.stackQb;
+    }
+    else {
+      out += SCORE_WEIGHTS.stackAny;
+    }
+  }
+  return out;
 }
 
 function scoreWeek17Component(
