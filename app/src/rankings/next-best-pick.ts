@@ -1,7 +1,7 @@
 import { Option } from "effect";
 import type { Player, Position, RosterPick } from "../content/types";
 import type { CustomRanking } from "./custom-rankings";
-import type { DraftPlatformAdapter } from "../content/adapters/types";
+import type { DraftPlatformAdapter, ScoringConfig } from "../content/adapters/types";
 import { getOpponents } from "../data/schedule";
 import { normalizeTeam } from "../utils/teams";
 import { playerKey } from '../content/player-key';
@@ -19,17 +19,19 @@ import { playerKey } from '../content/player-key';
  */
 
 // ----- Tunable knobs -----
+//
+// The literals below are the DraftKings-flavored baseline. They double as the
+// test-default scoring and are surfaced as the `draftKingsScoring` config.
+// Underdog gets its own `underdogScoring` config further down, where the
+// positional targets, caps, and late-draft escalation differ. Anything you
+// tweak here is what gets used when no adapter (or the DraftKings adapter) is
+// driving; adjust `underdogScoring` to retune that platform independently.
 export const SCORE_WEIGHTS = {
-  /** Weight for the ADP-vs-my-rank value component. */
   rank: 1.0,
   adpValue: .5,
-  /** Weight for the team-construction need component. */
   need: 10.0,
-  /** Bonus when a candidate shares a team with any already-rostered player. */
   stackAny: 3,
-  /** Additional bonus when that rostered teammate is a quarterback. */
   stackQb: 8,
-  /** Weight for the Week 17 opponent-correlation component. */
   week17: 3,
 } as const;
 
@@ -37,13 +39,14 @@ export const SCORE_WEIGHTS = {
 export const NEED_CLAMP = 50;
 export const NEED_ENABLED_PICK = 25;
 export const TARGET_MIN_COUNT: ReadonlyMap<Position, ReadonlyArray<readonly [number, number]>> = new Map([
-  ['QB', [[2, 110]]],
+  // DraftKings drafts run longer, so we want a third QB in the bag by pick 110.
+  ['QB', [[3, 110]]],
   ['TE', [[2, 150]]],
   ['RB', [[5, 190]]],
   ['WR', [[3, 60], [7, 190]]],
 ]);
 export const POSITION_COUNT_CAP: ReadonlyMap<Position, number> = new Map([
-  ['QB', 3],
+  ['QB', 4],
   ['TE', 4],
   ['RB', 7],
   ['WR', 9],
@@ -58,10 +61,73 @@ export const POSITIONAL_NEED_SCALE: ReadonlyMap<Position, number> = new Map([
 export const LATE_NEED_POSITIONS: ReadonlySet<Position> = new Set(['QB', 'TE']);
 /** Picks before this overall pick do not receive positive QB/TE need weight. */
 export const LATE_NEED_ENABLED_PICK = 90;
+/**
+ * Pick at which the late-draft need scaling kicks in (hard cliff). Before this
+ * pick the multiplier is 1; at this pick it jumps to `NEED_LATE_SCALE_START`.
+ */
+export const NEED_LATE_SCALE_START_PICK = 90;
+/** Pick at which the late-draft need scaling reaches its final value. */
+export const NEED_LATE_SCALE_END_PICK = 180;
+/** Need multiplier applied starting at `NEED_LATE_SCALE_START_PICK`. */
+export const NEED_LATE_SCALE_START = 2;
+/** Need multiplier reached at `NEED_LATE_SCALE_END_PICK` (and held after). */
+export const NEED_LATE_SCALE_END = 3;
 /** Default ADP window used to scale the ADP-vs-rank delta. */
 export const RANK_BASE_ADAPTS_TO = 50;
 export const DEFAULT_UPCOMING_POOL = 30;
 export const DEFAULT_TOP_N = 15;
+
+/**
+ * DraftKings scoring config. DraftKings snake drafts run 20 rounds, so the
+ * baseline wants a third QB and the late-draft need escalation stretches out
+ * to pick 180 (round 15).
+ */
+export const draftKingsScoring: ScoringConfig = {
+  weights: SCORE_WEIGHTS,
+  needClamp: NEED_CLAMP,
+  needEnabledPick: NEED_ENABLED_PICK,
+  targetMinCount: TARGET_MIN_COUNT,
+  positionCountCap: POSITION_COUNT_CAP,
+  positionalNeedScale: POSITIONAL_NEED_SCALE,
+  lateNeedPositions: LATE_NEED_POSITIONS,
+  lateNeedEnabledPick: LATE_NEED_ENABLED_PICK,
+  needLateScaleStartPick: NEED_LATE_SCALE_START_PICK,
+  needLateScaleEndPick: NEED_LATE_SCALE_END_PICK,
+  needLateScaleStart: NEED_LATE_SCALE_START,
+  needLateScaleEnd: NEED_LATE_SCALE_END,
+  rankBaseAdaptsTo: RANK_BASE_ADAPTS_TO,
+  defaultUpcomingPool: DEFAULT_UPCOMING_POOL,
+  defaultTopN: DEFAULT_TOP_N,
+};
+
+/**
+ * Underdog scoring config. Underdog contests are 18 rounds, so positional
+ * targets are tighter (want two QBs, eight WRs) and the late-draft need
+ * escalation compresses to pick 162 (round 13.5).
+ */
+export const underdogScoring: ScoringConfig = {
+  ...draftKingsScoring,
+  targetMinCount: new Map<Position, ReadonlyArray<readonly [number, number]>>([
+    ['QB', [[2, 110]]],
+    ['TE', [[2, 150]]],
+    ['RB', [[5, 190]]],
+    ['WR', [[3, 60], [7, 190]]],
+  ]),
+  positionCountCap: new Map<Position, number>([
+    ['QB', 3],
+    ['TE', 4],
+    ['RB', 7],
+    ['WR', 8],
+  ]),
+  needLateScaleEndPick: 162,
+};
+
+/**
+ * Default scoring used when a caller does not supply one (e.g. unit tests that
+ * exercise the formula directly). Mirrors the DraftKings baseline so the
+ * behaviors encoded in the test suite stay anchored to a single platform.
+ */
+export const DEFAULT_SCORING: ScoringConfig = draftKingsScoring;
 
 export interface PositionNeed {
   position: Position;
@@ -78,6 +144,18 @@ export interface ScoreBreakdown {
   week17: number;
 }
 
+/**
+ * One row in the per-factor score breakdown shown alongside a recommendation.
+ * `raw` is the pre-weight component value, `scale` is the weight applied to it,
+ * and `scaled` is `raw * scale` — the actual points contributed to `score`.
+ */
+export interface ScoreContribution {
+  label: string;
+  raw: number;
+  scale: number;
+  scaled: number;
+}
+
 /** Count of rostered players connected to a candidate via team overlap. */
 export interface StackDetail {
   /** Total rostered players on the connected team. */
@@ -91,6 +169,8 @@ export interface ScoredPlayer {
   myRank: number;
   score: number;
   breakdown: ScoreBreakdown;
+  /** Per-factor contribution rows for the recommendation breakdown table. */
+  contributions: ScoreContribution[];
   /** Rostered teammates on the candidate's team. */
   stackDetail: StackDetail;
   /** Rostered players on the candidate's Week 17 opponent team. */
@@ -102,6 +182,13 @@ export interface NextBestPickInput {
   available: ReadonlyArray<Player>;
   customRankings: ReadonlyArray<CustomRanking> | null;
   positionNeeds: ReadonlyArray<PositionNeed>;
+  /**
+   * Platform-specific scoring knobs. Pass `adapter.scoring` from the active
+   * draft platform so positional targets, caps, and late-draft escalation
+   * match the contest format. Defaults to `DEFAULT_SCORING` (DraftKings
+   * baseline) so direct callers and existing tests behave unchanged.
+   */
+  scoring?: ScoringConfig;
   /** Current overall draft pick; used to gate late-round-only need boosts. */
   currentPick?: number;
   upcomingPoolSize?: number;
@@ -116,9 +203,10 @@ export function rankNextBestPicks(input: NextBestPickInput): ScoredPlayer[] {
     available,
     customRankings,
     positionNeeds,
+    scoring = DEFAULT_SCORING,
     currentPick,
-    upcomingPoolSize = DEFAULT_UPCOMING_POOL,
-    topN = DEFAULT_TOP_N,
+    upcomingPoolSize = scoring.defaultUpcomingPool,
+    topN = scoring.defaultTopN,
   } = input;
 
   const myRankIndex = buildMyRankIndex(customRankings);
@@ -128,6 +216,7 @@ export function rankNextBestPicks(input: NextBestPickInput): ScoredPlayer[] {
   for (const n of positionNeeds) needByPosition.set(n.position, n);
 
   const upcoming = pickUpcomingPool(available, upcomingPoolSize);
+  const w = scoring.weights;
 
   const scored = upcoming.map((player) => {
     const myRank = resolveMyRank(player, myRankIndex);
@@ -135,21 +224,24 @@ export function rankNextBestPicks(input: NextBestPickInput): ScoredPlayer[] {
     const breakdown: ScoreBreakdown = {
       rank: 210 - myRank,
       adp: 210 - player.adp,
-      need: scoreNeedComponent(player, need, currentPick),
-      stack: scoreStackComponent(player, roster),
+      need: scoreNeedComponent(player, need, currentPick, scoring),
+      stack: scoreStackComponent(player, roster, scoring),
       week17: scoreWeek17Component(player, rosterTeams),
     };
-    const score =
-      SCORE_WEIGHTS.rank * breakdown.rank +
-      SCORE_WEIGHTS.adpValue * breakdown.adp +
-      SCORE_WEIGHTS.need * breakdown.need +
-      breakdown.stack +
-      SCORE_WEIGHTS.week17 * breakdown.week17;
+    const contributions: ScoreContribution[] = [
+      { label: 'Rank', raw: breakdown.rank, scale: w.rank, scaled: w.rank * breakdown.rank },
+      { label: 'ADP', raw: breakdown.adp, scale: w.adpValue, scaled: w.adpValue * breakdown.adp },
+      { label: 'Need', raw: breakdown.need, scale: w.need, scaled: w.need * breakdown.need },
+      { label: 'Stack', raw: breakdown.stack, scale: 1, scaled: breakdown.stack },
+      { label: 'Wk17', raw: breakdown.week17, scale: w.week17, scaled: w.week17 * breakdown.week17 },
+    ];
+    const score = contributions.reduce((sum, item) => sum + item.scaled, 0);
     return {
       player,
       myRank,
       score,
       breakdown,
+      contributions,
       stackDetail: stackDetailFor(player, rosterInfo),
       week17Detail: week17DetailFor(player, rosterInfo),
     };
@@ -193,7 +285,8 @@ function overallFromUserPick(rosterIndex: number, userPick: number, teamCount: n
 function scoreNeedComponent(
   player: Player,
   need: PositionNeed | undefined,
-  currentPick?: number,
+  currentPick: number | undefined,
+  scoring: ScoringConfig,
 ): number {
   if (!need || need.target <= 0) return 0;
   const draftPick = currentPick && currentPick > 0
@@ -201,48 +294,59 @@ function scoreNeedComponent(
     : player.adp > 0
       ? player.adp
       : 9999;
-  if (draftPick < NEED_ENABLED_PICK) return 0;
+  if (draftPick < scoring.needEnabledPick) return 0;
   const deficit = (need.target - need.current) / need.target;
 
   // QB and TE only receive positive need weight once the draft is past the
   // early rounds. Over-spending on those positions still gets punished at any
   // point (the negative side is always allowed).
-  if (deficit > 0 && LATE_NEED_POSITIONS.has(player.position)) {
-    if (draftPick < LATE_NEED_ENABLED_PICK) return 0;
+  if (deficit > 0 && scoring.lateNeedPositions.has(player.position)) {
+    if (draftPick < scoring.lateNeedEnabledPick) return 0;
   }
-  const milestones = TARGET_MIN_COUNT.get(player.position) ?? [];
+  const milestones = scoring.targetMinCount.get(player.position) ?? [];
   let count_need = 0;
   for (const [target_count, due_by_pick] of milestones) {
     if (draftPick > due_by_pick && need.count < target_count) {
       count_need = Math.max(count_need, (target_count - need.count) / target_count);
     }
   }
-  const max_count = POSITION_COUNT_CAP.get(player.position) ?? 99;
-  if (need.count >= max_count) return -50;
+  const max_count = scoring.positionCountCap.get(player.position) ?? 99;
+  if (need.count >= max_count) return -scoring.needClamp;
 
   const need_index = deficit + count_need;
-  const position_scale = POSITIONAL_NEED_SCALE.get(player.position) ?? 1;
+  const position_scale = scoring.positionalNeedScale.get(player.position) ?? 1;
 
-  return need_index * position_scale;
+  return need_index * position_scale * needLateScale(draftPick, scoring);
+}
+
+/**
+ * Late-draft need multiplier. Stays at 1 until `needLateScaleStartPick`,
+ * jumps to `needLateScaleStart` (hard cliff), then ramps linearly to
+ * `needLateScaleEnd` at `needLateScaleEndPick` and holds thereafter.
+ */
+function needLateScale(draftPick: number, scoring: ScoringConfig): number {
+  if (draftPick < scoring.needLateScaleStartPick) return 1;
+  if (draftPick >= scoring.needLateScaleEndPick) return scoring.needLateScaleEnd;
+  const span = scoring.needLateScaleEndPick - scoring.needLateScaleStartPick;
+  const t = (draftPick - scoring.needLateScaleStartPick) / span;
+  return scoring.needLateScaleStart + (scoring.needLateScaleEnd - scoring.needLateScaleStart) * t;
 }
 
 function scoreStackComponent(
   player: Player,
   roster: ReadonlyArray<RosterPick>,
+  scoring: ScoringConfig,
 ): number {
   const team = normalizeTeam(player.team);
   if (!team) return 0;
   const team_matches = roster.filter((p) => normalizeTeam(p.team) === team);
   let out = 0;
   for (const p of team_matches) {
-    if (p.position !== player.position && p.position !== "WR") {
-      out -= SCORE_WEIGHTS.stackAny * 3;
-    } 
-    else if (p.position === "QB") {
-      out += SCORE_WEIGHTS.stackQb;
-    }
-    else {
-      out += SCORE_WEIGHTS.stackAny;
+    if (p.position === player.position && p.position !== "WR") {
+      out -= scoring.weights.stackAny * 3;
+    } else {
+      out += scoring.weights.stackAny;
+      if (p.position === "QB") out += scoring.weights.stackQb;
     }
   }
   return out;

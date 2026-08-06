@@ -36,6 +36,7 @@ export default function NextBestPick({
       available,
       customRankings,
       positionNeeds,
+      scoring: adapter.scoring,
     });
   }, [roster, available, customRankings, adapter, userPickNumber]);
 

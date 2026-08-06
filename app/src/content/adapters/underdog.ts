@@ -2,6 +2,7 @@ import { Effect } from "effect";
 import type { DraftedPlayerObservation, Player, Position, RosterPick } from "../types";
 import type { AvailablePlayerRow, DraftPlatformAdapter } from "./types";
 import { findMatchingPlayer } from '../player-key';
+import { underdogScoring } from "../../rankings/next-best-pick";
 
 const TEAMS = 12;
 const DRAFT_ID_PATTERN = /\/draft\/([^/?#]+)/;
@@ -288,6 +289,7 @@ export const underdogAdapter: DraftPlatformAdapter = {
     { pos: ['TE'], label: 'TE', maxCapital: 3200 },
   ],
   draftCapital,
+  scoring: underdogScoring,
   getDraftId: Effect.sync(() => {
     const match = window.location.pathname.match(DRAFT_ID_PATTERN);
     return match ? `underdog:${match[1]}` : `underdog:${window.location.hostname}${window.location.pathname}`;

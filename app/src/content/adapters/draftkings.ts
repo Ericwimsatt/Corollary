@@ -1,6 +1,7 @@
 import { Effect } from "effect";
 import type { DraftedPlayerObservation, Player, Position, RosterPick } from "../types";
 import type { AvailablePlayerRow, DraftPlatformAdapter } from "./types";
+import { draftKingsScoring } from "../../rankings/next-best-pick";
 
 const ACTIVE_USER = '[class*="UserCard_is-active-user"]';
 const TEAMS = 12;
@@ -355,12 +356,13 @@ export const draftKingsAdapter: DraftPlatformAdapter = {
   teamCount: TEAMS,
   roundCount: 20,
   capitalCeilings: [
-    { pos: ['QB'], label: 'QB', maxCapital: 3000 },
-    { pos: ['RB'], label: 'RB', maxCapital: 9000 },
-    { pos: ['WR'], label: 'WR', maxCapital: 13000 },
-    { pos: ['TE'], label: 'TE', maxCapital: 3000 },
+    { pos: ['QB'], label: 'QB', maxCapital: 2300 },
+    { pos: ['RB'], label: 'RB', maxCapital: 8000 },
+    { pos: ['WR'], label: 'WR', maxCapital: 11000 },
+    { pos: ['TE'], label: 'TE', maxCapital: 2700 },
   ],
   draftCapital,
+  scoring: draftKingsScoring,
   getDraftId: Effect.sync(() => {
     const match = window.location.pathname.match(DRAFT_ID_PATTERN);
     return match ? `draftkings:${match[1]}` : 'draftkings:unknown';

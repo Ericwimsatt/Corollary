@@ -18,6 +18,12 @@ import {
   saveThemeSettings,
   type ThemeSettings,
 } from '../settings/theme-settings';
+import {
+  getCachedPlatformSetting,
+  getPlatformSetting,
+  savePlatformSetting,
+  type PlatformOverride,
+} from '../settings/platform-settings';
 import CapitalChart from './CapitalChart';
 import NextBestPick from './NextBestPick';
 import OpponentsTable from './OpponentsTable';
@@ -57,6 +63,7 @@ export default function App() {
   const [rankingsMessage, setRankingsMessage] = useState('Paste a CSV with name, position, team, and rank columns.');
   const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const [themeSettings, setThemeSettings] = useState<ThemeSettings>(defaultThemeSettings);
+  const [platformOverride, setPlatformOverride] = useState<PlatformOverride>(() => getCachedPlatformSetting());
   const settingsRef = useRef<HTMLSpanElement | null>(null);
   const pickAlertRef = useRef(new PickAlert());
 
@@ -127,6 +134,15 @@ export default function App() {
 
   useEffect(() => {
     getThemeSettings().then(setThemeSettings);
+  }, []);
+
+  useEffect(() => {
+    getPlatformSetting().then((loaded) => {
+      setPlatformOverride((current) => {
+        if (loaded !== current) refreshRankingsAnnotations();
+        return loaded;
+      });
+    });
   }, []);
 
   useEffect(() => {
@@ -251,6 +267,13 @@ export default function App() {
     saveThemeSettings(defaultThemeSettings).catch(() => undefined);
   };
 
+  const changePlatform = (next: PlatformOverride) => {
+    if (next === platformOverride) return;
+    setPlatformOverride(next);
+    savePlatformSetting(next).catch(() => undefined);
+    refreshRankingsAnnotations();
+  };
+
   const appStyle = useDraftKingsHorizontal
     ? styles.appDraftKingsHorizontal
     : isUnderdog
@@ -307,6 +330,9 @@ export default function App() {
                 </button>
                 {settingsOpen ? (
                   <div id="dh-settings-menu" style={styles.settingsMenu}>
+                    <div style={styles.settingsTitle}>Platform</div>
+                    <PlatformToggle value={platformOverride} onChange={changePlatform} />
+                    <div style={styles.settingsDivider} />
                     <div style={styles.settingsTitle}>Theme</div>
                     <ThemeRow
                       label="DraftKings"
@@ -474,6 +500,34 @@ function SettingsIcon() {
       <path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" />
       <path d="M19.4 13.4c.1-.5.1-.9.1-1.4s0-.9-.1-1.4l2-1.5-2-3.4-2.4 1a8 8 0 0 0-2.3-1.3L14.4 3h-4.8l-.4 2.4a8 8 0 0 0-2.3 1.3l-2.4-1-2 3.4 2 1.5c-.1.5-.1.9-.1 1.4s0 .9.1 1.4l-2 1.5 2 3.4 2.4-1a8 8 0 0 0 2.3 1.3l.4 2.4h4.8l.4-2.4a8 8 0 0 0 2.3-1.3l2.4 1 2-3.4-2.1-1.5Z" />
     </svg>
+  );
+}
+
+function PlatformToggle({
+  value,
+  onChange,
+}: {
+  value: PlatformOverride;
+  onChange: (next: PlatformOverride) => void;
+}) {
+  const options: ReadonlyArray<{ id: PlatformOverride; label: string }> = [
+    { id: 'auto', label: 'Auto' },
+    { id: 'draftkings', label: 'DraftKings' },
+    { id: 'underdog', label: 'Underdog' },
+  ];
+  return (
+    <div style={styles.platformToggle}>
+      {options.map((opt) => (
+        <button
+          key={opt.id}
+          type="button"
+          style={value === opt.id ? { ...styles.segmentButton, ...styles.segmentButtonActive } : styles.segmentButton}
+          onClick={() => onChange(opt.id)}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -696,6 +750,14 @@ const styles: Record<string, React.CSSProperties> = {
   segmentedControl: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
+    padding: 2,
+    border: `1px solid ${color.line}`,
+    borderRadius: 8,
+    background: color.panelSoft,
+  },
+  platformToggle: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr 1fr',
     padding: 2,
     border: `1px solid ${color.line}`,
     borderRadius: 8,

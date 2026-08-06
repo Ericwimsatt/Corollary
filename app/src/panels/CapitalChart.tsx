@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { RosterPick, Position } from '../content/types';
 import type { DraftPlatformAdapter } from '../content/adapters';
 import { color, positionColor } from './styles';
@@ -8,6 +9,14 @@ interface Props {
   userPickNumber: number;
   adapter: DraftPlatformAdapter;
   fillHeight?: boolean;
+  /** Render per-player segments inside each bar with hover tooltips. */
+  segmented?: boolean;
+}
+
+interface PlayerSegment {
+  pick: RosterPick;
+  capital: number;
+  overall: number;
 }
 
 function overallFromUserPick(rosterIndex: number, userPick: number, teamCount: number): number {
@@ -21,6 +30,8 @@ interface PosGroup {
   capital: number;
   count: number;
   pct: number;
+  maxCapital: number;
+  segments: PlayerSegment[];
 }
 
 function formatCapital(val: number): string {
@@ -28,27 +39,24 @@ function formatCapital(val: number): string {
   return String(val);
 }
 
-export default function CapitalChart({ roster, userPickNumber, adapter, fillHeight = false }: Props) {
+export default function CapitalChart({ roster, userPickNumber, adapter, fillHeight = false, segmented = false }: Props) {
   const groups: PosGroup[] = adapter.capitalCeilings.map((g) => {
     const players = roster.filter((p) => g.pos.includes(p.position));
-    const capital = players.reduce(
-      (sum, p) => {
-        // The chart receives this user's picks in draft order. DraftKings' overallPick
-        // is only the row index within its roster table, so use the roster order for
-        // both adapters instead of treating that value as a league-wide pick.
-        const rosterIndex = roster.indexOf(p);
-        const pk = overallFromUserPick(rosterIndex, userPickNumber, adapter.teamCount);
-        const cap = adapter.draftCapital(pk);
-        return sum + cap;
-      },
-      0
-    );
+    const segments: PlayerSegment[] = players.map((p) => {
+      const rosterIndex = roster.indexOf(p);
+      const pk = overallFromUserPick(rosterIndex, userPickNumber, adapter.teamCount);
+      const cap = adapter.draftCapital(pk);
+      return { pick: p, capital: cap, overall: pk };
+    });
+    const capital = segments.reduce((sum, s) => sum + s.capital, 0);
     const pct = (capital / g.maxCapital) * 100;
     return {
       label: g.label,
       capital,
       count: players.length,
       pct,
+      maxCapital: g.maxCapital,
+      segments,
     };
   });
 
@@ -65,14 +73,22 @@ export default function CapitalChart({ roster, userPickNumber, adapter, fillHeig
             <div key={g.label} style={fillHeight ? { ...styles.row, ...styles.rowFill } : styles.row}>
               <span style={{ ...styles.label, color: posColor }}>{g.label}</span>
               <div style={fillHeight ? { ...styles.barBg, ...styles.barBgFill } : styles.barBg}>
-                <div
-                  style={{
-                    ...styles.barFill,
-                    ...(fillHeight ? styles.barFillStretch : {}),
-                    width: `${Math.max(g.pct, 2)}%`,
-                    backgroundColor: posColor,
-                  }}
-                />
+                {segmented && g.segments.length > 0 ? (
+                  <SegmentedFill
+                    group={g}
+                    posColor={posColor}
+                    fillHeight={fillHeight}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      ...styles.barFill,
+                      ...(fillHeight ? styles.barFillStretch : {}),
+                      width: `${Math.max(g.pct, 2)}%`,
+                      backgroundColor: posColor,
+                    }}
+                  />
+                )}
               </div>
               <span style={styles.capital}>${formatCapital(g.capital)}</span>
               <span style={styles.count}>{g.count}</span>
@@ -81,6 +97,100 @@ export default function CapitalChart({ roster, userPickNumber, adapter, fillHeig
         })}
       </div>
     </section>
+  );
+}
+
+interface SegmentedFillProps {
+  group: PosGroup;
+  posColor: string;
+  fillHeight: boolean;
+}
+
+function SegmentedFill({ group, posColor, fillHeight }: SegmentedFillProps) {
+  const [hover, setHover] = useState<{ seg: PlayerSegment; rect: DOMRect } | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!hover) return;
+    const update = () => {
+      if (!trackRef.current) return;
+      const rect = trackRef.current.getBoundingClientRect();
+      setHover((prev) => (prev ? { ...prev, rect } : prev));
+    };
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
+    };
+  }, [hover]);
+
+  const totalCap = Math.max(group.capital, 1);
+  const trackPct = Math.min((group.capital / group.maxCapital) * 100, 100);
+
+  const tooltipContainer = trackRef.current?.getRootNode() instanceof ShadowRoot
+    ? trackRef.current.getRootNode() as ShadowRoot
+    : document.body;
+
+  const tooltipStyle: React.CSSProperties = hover
+    ? {
+        ...styles.tooltip,
+        top: hover.rect.top + hover.rect.height + 7,
+        left: hover.rect.left + hover.rect.width / 2,
+      }
+    : styles.tooltip;
+
+  return (
+    <div
+      ref={trackRef}
+      style={{
+        position: 'absolute',
+        inset: -1,
+        display: 'flex',
+        borderRadius: 999,
+        overflow: 'hidden',
+        pointerEvents: 'none',
+      }}
+    >
+      {group.segments.map((seg, i) => {
+        const segPct = (seg.capital / totalCap) * trackPct;
+        return (
+          <div
+            key={`${seg.pick.name}-${i}`}
+            style={{
+              width: `${segPct}%`,
+              height: '100%',
+              backgroundColor: posColor,
+              opacity: 1,
+              boxShadow: i > 0 ? 'inset 1px 0 0 rgba(255,255,255,.45)' : undefined,
+              pointerEvents: 'auto',
+              cursor: 'help',
+            }}
+            onMouseEnter={(e) => {
+              const target = e.currentTarget;
+              setHover({ seg, rect: target.getBoundingClientRect() });
+            }}
+            onMouseLeave={() => setHover(null)}
+          />
+        );
+      })}
+      {hover && createPortal(
+        <div style={tooltipStyle}>
+          <div style={styles.tooltipTitle}>
+            <span>{hover.seg.pick.name}</span>
+            <span style={styles.tooltipTeam}>{hover.seg.pick.team}</span>
+          </div>
+          <div style={styles.tooltipRow}>
+            <span><span style={{ ...styles.tooltipPos, color: posColor }}>{hover.seg.pick.position}</span> Pick {hover.seg.overall}</span>
+            <span style={styles.tooltipAdp}>${formatCapital(hover.seg.capital)}</span>
+          </div>
+          <div style={styles.tooltipRow}>
+            <span style={styles.tooltipMuted}>Round {hover.seg.pick.round} · ADP {hover.seg.pick.adp.toFixed(1)}</span>
+          </div>
+        </div>,
+        tooltipContainer,
+      )}
+    </div>
   );
 }
 
@@ -182,5 +292,59 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 7,
     fontSize: 10,
     fontWeight: 700,
+  },
+  tooltip: {
+    position: 'fixed',
+    transform: 'translateX(-50%)',
+    background: color.panel,
+    border: `1px solid ${color.lineStrong}`,
+    borderRadius: 8,
+    padding: '7px 9px',
+    zIndex: 2147483647,
+    whiteSpace: 'nowrap',
+    boxShadow: '0 12px 26px rgba(0, 0, 0, 0.42)',
+    pointerEvents: 'none',
+  },
+  tooltipTitle: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 14,
+    fontSize: 11.5,
+    fontWeight: 850,
+    color: color.text,
+    marginBottom: 5,
+    borderBottom: `1px solid ${color.line}`,
+    paddingBottom: 4,
+  },
+  tooltipTeam: {
+    color: color.muted,
+    fontSize: 10,
+    fontWeight: 850,
+  },
+  tooltipRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    gap: 16,
+    fontSize: 10.5,
+    fontWeight: 800,
+    color: color.text,
+    padding: '2px 0',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  tooltipAdp: {
+    color: color.text,
+    fontSize: 10.5,
+    fontWeight: 850,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  tooltipMuted: {
+    color: color.muted,
+    fontSize: 10,
+    fontWeight: 700,
+  },
+  tooltipPos: {
+    fontSize: 10,
+    fontWeight: 900,
+    marginRight: 3,
   },
 };
