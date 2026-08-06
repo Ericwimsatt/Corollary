@@ -123,6 +123,23 @@ describe('rankNextBestPicks', () => {
     expect(scored[1].breakdown.stack).toBe(0);
   });
 
+  it('gives a stack bonus when drafting a QB onto a team with a rostered skill player', () => {
+    const rosteredWr: RosterPick[] = [
+      { round: 1, pick: 1, overallPick: 1, name: 'Ja\'Marr Chase', position: 'WR', team: 'CIN', byeWeek: 6, adp: 5 },
+    ];
+    const burrow = player('Joe Burrow', 'QB', 'CIN', 55, 55);
+    const other = player('Other QB', 'QB', 'DET', 55, 55);
+    const scored = rankNextBestPicks({
+      roster: rosteredWr,
+      available: [burrow, other],
+      customRankings: null,
+      positionNeeds: [],
+    });
+    expect(scored[0].player.name).toBe('Joe Burrow');
+    expect(scored[0].breakdown.stack).toBeCloseTo(SCORE_WEIGHTS.stackAny + SCORE_WEIGHTS.stackQb);
+    expect(scored[1].breakdown.stack).toBe(0);
+  });
+
   it('gives a Week 17 bonus when the candidate faces a rostered player in Week 17', () => {
     // BAL travels to CIN in week 17 per schedule.json, so a BAL player should
     // get the week17 boost when a CIN player is rostered.

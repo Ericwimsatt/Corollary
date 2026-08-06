@@ -346,7 +346,10 @@ function scoreStackComponent(
       out -= scoring.weights.stackAny * 3;
     } else {
       out += scoring.weights.stackAny;
-      if (p.position === "QB") out += scoring.weights.stackQb;
+      // QB stack bonus applies symmetrically: when the rostered teammate is a
+      // QB, or when the candidate is the QB being stacked with a rostered
+      // skill player.
+      if (p.position === "QB" || player.position === "QB") out += scoring.weights.stackQb;
     }
   }
   return out;
