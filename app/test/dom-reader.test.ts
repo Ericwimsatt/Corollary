@@ -92,6 +92,27 @@ describe('DraftKings drafted-player sources', () => {
     })]);
   });
 
+  it('reads a board player ID from player-card markup when the headshot URL changes', () => {
+    document.body.innerHTML = `
+      <div class="DraftBoard_draft-board">
+        <div class="DraftBoardColumn_draft-board-column">
+          <div class="CellBase_draft-cell" data-player-id="693112">
+            <div class="CellHeader_pick-number">4</div>
+            <div class="PlayerCell_player-details">
+              <a href="/playercard/693112"><img alt="Bijan Robinson icon" src="https://cdn.example.test/headshot.webp"></a>
+              <div class="PlayerCell_position-and-team"><div>RB</div><div class="PlayerCell_team">ATL</div></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    const picks = run(source('draft-board'));
+    expect(picks).toEqual([expect.objectContaining({
+      sourcePlayerId: 'draftkings:693112',
+      name: 'Bijan Robinson',
+    })]);
+  });
+
   it('reads the latest pick and resolves its owner from the pick order', () => {
     document.body.innerHTML = `
       <div class="PickOrder_pick-order">

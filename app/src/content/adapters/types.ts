@@ -28,6 +28,26 @@ export interface ScoringWeights {
   readonly week17: number;
 }
 
+export interface CapitalGoal {
+  /** Fraction of the position's full-draft capital target. */
+  readonly fraction: number;
+  /** Overall pick by which the fraction should be reached. */
+  readonly pick: number;
+}
+
+export interface CountGoal {
+  /** Minimum number of players wanted by the specified pick. */
+  readonly count: number;
+  /** Overall pick by which the count should be reached. */
+  readonly pick: number;
+}
+
+export interface PositionScoringPolicy {
+  readonly capitalGoals: ReadonlyArray<CapitalGoal>;
+  readonly maxCount?: number;
+  readonly minCountGoals?: ReadonlyArray<CountGoal>;
+}
+
 /**
  * The complete set of tunable knobs that drive the Next Best Pick scoring
  * formula. All values are platform-scoped: DraftKings (longer, looser drafts)
@@ -39,30 +59,10 @@ export interface ScoringConfig {
   readonly weights: ScoringWeights;
   /** Maximum magnitude for normalized need scores. */
   readonly needClamp: number;
-  /** Picks before this overall pick do not receive any positive need weight. */
-  readonly needEnabledPick: number;
-  /**
-   * Count-based "should have N by pick X" milestones per position. Each row is
-   * `[target_count, due_by_pick]`; the most-urgent unsatisfied milestone adds
-   * to the need index.
-   */
-  readonly targetMinCount: ReadonlyMap<Position, ReadonlyArray<readonly [number, number]>>;
-  /** Hard cap on rostered count per position; saturation returns a penalty. */
-  readonly positionCountCap: ReadonlyMap<Position, number>;
-  /** Per-position multiplier applied to the computed need index. */
-  readonly positionalNeedScale: ReadonlyMap<Position, number>;
-  /** Positions whose positive need is gated until the draft is older. */
-  readonly lateNeedPositions: ReadonlySet<Position>;
-  /** Picks before this overall pick do not get positive QB/TE need weight. */
-  readonly lateNeedEnabledPick: number;
-  /** Pick at which the late-draft need scaling kicks in (hard cliff). */
-  readonly needLateScaleStartPick: number;
-  /** Pick at which the late-draft need scaling reaches its final value. */
-  readonly needLateScaleEndPick: number;
-  /** Need multiplier applied starting at `needLateScaleStartPick`. */
-  readonly needLateScaleStart: number;
-  /** Need multiplier reached at `needLateScaleEndPick` (and held after). */
-  readonly needLateScaleEnd: number;
+  /** Complete positional policy: capital goals plus optional count rules. */
+  readonly positionPolicies: ReadonlyMap<Position, PositionScoringPolicy>;
+  /** Capital gained by a player selected at an overall pick. */
+  readonly draftCapital: (overallPick: number) => number;
   /** Default ADP window used to scale the ADP-vs-rank delta. */
   readonly rankBaseAdaptsTo: number;
   /** Default candidate pool size when the caller does not pass one. */

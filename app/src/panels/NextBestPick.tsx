@@ -4,6 +4,7 @@ import type { DraftPlatformAdapter } from '../content/adapters/types';
 import type { CustomRanking } from '../rankings/custom-rankings';
 import {
   buildPositionNeeds,
+  overallPickForRosterIndex,
   rankNextBestPicks,
   type ScoredPlayer,
   type StackDetail,
@@ -31,12 +32,14 @@ export default function NextBestPick({
 }: Props) {
   const scored = useMemo<ScoredPlayer[]>(() => {
     const positionNeeds = buildPositionNeeds(roster, adapter, userPickNumber);
+    const currentPick = overallPickForRosterIndex(roster.length, userPickNumber, adapter.teamCount);
     return rankNextBestPicks({
       roster,
       available,
       customRankings,
       positionNeeds,
       scoring: adapter.scoring,
+      currentPick,
     });
   }, [roster, available, customRankings, adapter, userPickNumber]);
 

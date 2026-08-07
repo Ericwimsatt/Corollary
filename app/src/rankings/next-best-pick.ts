@@ -1,7 +1,7 @@
 import { Option } from "effect";
 import type { Player, Position, RosterPick } from "../content/types";
 import type { CustomRanking } from "./custom-rankings";
-import type { DraftPlatformAdapter, ScoringConfig } from "../content/adapters/types";
+import type { CapitalGoal, DraftPlatformAdapter, PositionScoringPolicy, ScoringConfig } from "../content/adapters/types";
 import { getOpponents } from "../data/schedule";
 import { normalizeTeam } from "../utils/teams";
 import { playerKey } from '../content/player-key';
@@ -23,7 +23,7 @@ import { playerKey } from '../content/player-key';
 // The literals below are the DraftKings-flavored baseline. They double as the
 // test-default scoring and are surfaced as the `draftKingsScoring` config.
 // Underdog gets its own `underdogScoring` config further down, where the
-// positional targets, caps, and late-draft escalation differ. Anything you
+// positional goals and caps differ. Anything you
 // tweak here is what gets used when no adapter (or the DraftKings adapter) is
 // driving; adjust `underdogScoring` to retune that platform independently.
 export const SCORE_WEIGHTS = {
@@ -36,90 +36,64 @@ export const SCORE_WEIGHTS = {
 } as const;
 
 /** Maximum magnitude for normalized need scores. */
-export const NEED_CLAMP = 50;
-export const NEED_ENABLED_PICK = 25;
-export const TARGET_MIN_COUNT: ReadonlyMap<Position, ReadonlyArray<readonly [number, number]>> = new Map([
-  // DraftKings drafts run longer, so we want a third QB in the bag by pick 110.
-  ['QB', [[3, 110]]],
-  ['TE', [[2, 150]]],
-  ['RB', [[5, 190]]],
-  ['WR', [[3, 60], [7, 190]]],
-]);
-export const POSITION_COUNT_CAP: ReadonlyMap<Position, number> = new Map([
-  ['QB', 4],
-  ['TE', 4],
-  ['RB', 7],
-  ['WR', 9],
-]);
-export const POSITIONAL_NEED_SCALE: ReadonlyMap<Position, number> = new Map([
-  ['QB', .5],
-  ['TE', .5],
-  ['RB', 1],
-  ['WR', 1],
-]);
-/** Positions whose need is gated until the draft is past this pick. */
-export const LATE_NEED_POSITIONS: ReadonlySet<Position> = new Set(['QB', 'TE']);
-/** Picks before this overall pick do not receive positive QB/TE need weight. */
-export const LATE_NEED_ENABLED_PICK = 90;
-/**
- * Pick at which the late-draft need scaling kicks in (hard cliff). Before this
- * pick the multiplier is 1; at this pick it jumps to `NEED_LATE_SCALE_START`.
- */
-export const NEED_LATE_SCALE_START_PICK = 90;
-/** Pick at which the late-draft need scaling reaches its final value. */
-export const NEED_LATE_SCALE_END_PICK = 180;
-/** Need multiplier applied starting at `NEED_LATE_SCALE_START_PICK`. */
-export const NEED_LATE_SCALE_START = 2;
-/** Need multiplier reached at `NEED_LATE_SCALE_END_PICK` (and held after). */
-export const NEED_LATE_SCALE_END = 3;
+export const NEED_CLAMP = 2.5;
 /** Default ADP window used to scale the ADP-vs-rank delta. */
 export const RANK_BASE_ADAPTS_TO = 50;
 export const DEFAULT_UPCOMING_POOL = 30;
 export const DEFAULT_TOP_N = 15;
 
+const CAPITAL_GOALS: ReadonlyMap<Position, ReadonlyArray<CapitalGoal>> = new Map([
+  ['QB', [{ fraction: 1, pick: 140 }]],
+  ['RB', [{ fraction: .35, pick: 50 }, { fraction: .7, pick: 100 }, { fraction: 1, pick: 200 }]],
+  ['WR', [{ fraction: .5, pick: 50 }, { fraction: .8, pick: 80 }, { fraction: 1, pick: 200 }]],
+  ['TE', [{ fraction: .5, pick: 60 }, { fraction: .8, pick: 120 }, { fraction: 1, pick: 200 }]],
+]);
+
+const POSITION_POLICIES: ReadonlyMap<Position, PositionScoringPolicy> = new Map([
+  ['QB', { capitalGoals: CAPITAL_GOALS.get('QB')!, maxCount: 3 }],
+  ['RB', { capitalGoals: CAPITAL_GOALS.get('RB')!, maxCount: 7 }],
+  ['WR', { capitalGoals: CAPITAL_GOALS.get('WR')!, maxCount: 9 }],
+  ['TE', { capitalGoals: CAPITAL_GOALS.get('TE')!, maxCount: 4 }],
+]);
+
+function draftKingsCapital(overallPick: number): number {
+  return Math.round(5000 * Math.exp(-Math.pow((overallPick - 1) / 57.5, 0.74)));
+}
+
+function underdogCapital(overallPick: number): number {
+  return Math.round(5000 * Math.exp(-Math.pow((overallPick - 1) / 52, 0.74)));
+}
+
 /**
- * DraftKings scoring config. DraftKings snake drafts run 20 rounds, so the
- * baseline wants a third QB and the late-draft need escalation stretches out
- * to pick 180 (round 15).
+ * DraftKings scoring config. DraftKings snake drafts run 20 rounds and require
+ * a three-QB final roster, while QB capital is targeted by pick 140.
  */
 export const draftKingsScoring: ScoringConfig = {
   weights: SCORE_WEIGHTS,
   needClamp: NEED_CLAMP,
-  needEnabledPick: NEED_ENABLED_PICK,
-  targetMinCount: TARGET_MIN_COUNT,
-  positionCountCap: POSITION_COUNT_CAP,
-  positionalNeedScale: POSITIONAL_NEED_SCALE,
-  lateNeedPositions: LATE_NEED_POSITIONS,
-  lateNeedEnabledPick: LATE_NEED_ENABLED_PICK,
-  needLateScaleStartPick: NEED_LATE_SCALE_START_PICK,
-  needLateScaleEndPick: NEED_LATE_SCALE_END_PICK,
-  needLateScaleStart: NEED_LATE_SCALE_START,
-  needLateScaleEnd: NEED_LATE_SCALE_END,
+  positionPolicies: new Map([
+    ...POSITION_POLICIES,
+    ['QB', { capitalGoals: CAPITAL_GOALS.get('QB')!, maxCount: 3, minCountGoals: [{ count: 3, pick: 240 }] }],
+  ]),
+  draftCapital: draftKingsCapital,
   rankBaseAdaptsTo: RANK_BASE_ADAPTS_TO,
   defaultUpcomingPool: DEFAULT_UPCOMING_POOL,
   defaultTopN: DEFAULT_TOP_N,
 };
 
 /**
- * Underdog scoring config. Underdog contests are 18 rounds, so positional
- * targets are tighter (want two QBs, eight WRs) and the late-draft need
- * escalation compresses to pick 162 (round 13.5).
+ * Underdog scoring config. Underdog contests are 18 rounds, so the WR cap is
+ * tighter than DraftKings while the shared capital curves remain comparable.
  */
 export const underdogScoring: ScoringConfig = {
   ...draftKingsScoring,
-  targetMinCount: new Map<Position, ReadonlyArray<readonly [number, number]>>([
-    ['QB', [[2, 110]]],
-    ['TE', [[2, 150]]],
-    ['RB', [[5, 190]]],
-    ['WR', [[3, 60], [7, 190]]],
+  positionPolicies: new Map([
+    ['QB', { capitalGoals: CAPITAL_GOALS.get('QB')!, maxCount: 3 }],
+    ['RB', { capitalGoals: CAPITAL_GOALS.get('RB')!, maxCount: 7 }],
+    ['WR', { capitalGoals: CAPITAL_GOALS.get('WR')!, maxCount: 8 }],
+    ['TE', { capitalGoals: CAPITAL_GOALS.get('TE')!, maxCount: 4 }],
   ]),
-  positionCountCap: new Map<Position, number>([
-    ['QB', 3],
-    ['TE', 4],
-    ['RB', 7],
-    ['WR', 8],
-  ]),
-  needLateScaleEndPick: 162,
+  draftCapital: underdogCapital,
 };
 
 /**
@@ -267,14 +241,14 @@ export function buildPositionNeeds(
     const players = roster.filter((p) => ceiling.pos.includes(p.position));
     const current = players.reduce((sum, p) => {
       const rosterIndex = roster.indexOf(p);
-      const overall = overallFromUserPick(rosterIndex, userPickNumber, adapter.teamCount);
+      const overall = overallPickForRosterIndex(rosterIndex, userPickNumber, adapter.teamCount);
       return sum + adapter.draftCapital(overall);
     }, 0);
     return { position: ceiling.label, current, target: ceiling.maxCapital, count: players.length };
   });
 }
 
-function overallFromUserPick(rosterIndex: number, userPick: number, teamCount: number): number {
+export function overallPickForRosterIndex(rosterIndex: number, userPick: number, teamCount: number): number {
   const round = rosterIndex + 1;
   if (round % 2 === 1) return (round - 1) * teamCount + userPick;
   return round * teamCount - userPick + 1;
@@ -294,42 +268,44 @@ function scoreNeedComponent(
     : player.adp > 0
       ? player.adp
       : 9999;
-  if (draftPick < scoring.needEnabledPick) return 0;
-  const deficit = (need.target - need.current) / need.target;
+  const policy = scoring.positionPolicies.get(player.position);
+  if (!policy) return 0;
+  if (policy.maxCount !== undefined && need.count >= policy.maxCount) return -scoring.needClamp;
 
-  // QB and TE only receive positive need weight once the draft is past the
-  // early rounds. Over-spending on those positions still gets punished at any
-  // point (the negative side is always allowed).
-  if (deficit > 0 && scoring.lateNeedPositions.has(player.position)) {
-    if (draftPick < scoring.lateNeedEnabledPick) return 0;
-  }
-  const milestones = scoring.targetMinCount.get(player.position) ?? [];
-  let count_need = 0;
-  for (const [target_count, due_by_pick] of milestones) {
-    if (draftPick > due_by_pick && need.count < target_count) {
-      count_need = Math.max(count_need, (target_count - need.count) / target_count);
+  const expectedFraction = capitalFractionAtPick(policy.capitalGoals, draftPick);
+  const projectedCapital = need.current + scoring.draftCapital(draftPick);
+  const projectedFraction = projectedCapital / need.target;
+  const capitalGap = expectedFraction - projectedFraction;
+  const capitalScore = capitalGap >= 0 ? capitalGap : capitalGap * 2;
+
+  let countScore = 0;
+  for (const goal of policy.minCountGoals ?? []) {
+    if (draftPick >= goal.pick && need.count < goal.count) {
+      countScore = Math.max(countScore, (goal.count - need.count) / goal.count);
     }
   }
-  const max_count = scoring.positionCountCap.get(player.position) ?? 99;
-  if (need.count >= max_count) return -scoring.needClamp;
 
-  const need_index = deficit + count_need;
-  const position_scale = scoring.positionalNeedScale.get(player.position) ?? 1;
-
-  return need_index * position_scale * needLateScale(draftPick, scoring);
+  return clamp(capitalScore + countScore, -scoring.needClamp, scoring.needClamp);
 }
 
-/**
- * Late-draft need multiplier. Stays at 1 until `needLateScaleStartPick`,
- * jumps to `needLateScaleStart` (hard cliff), then ramps linearly to
- * `needLateScaleEnd` at `needLateScaleEndPick` and holds thereafter.
- */
-function needLateScale(draftPick: number, scoring: ScoringConfig): number {
-  if (draftPick < scoring.needLateScaleStartPick) return 1;
-  if (draftPick >= scoring.needLateScaleEndPick) return scoring.needLateScaleEnd;
-  const span = scoring.needLateScaleEndPick - scoring.needLateScaleStartPick;
-  const t = (draftPick - scoring.needLateScaleStartPick) / span;
-  return scoring.needLateScaleStart + (scoring.needLateScaleEnd - scoring.needLateScaleStart) * t;
+function capitalFractionAtPick(goals: ReadonlyArray<CapitalGoal>, pick: number): number {
+  if (goals.length === 0) return 0;
+  const ordered = [...goals].sort((a, b) => a.pick - b.pick);
+  const first = ordered[0];
+  if (pick <= first.pick) return first.fraction * Math.max(0, pick) / first.pick;
+  for (let i = 1; i < ordered.length; i += 1) {
+    const previous = ordered[i - 1];
+    const current = ordered[i];
+    if (pick <= current.pick) {
+      const t = (pick - previous.pick) / (current.pick - previous.pick);
+      return previous.fraction + (current.fraction - previous.fraction) * t;
+    }
+  }
+  return ordered[ordered.length - 1].fraction;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }
 
 function scoreStackComponent(

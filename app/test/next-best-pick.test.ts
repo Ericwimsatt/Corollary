@@ -3,7 +3,6 @@ import {
   rankNextBestPicks,
   buildPositionNeeds,
   SCORE_WEIGHTS,
-  LATE_NEED_ENABLED_PICK,
   type PositionNeed,
 } from '../src/rankings/next-best-pick';
 import type { Player, RosterPick } from '../src/content/types';
@@ -66,7 +65,7 @@ describe('rankNextBestPicks', () => {
     });
     expect(scored[0].player.name).toBe('Stud RB');
     expect(scored[0].breakdown.rank).toBeGreaterThan(0);
-    expect(scored[1].breakdown.rank).toBe(0);
+    expect(scored[1].breakdown.rank).toBe(180);
   });
 
   it('boosts positions behind target capital', () => {
@@ -82,6 +81,7 @@ describe('rankNextBestPicks', () => {
         need('WR', 0, 13000),
         need('TE', 3000, 3000),
       ],
+      currentPick: 100,
     });
     expect(scored[0].player.name).toBe('RB Needs Capital');
     expect(scored[0].breakdown.need).toBeGreaterThan(0);
@@ -184,7 +184,7 @@ describe('rankNextBestPicks', () => {
     expect(scored[0].myRank).toBe(20);
   });
 
-  it('falls back to ADP when neither platform rank nor custom rank is present', () => {
+  it('uses a conservative fallback when neither platform rank nor custom rank is present', () => {
     const a = player('Unknown', 'RB', 'DET', 42, 0);
     const scored = rankNextBestPicks({
       roster: baseRoster,
@@ -192,8 +192,8 @@ describe('rankNextBestPicks', () => {
       customRankings: null,
       positionNeeds: [],
     });
-    expect(scored[0].myRank).toBe(42);
-    expect(scored[0].breakdown.rank).toBe(0);
+    expect(scored[0].myRank).toBe(92);
+    expect(scored[0].breakdown.rank).toBe(118);
   });
 
   it('returns empty when no available players have ADP', () => {
@@ -206,7 +206,7 @@ describe('rankNextBestPicks', () => {
     expect(scored).toHaveLength(0);
   });
 
-  it('gates positive QB need before the late-need pick and opens it after', () => {
+  it('uses the QB capital goal instead of a late-round gate', () => {
     const earlyQb = player('Early QB', 'QB', 'DET', 30, 30);
     const earlyRb = player('Early RB', 'RB', 'DET', 30, 30);
     const earlyScored = rankNextBestPicks({
@@ -221,10 +221,10 @@ describe('rankNextBestPicks', () => {
       ],
       currentPick: 20,
     });
-    expect(earlyScored.find((s) => s.player.name === 'Early QB')!.breakdown.need).toBe(0);
+    expect(earlyScored.find((s) => s.player.name === 'Early QB')!.breakdown.need).toBeLessThan(0);
 
-    const lateQb = player('Late QB', 'QB', 'DET', LATE_NEED_ENABLED_PICK + 10, LATE_NEED_ENABLED_PICK + 10);
-    const lateRb = player('Late RB', 'RB', 'DET', LATE_NEED_ENABLED_PICK + 10, LATE_NEED_ENABLED_PICK + 10);
+    const lateQb = player('Late QB', 'QB', 'DET', 120, 120);
+    const lateRb = player('Late RB', 'RB', 'DET', 120, 120);
     const lateScored = rankNextBestPicks({
       roster: baseRoster,
       available: [lateQb, lateRb],
@@ -235,10 +235,41 @@ describe('rankNextBestPicks', () => {
         need('WR', 0, 13000),
         need('TE', 0, 3000),
       ],
-      currentPick: LATE_NEED_ENABLED_PICK + 1,
+      currentPick: 120,
     });
     expect(lateScored.find((s) => s.player.name === 'Late QB')!.breakdown.need).toBeGreaterThan(0);
     expect(lateRb.name).not.toBe(lateQb.name); // sanity
+  });
+
+  it('discourages QB after an early QB while still allowing QB after pick 170', () => {
+    const roster: RosterPick[] = [
+      { round: 1, pick: 1, overallPick: 1, name: 'Early QB', position: 'QB', team: 'DET', byeWeek: 0, adp: 1 },
+    ];
+    const qb = player('Later QB', 'QB', 'GB', 180, 180);
+    const scored = rankNextBestPicks({
+      roster,
+      available: [qb],
+      customRankings: null,
+      positionNeeds: [need('QB', 0, 2300)],
+      currentPick: 180,
+    });
+    expect(scored[0].breakdown.need).toBeGreaterThan(0);
+  });
+
+  it('hard-caps QB recommendations at three rostered QBs', () => {
+    const roster: RosterPick[] = [
+      { round: 1, pick: 1, overallPick: 1, name: 'QB1', position: 'QB', team: 'DET', byeWeek: 0, adp: 1 },
+      { round: 2, pick: 12, overallPick: 24, name: 'QB2', position: 'QB', team: 'GB', byeWeek: 0, adp: 24 },
+      { round: 3, pick: 1, overallPick: 25, name: 'QB3', position: 'QB', team: 'BUF', byeWeek: 0, adp: 25 },
+    ];
+    const scored = rankNextBestPicks({
+      roster,
+      available: [player('QB4', 'QB', 'KC', 100, 100)],
+      customRankings: null,
+      positionNeeds: [need('QB', 10000, 2300)],
+      currentPick: 100,
+    });
+    expect(scored[0].breakdown.need).toBe(-2.5);
   });
 
   it('still punishes over-spent QB/TE need even before the late-need pick', () => {
@@ -264,6 +295,6 @@ describe('buildPositionNeeds', () => {
     const rb = needs.find((n) => n.position === 'RB');
     expect(rb).toBeDefined();
     expect(rb!.current).toBeGreaterThan(0);
-    expect(rb!.target).toBe(9000);
+    expect(rb!.target).toBe(8000);
   });
 });

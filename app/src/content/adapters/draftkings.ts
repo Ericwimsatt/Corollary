@@ -7,10 +7,37 @@ const ACTIVE_USER = '[class*="UserCard_is-active-user"]';
 const TEAMS = 12;
 const DRAFT_ID_PATTERN = /\/draft\/snake\/(\d+)/;
 
-function sourcePlayerIdFromImage(image: Element | null): string | null {
-  const src = image?.getAttribute('src') ?? '';
-  const match = src.match(/\/players\/\d+\/(\d+)\.(?:png|jpe?g|webp)(?:[?#]|$)/i);
-  return match ? `draftkings:${match[1]}` : null;
+function sourcePlayerIdFromElement(element: Element | null): string | null {
+  if (!element) return null;
+
+  // DraftKings surfaces the same player ID through different markup depending
+  // on the draft view: a headshot URL in the player table, a data attribute on
+  // a board card, or a player-card link. Check the card plus a containing card
+  // so a layout-only wrapper does not lose the identity.
+  const scope = element.closest('[data-player-id], [data-playerid], [data-player_id]') ?? element;
+  const candidates = [scope, ...Array.from(scope.querySelectorAll(
+    '[data-player-id], [data-playerid], [data-player_id], a[href], img[src]',
+  ))];
+
+  for (const candidate of candidates) {
+    const values = [
+      candidate.getAttribute('data-player-id'),
+      candidate.getAttribute('data-playerid'),
+      candidate.getAttribute('data-player_id'),
+      candidate.getAttribute('href'),
+      candidate.getAttribute('src'),
+    ].filter((value): value is string => Boolean(value));
+
+    for (const value of values) {
+      const match = value.match(/^(\d+)$/)
+        ?? value.match(/[?&](?:playerId|player_id|playerid)=(\d+)/i)
+        ?? value.match(/\/playercard\/(\d+)/i)
+        ?? value.match(/\/players\/\d+\/(\d+)\.(?:png|jpe?g|webp)(?:[?#]|$)/i);
+      if (match) return `draftkings:${match[1]}`;
+    }
+  }
+
+  return null;
 }
 
 function parsePosition(text: string): Position | null {
@@ -111,7 +138,7 @@ function parseAvailablePlayerRow(row: Element): AvailablePlayerRow | null {
     byeCell: byeCell ?? null,
     byeNumber,
     byeNumberSpan,
-    sourcePlayerId: sourcePlayerIdFromImage(playerImage),
+    sourcePlayerId: sourcePlayerIdFromElement(playerCell),
     rank,
     name,
     position,
@@ -277,7 +304,7 @@ function parseDraftBoardCell(
 ): DraftedPlayerObservation | null {
   const overallPick = parseInt(cell.querySelector('[class*="CellHeader_pick-number"]')?.textContent ?? '', 10);
   const details = cell.querySelector('[class*="PlayerCell_player-details"]');
-  const image = details?.querySelector('[class*="PlayerCell_player-thumbnail"]') ?? null;
+  const image = details?.querySelector('[class*="PlayerCell_player-thumbnail"], img') ?? null;
   const imageAlt = image?.getAttribute('alt')?.trim() ?? '';
   const name = imageAlt.replace(/\s+icon$/i, '').trim()
     || details?.querySelector('[class*="PlayerCell_player-name"]')?.textContent?.trim()
@@ -288,7 +315,7 @@ function parseDraftBoardCell(
   if (!Number.isFinite(overallPick) || overallPick < 1 || !name || !position || !team) return null;
 
   return {
-    sourcePlayerId: sourcePlayerIdFromImage(image),
+    sourcePlayerId: sourcePlayerIdFromElement(cell),
     name,
     position,
     team,
@@ -338,7 +365,7 @@ function readLatestPick(): ReadonlyArray<DraftedPlayerObservation> {
   if (draftSlot === null) return [];
 
   return [{
-    sourcePlayerId: null,
+    sourcePlayerId: sourcePlayerIdFromElement(latest),
     name: match[1].trim(),
     position: match[2].toUpperCase() as Position,
     team: match[3].toUpperCase(),

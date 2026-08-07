@@ -283,10 +283,10 @@ export const underdogAdapter: DraftPlatformAdapter = {
   teamCount: TEAMS,
   roundCount: 18,
   capitalCeilings: [
-    { pos: ['QB'], label: 'QB', maxCapital: 3200 },
+    { pos: ['QB'], label: 'QB', maxCapital: 2000 },
     { pos: ['RB'], label: 'RB', maxCapital: 8200 },
-    { pos: ['WR'], label: 'WR', maxCapital: 11800 },
-    { pos: ['TE'], label: 'TE', maxCapital: 3200 },
+    { pos: ['WR'], label: 'WR', maxCapital: 11000 },
+    { pos: ['TE'], label: 'TE', maxCapital: 2400 },
   ],
   draftCapital,
   scoring: underdogScoring,
