@@ -3,6 +3,7 @@ import {
   rankNextBestPicks,
   buildPositionNeeds,
   SCORE_WEIGHTS,
+  underdogScoring,
   type PositionNeed,
 } from '../src/rankings/next-best-pick';
 import type { Player, RosterPick } from '../src/content/types';
@@ -282,6 +283,41 @@ describe('rankNextBestPicks', () => {
       currentPick: 10,
     });
     expect(scored[0].breakdown.need).toBeLessThan(0);
+  });
+
+  it('does not push a second-round TE after an early premium TE on Underdog', () => {
+    const roster: RosterPick[] = [{
+      round: 2, pick: 2, overallPick: 14, name: 'Brock Bowers', position: 'TE',
+      team: 'LV', byeWeek: 0, adp: 15,
+    }];
+    const scored = rankNextBestPicks({
+      roster,
+      available: [
+        player('Trey McBride', 'TE', 'ARI', 22, 22),
+        player('Available WR', 'WR', 'DET', 30, 30),
+      ],
+      customRankings: null,
+      positionNeeds: [need('TE', 3600, 2400), need('WR', 0, 11000)],
+      scoring: underdogScoring,
+      currentPick: 26,
+    });
+    expect(scored[0].player.name).toBe('Available WR');
+  });
+
+  it('creates more early Underdog RB urgency than WR urgency', () => {
+    const scored = rankNextBestPicks({
+      roster: baseRoster,
+      available: [
+        player('Early RB', 'RB', 'DET', 25, 25),
+        player('Early WR', 'WR', 'DET', 25, 25),
+      ],
+      customRankings: null,
+      positionNeeds: [need('RB', 0, 8200), need('WR', 0, 11000)],
+      scoring: underdogScoring,
+      currentPick: 20,
+    });
+    expect(scored.find((s) => s.player.name === 'Early RB')!.breakdown.need)
+      .toBeGreaterThan(scored.find((s) => s.player.name === 'Early WR')!.breakdown.need);
   });
 });
 

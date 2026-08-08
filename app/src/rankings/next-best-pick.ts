@@ -43,10 +43,20 @@ export const DEFAULT_UPCOMING_POOL = 30;
 export const DEFAULT_TOP_N = 15;
 
 const CAPITAL_GOALS: ReadonlyMap<Position, ReadonlyArray<CapitalGoal>> = new Map([
-  ['QB', [{ fraction: 1, pick: 140 }]],
-  ['RB', [{ fraction: .35, pick: 50 }, { fraction: .7, pick: 100 }, { fraction: 1, pick: 200 }]],
-  ['WR', [{ fraction: .5, pick: 50 }, { fraction: .8, pick: 80 }, { fraction: 1, pick: 200 }]],
-  ['TE', [{ fraction: .5, pick: 60 }, { fraction: .8, pick: 120 }, { fraction: 1, pick: 200 }]],
+  ['QB', [{ fraction: 1, pick: 110 }]],
+  ['RB', [{ fraction: .35, pick: 42 }, { fraction: .7, pick: 88 }, { fraction: 1, pick: 180 }]],
+  ['WR', [{ fraction: .5, pick: 42 }, { fraction: .8, pick: 72 }, { fraction: 1, pick: 180 }]],
+  ['TE', [{ fraction: .5, pick: 52 }, { fraction: .8, pick: 105 }, { fraction: 1, pick: 180 }]],
+]);
+
+// Underdog's 18-round build needs an earlier RB commitment than the longer DK
+// format. Keep this platform-specific so the two draft rooms do not drift
+// together when one curve is tuned.
+const UNDERDOG_CAPITAL_GOALS: ReadonlyMap<Position, ReadonlyArray<CapitalGoal>> = new Map([
+  ['QB', [{ fraction: 1, pick: 110 }]],
+  ['RB', [{ fraction: .6, pick: 36 }, { fraction: .8, pick: 84 }, { fraction: 1, pick: 180 }]],
+  ['WR', [{ fraction: .5, pick: 42 }, { fraction: .8, pick: 72 }, { fraction: 1, pick: 180 }]],
+  ['TE', [{ fraction: .5, pick: 52 }, { fraction: .8, pick: 105 }, { fraction: 1, pick: 180 }]],
 ]);
 
 const POSITION_POLICIES: ReadonlyMap<Position, PositionScoringPolicy> = new Map([
@@ -61,7 +71,7 @@ function draftKingsCapital(overallPick: number): number {
 }
 
 function underdogCapital(overallPick: number): number {
-  return Math.round(5000 * Math.exp(-Math.pow((overallPick - 1) / 52, 0.74)));
+  return Math.round(5200 * Math.exp(-Math.pow((overallPick - 1) / 48, 0.74)));
 }
 
 /**
@@ -88,10 +98,10 @@ export const draftKingsScoring: ScoringConfig = {
 export const underdogScoring: ScoringConfig = {
   ...draftKingsScoring,
   positionPolicies: new Map([
-    ['QB', { capitalGoals: CAPITAL_GOALS.get('QB')!, maxCount: 3 }],
-    ['RB', { capitalGoals: CAPITAL_GOALS.get('RB')!, maxCount: 7 }],
-    ['WR', { capitalGoals: CAPITAL_GOALS.get('WR')!, maxCount: 8 }],
-    ['TE', { capitalGoals: CAPITAL_GOALS.get('TE')!, maxCount: 4 }],
+    ['QB', { capitalGoals: UNDERDOG_CAPITAL_GOALS.get('QB')!, maxCount: 3 }],
+    ['RB', { capitalGoals: UNDERDOG_CAPITAL_GOALS.get('RB')!, maxCount: 7 }],
+    ['WR', { capitalGoals: UNDERDOG_CAPITAL_GOALS.get('WR')!, maxCount: 8 }],
+    ['TE', { capitalGoals: UNDERDOG_CAPITAL_GOALS.get('TE')!, maxCount: 4 }],
   ]),
   draftCapital: underdogCapital,
 };
@@ -273,9 +283,16 @@ function scoreNeedComponent(
   if (policy.maxCount !== undefined && need.count >= policy.maxCount) return -scoring.needClamp;
 
   const expectedFraction = capitalFractionAtPick(policy.capitalGoals, draftPick);
-  const projectedCapital = need.current + scoring.draftCapital(draftPick);
-  const projectedFraction = projectedCapital / need.target;
-  const capitalGap = expectedFraction - projectedFraction;
+  // Need describes the roster before the candidate is drafted. For skill
+  // positions, comparing already-spent capital makes an early premium TE/RB
+  // fill its bucket without creating a second-player chase. QB is the
+  // exception: an early QB should be judged by the capital it would consume,
+  // since one early QB is intended to fill most of that bar.
+  const capitalToCompare = player.position === 'QB'
+    ? need.current + scoring.draftCapital(draftPick)
+    : need.current;
+  const currentFraction = capitalToCompare / need.target;
+  const capitalGap = expectedFraction - currentFraction;
   const capitalScore = capitalGap >= 0 ? capitalGap : capitalGap * 2;
 
   let countScore = 0;

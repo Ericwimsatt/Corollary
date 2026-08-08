@@ -91,6 +91,24 @@ describe('AvailableStore', () => {
     );
   });
 
+  it('removes a catalog player when the draft board omits its source ID', async () => {
+    await run(
+      Effect.gen(function*() {
+        const store = yield* AvailableStore;
+        yield* store.load;
+        yield* store.switchDraft(DRAFT_A);
+        yield* store.merge([{
+          ...player('Bijan Robinson', 'RB', 'ATL', 2, 2),
+          sourcePlayerId: 'underdog:bijan',
+        }]);
+        yield* store.excludeDrafted([{
+          name: 'Bijan Robinson', team: 'ATL', position: 'RB',
+        }]);
+        expect(yield* store.getAll).toHaveLength(0);
+      }),
+    );
+  });
+
   it('only excludes drafted players from the current draft', async () => {
     await run(
       Effect.gen(function*() {

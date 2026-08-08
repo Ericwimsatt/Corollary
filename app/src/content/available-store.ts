@@ -43,6 +43,7 @@ export const AvailableStoreLive = Layer.effect(
     const loaded = yield* Ref.make(false);
     const draftIdRef = yield* Ref.make<string | null>(null);
     const draftedKeysRef = yield* Ref.make(new Set<string>());
+    const draftedNameKeysRef = yield* Ref.make(new Set<string>());
 
     const loadFromChrome = Effect.tryPromise({
       try: () => chrome.storage.local.get(STORAGE_KEY),
@@ -81,7 +82,10 @@ export const AvailableStoreLive = Layer.effect(
       Effect.gen(function*() {
         if (!draftId) return;
         const previous = yield* Ref.get(draftIdRef);
-        if (previous !== draftId) yield* Ref.set(draftedKeysRef, new Set());
+        if (previous !== draftId) {
+          yield* Ref.set(draftedKeysRef, new Set());
+          yield* Ref.set(draftedNameKeysRef, new Set());
+        }
         yield* Ref.set(draftIdRef, draftId);
       });
 
@@ -120,12 +124,20 @@ export const AvailableStoreLive = Layer.effect(
         if (drafted.length === 0) return;
         const catalog = yield* Ref.get(cache);
         const removed = new Set<string>();
+        const removedNames = new Set<string>();
         for (const event of drafted) {
           removed.add(playerKey(event));
           const catalogPlayer = findMatchingPlayer(catalog, event);
-          if (catalogPlayer) removed.add(playerKey(catalogPlayer));
+          if (catalogPlayer) {
+            removed.add(playerKey(catalogPlayer));
+            // Only use the name fallback after resolving to one unambiguous
+            // catalog entry. This preserves distinct same-team players whose
+            // platform rows share an abbreviated name.
+            removedNames.add(namePlayerKey(catalogPlayer));
+          }
         }
         yield* Ref.update(draftedKeysRef, current => new Set([...current, ...removed]));
+        yield* Ref.update(draftedNameKeysRef, current => new Set([...current, ...removedNames]));
       });
 
     const learnDraftedPlayers = (drafted: ReadonlyArray<DraftedPlayer>) =>
@@ -153,7 +165,8 @@ export const AvailableStoreLive = Layer.effect(
     const getAll = Effect.gen(function*() {
       const players = yield* Ref.get(cache);
       const drafted = yield* Ref.get(draftedKeysRef);
-      return players.filter(p => !drafted.has(playerKey(p)));
+      const draftedNames = yield* Ref.get(draftedNameKeysRef);
+      return players.filter(p => !drafted.has(playerKey(p)) && !draftedNames.has(namePlayerKey(p)));
     });
     const getCatalog = Ref.get(cache);
 
